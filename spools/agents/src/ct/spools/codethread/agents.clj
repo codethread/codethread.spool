@@ -1,5 +1,5 @@
 (ns ct.spools.codethread.agents
-  "Repo-local harness seats and routing policy, ported from millstrand.
+  "Codethread-shared harness seats and routing policy, ported from millstrand.
 
   Aliases are pure model handles (`:sol-low`, `:terra-med`, `:opus`) rather
   than role names. A `-ro` suffix marks an enforced read-only sandbox.
@@ -29,7 +29,7 @@
 (def ^:private luna-rates {:input 1.0 :cache-read 0.1 :output 6.0})
 
 (shuttle/defharnesses ^:private harness-defs
-  "Repo-local harness tools. Seats layered over them live in `alias-defs`."
+  "Codethread-shared harness tools. Seats layered over them live in `alias-defs`."
   {:codex
    {:argv ["codex" "exec" "--json" "--skip-git-repo-check" "--color" "never"
            "--dangerously-bypass-approvals-and-sandbox"
@@ -67,7 +67,7 @@
     :doc "Claude Opus interactive TUI for HITL sessions when Fable-level depth is not warranted."}})
 
 (shuttle/defaliases ^:private alias-defs
-  "Repo-local seats layered over `harness-defs` and agent-run's :pi tool."
+  "Codethread-shared seats layered over `harness-defs` and agent-run's :pi tool."
   {:luna-low
    {:alias-of :codex
     :extra-args ["-m" "gpt-5.6-luna" "-c" "model_reasoning_effort=low"]

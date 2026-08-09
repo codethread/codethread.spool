@@ -16,7 +16,7 @@
 (def ^:private spools-edn
   {:spools
    {'codethread/spools {:local/root project-root
-                        :roots {'codethread/devflow-setup "spools/devflow"}}
+                        :roots {'codethread/devflow-setup "spools/devflow-setup"}}
     'codethread/devflow {:local/root devflow-root
                          :roots {'codethread/devflow "."
                                  'codethread/devflow-kanban-adapter "kanban-adapter"}}

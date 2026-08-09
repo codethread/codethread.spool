@@ -6,7 +6,7 @@ Codethread publishes four small producer roots. The producer namespaces use the 
 | --- | --- | --- |
 | `spools/agents` | `ct.spools.codethread.agents` | Harness declarations and model-seat aliases for delegation and reviews |
 | `spools/spool-bump` | `ct.spools.codethread.spool-bump` | Third-party spool bump workflow |
-| `spools/devflow` | `ct.spools.codethread.devflow-setup` | Consumer composition seed for the external Devflow Kanban adapter |
+| `spools/devflow-setup` | `ct.spools.codethread.devflow-setup` | Consumer composition seed for the external Devflow Kanban adapter |
 | `spools/ralph` | `ct.spools.codethread.ralph` | One-card-per-iteration Ralph workflow |
 
 The Devflow setup root contains no Devflow implementation or guidance. Consumers approve and activate the external `codethread/devflow` and `codethread/devflow-kanban-adapter` roots, then activate this setup root after the adapter.
@@ -23,7 +23,7 @@ The following is the trusted consumer shape for a local checkout. The consumer o
   {:local/root ".."
    :roots {codethread/agents "spools/agents"
            codethread/spool-bump "spools/spool-bump"
-           codethread/devflow-setup "spools/devflow"
+           codethread/devflow-setup "spools/devflow-setup"
            codethread/ralph "spools/ralph"}}
   codethread/devflow
   {:local/root "../../devflow.spool"

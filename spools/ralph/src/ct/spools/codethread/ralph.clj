@@ -3,10 +3,9 @@
 
   Ralph is the coordinator of its epic: each run orients from live kanban
   state, claims exactly one feature, drives that feature through its validated
-  slice, and
-  stops at a judgment point that closes the epic only when no feature cards
-  remain. The Go binary supplies the polling loop; this workflow owns the work
-  discipline inside one iteration. Claim metadata persisted in
+  slice and stops at a judgment point that closes the epic only when no feature
+  cards remain. The Go binary supplies the polling loop; this workflow owns the
+  work discipline inside one iteration. Claim metadata persisted in
   `workflow/context` conforms to `:ct.spools.codethread.ralph/ralph-context`."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
@@ -34,7 +33,7 @@
 
   The iteration is deliberately one-card wide: orient from the epic's live
   frontier, claim exactly one feature, work its tasks with the repo's note and
-  cold-gate discipline, and hands the validated slice to the consumer's own
+  cold-gate discipline, and hand the validated slice to the consumer's own
   landing policy. The final judgment closes the epic only when its feature
   frontier is empty.
   Params: `epic` (required epic strand id)."
