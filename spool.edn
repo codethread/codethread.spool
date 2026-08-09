@@ -1,0 +1,7 @@
+{:spool/format 1
+ :roots {codethread/agents {:root "spools/agents"}
+         codethread/spool-bump {:root "spools/spool-bump"}
+         codethread/devflow-setup {:root "spools/devflow-setup"}
+         codethread/ralph {:root "spools/ralph"}}
+ :requires {ct.spools/agent-run "v26"
+            codethread/kanban "v24"}}

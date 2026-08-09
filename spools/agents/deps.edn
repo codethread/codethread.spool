@@ -1,0 +1,7 @@
+{:paths ["src"]
+ :aliases
+ {:test {:extra-paths ["test"]
+         :extra-deps {io.millstrand/millstrand {:local/root "../../../skein-src"}
+                      ct.spools/agent-run {:local/root "../../../agent-harness.spool/agent-run"}
+                      ct.spools/delegation {:local/root "../../../agent-harness.spool/delegation"}}
+         :main-opts ["-m" "ct.spools.codethread.agents-test"]}}}

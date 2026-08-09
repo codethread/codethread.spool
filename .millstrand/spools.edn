@@ -1,1 +1,27 @@
-{:spools {millstrand.spools/batteries {:millstrand/source-root "spools/batteries"}}}
+{:spools
+ {millstrand.spools/batteries {:millstrand/source-root "spools/batteries"}
+  codethread/spools
+  {:local/root ".."
+   :roots {codethread/agents "spools/agents"
+           codethread/spool-bump "spools/spool-bump"
+           codethread/devflow-setup "spools/devflow-setup"
+           codethread/ralph "spools/ralph"}}
+  millhouse/spools
+  {:local/root "../../millhouse.spool"
+   :roots {millhouse.spools/workflow "spools/workflow"
+           millhouse.spools.executors/shell "spools/shell-executor"}}
+  ct.spools/agent-run
+  {:local/root "../../agent-harness.spool"
+   :roots {ct.spools/agent-run "agent-run"
+           ct.spools/harness-core "harness-core"
+           ct.spools/claude-harness "claude-harness"
+           ct.spools/codex-harness "codex-harness"
+           ct.spools/pi-harness "pi-harness"
+           ct.spools/agent-cli "agent-cli"
+           ct.spools/delegation "delegation"}}
+  codethread/devflow
+  {:local/root "../../devflow.spool"
+   :roots {codethread/devflow "."
+           codethread/devflow-kanban-adapter "kanban-adapter"}}
+  codethread/kanban {:local/root "../../kanban.spool"
+                     :roots {codethread/kanban "."}}}}
