@@ -66,7 +66,9 @@
    :hitl-opus
    {:argv ["claude" "--model" "opus" "--dangerously-skip-permissions"]
     :parse :raw
-    :doc "Claude Opus interactive TUI for HITL sessions when Fable-level depth is not warranted."}})
+    :doc (format-alpha/reflow
+          "|Claude Opus interactive TUI for HITL sessions when Fable-level depth
+           |is not warranted.")}})
 
 (shuttle/defaliases ^:private alias-defs
   "Codethread-shared seats layered over `harness-defs` and agent-run's :pi tool."

@@ -5,8 +5,8 @@
   state, claims exactly one feature, drives that feature through its validated
   slice and stops at a judgment point that closes the epic only when no feature
   cards remain. The Go binary supplies the polling loop; this workflow owns the
-  work discipline inside one iteration. Claim metadata is written to
-  `workflow/context` for the consumer-owned handoff."
+  work discipline inside one iteration. The doing-task note is the claim
+  record used by the consumer-owned handoff."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [millstrand.api.format.alpha :as format-alpha]
@@ -64,13 +64,9 @@
                                    |frontier. Claim it with your owner, branch, and worktree:
                                    |`strand kanban claim <feature-id> --owner <name> --branch
                                    |<branch> --worktree <absolute-path>`. Record the chosen
-                                   |feature id and the branch/worktree on this doing-task, then
-                                   |persist all four values on the run root before completing
-                                   |this step with one mutation:
-                                   |`strand workflow complete <run-id> --context
-                                   |'{\"ralph/feature\":\"<feature-id>\",\"ralph/branch\":\"<branch>\",
-                                   |\"ralph/worktree\":\"<worktree>\",\"ralph/card\":\"<feature-id>\"}'`.
-                                   |Do not use `workflow next` here: it cannot carry this context.
+                                   |feature id, branch, and absolute worktree in the
+                                   |doing-task note, including the claim command result as
+                                   |evidence before completing this step.
                                    |Do not claim a second feature in this iteration."))})
    (workflow/step :work-tasks
                   (fn [_] "Work the claimed feature's ready tasks")
@@ -105,12 +101,12 @@
                   :attributes {"workflow/action-ref" "ralph.hand-off"
                                "workflow/instruction"
                                (format-alpha/reflow
-                                "|Hand the committed, validated slice and its evidence to the
-                                 |consumer-owned landing policy. Do not mark the feature card or
-                                 |epic done here, and do not claim it landed without the consumer's
-                                 |landing evidence. If the context is missing or does not match
-                                 |the feature card, stop and record the mismatch instead of
-                                 |guessing.")})
+                                "|Use the feature id, branch, and worktree recorded in the
+                                 |doing-task body and latest note as the claim evidence. Hand
+                                 |the committed, validated slice and its evidence to the
+                                 |consumer-owned landing policy. Do not mark the feature card
+                                 |or epic done here, and do not claim it landed without the
+                                 |consumer's landing evidence.")})
    (workflow/checkpoint :epic-judgment
                         (fn [{:keys [epic]}]
                           (str "Close " epic " only if no feature cards remain"))

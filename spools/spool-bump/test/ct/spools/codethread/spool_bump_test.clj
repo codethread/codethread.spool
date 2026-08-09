@@ -3,7 +3,6 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [ct.spools.codethread.spool-bump]
-            [ct.spools.codethread.spool-bump.internal.support :as support]
             [millstrand.api.current.alpha :as current]
             [millstrand.api.runtime.alpha :as runtime]
             [millhouse.spools.workflow :as workflow]
@@ -29,12 +28,22 @@
         (is (contains? #{:applied :unchanged}
                        (get-in result [:modules :codethread/spool-bump :status])))
         (current/with-runtime rt
-          (is (= #{:start}
-                 (:entrypoints (workflow/resolve-workflow :spool-bump)))))
-        (is (str/includes? support/feature-ci-watch-script "gh pr checks"))
-        (is (= ["sh" "-c" support/feature-ci-watch-script "watch" "branch" "180" "5"]
-               (support/sh-gate support/feature-ci-watch-script
-                                "watch" "branch" "180" "5")))))))
+          (let [definition (:value (workflow/resolve-workflow :spool-bump))
+                step (fn [id]
+                       (some #(when (= id (:id %)) %) (:steps definition)))
+                ci-argv ((get-in (step :wait-for-green) [:attributes "shell/argv"])
+                         {:branch "branch"})
+                pull-argv (get-in (step :pull-main) [:attributes "shell/argv"])]
+            (is (= #{:start} (:entrypoints definition)))
+            (testing "the registered CI gate retains its packaged script support"
+              (is (= ["sh" "-c"] (subvec ci-argv 0 2)))
+              (is (= "spool-bump-ci-watch" (nth ci-argv 3)))
+              (is (= ["branch" "180" "5"] (subvec ci-argv 4)))
+              (is (str/includes? (nth ci-argv 2) "gh pr checks")))
+            (testing "the registered pull gate retains its inline script support"
+              (is (= ["sh" "-c"] (subvec pull-argv 0 2)))
+              (is (str/includes? (nth pull-argv 2)
+                                 "git -C \"$root\" pull --ff-only origin main")))))))))
 
 (defn -main [& _]
   (let [summary (clojure.test/run-tests 'ct.spools.codethread.spool-bump-test)]

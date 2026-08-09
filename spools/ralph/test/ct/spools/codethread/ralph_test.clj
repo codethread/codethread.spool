@@ -35,8 +35,10 @@
           (is (str/includes? (pr-str definition)
                              "consumer-owned landing policy"))
           (is (str/includes? (pr-str definition)
-                             "Do not mark the feature card"))
-          (is (not (re-find #"roster|--workflow land|:workflow land"
+                             "doing-task body and latest note as the claim evidence"))
+          (is (str/includes? (pr-str definition)
+                             "do not claim it landed without the consumer's landing evidence"))
+          (is (not (re-find #"ralph/(?:feature|branch|worktree|card)|--context"
                             (pr-str definition)))))))))
 
 (defn -main [& _]

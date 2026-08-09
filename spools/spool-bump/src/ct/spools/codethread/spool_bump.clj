@@ -1,15 +1,46 @@
 (ns ct.spools.codethread.spool-bump
   "The third-party spool bump workflow (family `spool-bump`)."
-  (:require [clojure.spec.alpha :as s]
+  (:require [clojure.java.io :as io]
+            [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [millstrand.api.format.alpha :as format-alpha]
-            [millhouse.spools.workflow :as workflow]
-            [ct.spools.codethread.spool-bump.internal.support :as support]))
+            [millhouse.spools.workflow :as workflow]))
 
 (defn- non-blank-string?
   "Return true when v is a non-blank string."
   [v]
-  (support/non-blank-string? v))
+  (and (string? v) (not (str/blank? v))))
+
+(defn- script
+  "Return the frozen source of named workspace script."
+  [name]
+  (if-let [resource (io/resource
+                     (str "ct/spools/codethread/spool_bump/scripts/" name))]
+    (slurp resource)
+    (throw (ex-info "Missing spool-bump support script" {:script name}))))
+
+(defn- sh-gate
+  "Return shell argv that runs script with name as $0 and args as positionals."
+  [script name & args]
+  (into ["sh" "-c" script name] args))
+
+(def ^:private feature-ci-watch-script
+  "POSIX script for the feature CI shell gate."
+  (script "feature-ci-watch.sh"))
+
+(def ^:private land-pull-main-script
+  "Fast-forward the canonical main checkout to origin/main.
+
+  This stays inline as the small-script exemplar: eight lines of shell and no
+  data-shaping logic do not earn a separate file."
+  (str "set -eu\n"
+       "root=$(dirname \"$(git rev-parse --path-format=absolute --git-common-dir)\")\n"
+       "branch=$(git -C \"$root\" branch --show-current)\n"
+       "if [ \"$branch\" != main ]; then\n"
+       "  echo \"refusing to update canonical checkout: expected main, found $branch\" >&2\n"
+       "  exit 1\n"
+       "fi\n"
+       "git -C \"$root\" pull --ff-only origin main\n"))
 
 (s/def ::non-blank-string non-blank-string?)
 
@@ -219,8 +250,8 @@
                   :attributes
                   {"workflow/action-ref" "spool-bump.pr.green"
                    "shell/argv" (fn [{:keys [branch]}]
-                                  (support/sh-gate support/feature-ci-watch-script
-                                                   "spool-bump-ci-watch" branch "180" "5"))
+                                  (sh-gate feature-ci-watch-script
+                                            "spool-bump-ci-watch" branch "180" "5"))
                    "shell/cwd" (fn [{:keys [worktree]}] worktree)
                    "shell/timeout-secs" 5400
                    "workflow/instruction"
@@ -252,7 +283,7 @@
                   :depends-on [:merge]
                   :attributes
                   {"workflow/action-ref" "spool-bump.main.pull"
-                   "shell/argv" ["sh" "-c" support/land-pull-main-script]
+                   "shell/argv" ["sh" "-c" land-pull-main-script]
                    "shell/cwd" (fn [{:keys [worktree]}] worktree)
                    "shell/timeout-secs" 300
                    "workflow/instruction"
