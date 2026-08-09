@@ -3,4 +3,4 @@
  {:test {:extra-paths ["test"]
          :extra-deps {io.millstrand/millstrand {:local/root "../../../skein-src"}
                       millhouse.spools/workflow {:local/root "../../../millhouse.spool/spools/workflow"}}
-         :main-opts ["-m" "codethread.spools.ralph-test"]}}}
+         :main-opts ["-m" "ct.spools.codethread.ralph-test"]}}}

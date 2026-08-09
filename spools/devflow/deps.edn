@@ -1,8 +1,9 @@
-{:paths ["src" "resources"]
- :deps {camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.3"}}
+{:paths ["src"]
  :aliases
  {:test {:extra-paths ["test"]
          :extra-deps {io.millstrand/millstrand {:local/root "../../../skein-src"}
                       millhouse.spools/workflow {:local/root "../../../millhouse.spool/spools/workflow"}
+                      codethread/devflow {:local/root "../../../devflow.spool"}
+                      codethread/devflow-kanban-adapter {:local/root "../../../devflow.spool/kanban-adapter"}
                       codethread/kanban {:local/root "../../../kanban.spool"}}
-         :main-opts ["-m" "codethread.spools.devflow-test"]}}}
+         :main-opts ["-m" "ct.spools.codethread.devflow-setup-test"]}}}
