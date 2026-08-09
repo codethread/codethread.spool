@@ -4,7 +4,7 @@
             [clojure.string :as str]
             [millstrand.api.format.alpha :as format-alpha]
             [millhouse.spools.workflow :as workflow]
-            [ct.spools.codethread.spool-bump.support :as support]))
+            [ct.spools.codethread.spool-bump.internal.support :as support]))
 
 (defn- non-blank-string?
   "Return true when v is a non-blank string."

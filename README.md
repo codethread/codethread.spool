@@ -19,95 +19,133 @@ The following is the trusted consumer shape for a local checkout. The consumer o
 
 ```clojure
 {:spools
- {codethread/spools
+ {millstrand.spools/batteries {:millstrand/source-root "spools/batteries"}
+  codethread/spools
   {:local/root ".."
    :roots {codethread/agents "spools/agents"
            codethread/spool-bump "spools/spool-bump"
            codethread/devflow-setup "spools/devflow-setup"
            codethread/ralph "spools/ralph"}}
+  millhouse/spools
+  {:local/root "../../millhouse.spool"
+   :roots {millhouse.spools/workflow "spools/workflow"
+           millhouse.spools.executors/shell "spools/shell-executor"}}
+  ct.spools/agent-run
+  {:local/root "../../agent-harness.spool"
+   :roots {ct.spools/agent-run "agent-run"
+           ct.spools/harness-core "harness-core"
+           ct.spools/claude-harness "claude-harness"
+           ct.spools/codex-harness "codex-harness"
+           ct.spools/pi-harness "pi-harness"
+           ct.spools/agent-cli "agent-cli"
+           ct.spools/delegation "delegation"}}
   codethread/devflow
   {:local/root "../../devflow.spool"
    :roots {codethread/devflow "."
            codethread/devflow-kanban-adapter "kanban-adapter"}}
-  codethread/kanban
-  {:local/root "../../kanban.spool"
-   :roots {codethread/kanban "."}}}}
+  codethread/kanban {:local/root "../../kanban.spool"
+                     :roots {codethread/kanban "."}}}}
 ```
 
 ```clojure
 (require '[millstrand.api.current.alpha :as current]
          '[millstrand.api.runtime.alpha :as runtime])
 
-(def rt (current/runtime))
+(def runtime (current/runtime))
 
-(runtime/module! rt :millhouse/spools-workflow
+(runtime/module! runtime :millstrand/spools-batteries
+  {:ns 'millstrand.spools.batteries
+   :spools ['millstrand.spools/batteries]
+   :required? true})
+
+(runtime/module! runtime :millhouse/spools-workflow
   {:ns 'millhouse.spools.workflow
    :spools ['millhouse.spools/workflow]
    :required? true})
-(runtime/module! rt :millhouse/spools-workflow-cli
+(runtime/module! runtime :millhouse/spools-workflow-cli
   {:ns 'millhouse.spools.workflow.cli
    :spools ['millhouse.spools/workflow]
    :after [:millhouse/spools-workflow]
    :required? true})
-(runtime/module! rt :millhouse/spools-shell
+(runtime/module! runtime :millhouse/spools-shell
   {:ns 'millhouse.spools.executors.shell
    :spools ['millhouse.spools.executors/shell 'millhouse.spools/workflow]
    :after [:millhouse/spools-workflow]
    :required? true})
-(runtime/module! rt :ct/spools-agent-run
+
+(runtime/module! runtime :millstrand/spools-agent-run
   {:ns 'ct.spools.agent-run
    :spools ['ct.spools/agent-run]
    :required? true})
-(runtime/module! rt :ct/spools-delegation
+(runtime/module! runtime :millstrand/spools-delegation
   {:ns 'ct.spools.delegation
    :spools ['ct.spools/delegation 'ct.spools/agent-run]
-   :after [:ct/spools-agent-run]
+   :after [:millstrand/spools-agent-run]
    :required? true})
-(runtime/module! rt :ct/spools-harness-core
+(runtime/module! runtime :millstrand/spools-harness-core
   {:ns 'ct.spools.harness-core
    :spools ['ct.spools/harness-core]
-   :after [:ct/spools-agent-run]
+   :after [:millstrand/spools-agent-run]
    :required? true})
-(runtime/module! rt :ct/spools-codex-harness
+(runtime/module! runtime :millstrand/spools-claude-harness
+  {:ns 'ct.spools.claude-harness
+   :spools ['ct.spools/claude-harness 'ct.spools/harness-core]
+   :after [:millstrand/spools-harness-core]
+   :required? true})
+(runtime/module! runtime :millstrand/spools-codex-harness
   {:ns 'ct.spools.codex-harness
    :spools ['ct.spools/codex-harness 'ct.spools/harness-core]
-   :after [:ct/spools-harness-core]
+   :after [:millstrand/spools-harness-core]
    :required? true})
-(runtime/module! rt :ct/spools-agent-cli
+(runtime/module! runtime :millstrand/spools-pi-harness
+  {:ns 'ct.spools.pi-harness
+   :spools ['ct.spools/pi-harness 'ct.spools/harness-core]
+   :after [:millstrand/spools-harness-core]
+   :required? true})
+(runtime/module! runtime :millstrand/spools-agent-cli
   {:ns 'ct.spools.agent-cli
    :spools ['ct.spools/agent-cli 'ct.spools/harness-core]
-   :after [:ct/spools-harness-core :ct/spools-codex-harness]
+   :after [:millstrand/spools-harness-core
+           :millstrand/spools-claude-harness
+           :millstrand/spools-codex-harness
+           :millstrand/spools-pi-harness]
    :required? true})
-(runtime/module! rt :devflow
+
+(runtime/module! runtime :devflow
   {:ns 'ct.spools.devflow
    :spools ['codethread/devflow 'millhouse.spools/workflow]
    :after [:millhouse/spools-workflow]
    :required? true})
-(runtime/module! rt :kanban
+(runtime/module! runtime :millstrand/spools-kanban
   {:ns 'ct.spools.kanban
    :spools ['codethread/kanban]
    :required? true})
-(runtime/module! rt :devflow/kanban-adapter
+(runtime/module! runtime :devflow/kanban-adapter
   {:ns 'ct.spools.devflow-kanban-adapter
-   :spools ['codethread/devflow-kanban-adapter 'codethread/devflow 'codethread/kanban 'millhouse.spools/workflow]
-   :after [:devflow :kanban :millhouse/spools-workflow]
+   :spools ['codethread/devflow-kanban-adapter
+            'codethread/devflow 'codethread/kanban
+            'millhouse.spools/workflow]
+   :after [:devflow :millstrand/spools-kanban
+           :millhouse/spools-workflow]
    :required? true})
-(runtime/module! rt :codethread/agents
+
+(runtime/module! runtime :codethread/agents
   {:ns 'ct.spools.codethread.agents
    :spools ['codethread/agents 'ct.spools/agent-run 'ct.spools/delegation]
-   :after [:ct/spools-agent-run :ct/spools-delegation]
+   :after [:millstrand/spools-agent-run
+           :millstrand/spools-delegation]
    :required? true})
-(runtime/module! rt :codethread/spool-bump
+(runtime/module! runtime :codethread/spool-bump
   {:ns 'ct.spools.codethread.spool-bump
    :spools ['codethread/spool-bump 'millhouse.spools/workflow]
    :after [:millhouse/spools-workflow]
    :required? true})
-(runtime/module! rt :codethread/devflow-setup
+(runtime/module! runtime :codethread/devflow-setup
   {:ns 'ct.spools.codethread.devflow-setup
    :spools ['codethread/devflow-setup]
    :after [:devflow/kanban-adapter]
    :required? true})
-(runtime/module! rt :codethread/ralph
+(runtime/module! runtime :codethread/ralph
   {:ns 'ct.spools.codethread.ralph
    :spools ['codethread/ralph 'millhouse.spools/workflow]
    :after [:millhouse/spools-workflow]

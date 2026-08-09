@@ -3,7 +3,7 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [ct.spools.codethread.spool-bump]
-            [ct.spools.codethread.spool-bump.support :as support]
+            [ct.spools.codethread.spool-bump.internal.support :as support]
             [millstrand.api.current.alpha :as current]
             [millstrand.api.runtime.alpha :as runtime]
             [millhouse.spools.workflow :as workflow]

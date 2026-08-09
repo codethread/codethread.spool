@@ -5,8 +5,8 @@
   state, claims exactly one feature, drives that feature through its validated
   slice and stops at a judgment point that closes the epic only when no feature
   cards remain. The Go binary supplies the polling loop; this workflow owns the
-  work discipline inside one iteration. Claim metadata persisted in
-  `workflow/context` conforms to `:ct.spools.codethread.ralph/ralph-context`."
+  work discipline inside one iteration. Claim metadata is written to
+  `workflow/context` for the consumer-owned handoff."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [millstrand.api.format.alpha :as format-alpha]
@@ -19,15 +19,6 @@
 
 (s/def ::epic non-blank-string?)
 (s/def ::ralph-iterate-params (s/keys :req-un [::epic]))
-(s/def :ralph/feature non-blank-string?)
-(s/def :ralph/branch non-blank-string?)
-(s/def :ralph/worktree non-blank-string?)
-(s/def :ralph/card non-blank-string?)
-(s/def ::ralph-context
-  (s/and
-   (s/keys :req [:ralph/feature :ralph/branch :ralph/worktree :ralph/card])
-   #(= (:ralph/feature %) (:ralph/card %))))
-
 (workflow/defworkflow ralph-iterate
   "Run one Ralph iteration for an epic (family \"ralph\").
 

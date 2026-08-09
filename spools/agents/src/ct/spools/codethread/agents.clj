@@ -60,7 +60,9 @@
    :hitl-fable
    {:argv ["claude" "--model" "claude-fable-5" "--dangerously-skip-permissions"]
     :parse :raw
-    :doc "Claude Fable interactive TUI: the top-of-graph HITL seat; the prompt rides as the initial argv message."}
+    :doc (format-alpha/reflow
+          "|Claude Fable interactive TUI: the top-of-graph HITL seat; the prompt
+           |rides as the initial argv message.")}
    :hitl-opus
    {:argv ["claude" "--model" "opus" "--dangerously-skip-permissions"]
     :parse :raw

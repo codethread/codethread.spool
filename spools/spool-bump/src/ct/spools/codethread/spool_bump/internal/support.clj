@@ -1,4 +1,4 @@
-(ns ct.spools.codethread.spool-bump.support
+(ns ct.spools.codethread.spool-bump.internal.support
   "Shared script helpers for the repo's independently loaded workflow definitions."
   (:require [clojure.java.io :as io]
             [clojure.string :as str]))
