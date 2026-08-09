@@ -1,0 +1,11 @@
+.cpcache/
+.nrepl-port
+.test-repl-port
+.test-repl.pid
+
+/bin/
+site/
+
+.lsp/
+.clj-kondo/
+

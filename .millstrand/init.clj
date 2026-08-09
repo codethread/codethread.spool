@@ -3,12 +3,16 @@
 
 (def runtime (current/runtime))
 
-;; batteries is approved as a shipped source-root spool by default. The module
-;; guard keeps source loading behind that visible approval. The declaration
-;; carries a source target and world policy only: the module's contribution is
-;; the declaration data the authoring forms in `millstrand.spools.batteries` collect
-;; as its source loads — the strand ops and the glossary seed their documented
-;; failure modes reference.
+;; batteries load by default, see
+;; https://codethread.github.io/millstrand/spools/batteries/ for details
+;; adds common commands like `strand add` `strand list` etc
+;; you can omit this `module!` and build entirely your own way, see
+;; https://codethread.github.io/millstrand/docs/spools/customisation/
 (runtime/module! runtime :millstrand/spools-batteries
                  {:ns 'millstrand.spools.batteries
                   :spools ['millstrand.spools/batteries]})
+
+(runtime/module! runtime :module-me-help
+                 {:file "me/help.clj"
+                  :spools ['millstrand.spools/batteries]
+                  :after [:millstrand/spools-batteries]})
