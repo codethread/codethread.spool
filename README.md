@@ -135,6 +135,15 @@ The following is the trusted consumer shape for a local checkout. The consumer o
    :after [:millstrand/spools-agent-run
            :millstrand/spools-delegation]
    :required? true})
+(runtime/module! runtime :millstrand/spools-subagent
+  {:ns 'ct.spools.executors.subagent
+   :spools ['ct.spools/agent-run 'millhouse.spools/workflow]
+   :after [:millstrand/spools-agent-run
+           :millhouse/spools-workflow
+           :codethread/agents
+           :devflow
+           :devflow/kanban-adapter]
+   :required? true})
 (runtime/module! runtime :codethread/spool-bump
   {:ns 'ct.spools.codethread.spool-bump
    :spools ['codethread/spool-bump 'millhouse.spools/workflow]
@@ -153,6 +162,8 @@ The following is the trusted consumer shape for a local checkout. The consumer o
 ```
 
 The external adapter owns the Kanban-bound `:decompose` workflow. The local setup root contributes only the lifecycle seed that calls `ct.spools.devflow-kanban-adapter/repoint-decompose-seed!`.
+
+The subagent executor bridges Workflow `:subagent` gates to durable `agent-run` runs, so activate it after the shared agents and external Devflow adapter modules.
 
 The agents root publishes harness and alias declarations, including `:luna-high` and read-only seats. The current agent-run default-contract API does not accept an explicit runtime, so this first release does not bind default worker or review contract text from shared code; a consumer may provide that runtime-aware policy separately.
 
