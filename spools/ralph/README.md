@@ -2,7 +2,7 @@
 
 Ralph drives a Kanban epic through repeated headless agent runs, with a full-screen dashboard over the top. The complete Go module, its deterministic tests, and the tracked launcher live in this spool root.
 
-The `ralph` bin is declared by `ct.spools.codethread.ralph`. From a live Weaver, `mill bin list` discovers it, `mill bin build ralph` compiles `bin/ralph.bin`, and `mill bin run ralph -- --help` runs the compiled tool with the trailing arguments unchanged. The launcher requires `MILLSTRAND_WORKSPACE`; `mill bin run` supplies that variable for the selected Weaver. Running it without a build prints the build command and exits non-zero.
+The `ralph` bin is declared by `ct.spools.codethread.ralph`. From a live Weaver, `mill bin list` discovers it, `mill bin build ralph` compiles `bin/ralph.bin`, and `mill bin run ralph --help` runs the compiled tool with the trailing arguments unchanged. The launcher requires `MILLSTRAND_WORKSPACE`; `mill bin run` supplies that variable for the selected Weaver. Running it without a build prints the build command and exits non-zero.
 
 For local development, run `clojure -M:test` for the Clojure workflow publication test and run `go test ./...`, `go vet ./...`, and `go build .` from this directory. The root `make quality` target runs those checks as part of Codethread's quality gate.
 

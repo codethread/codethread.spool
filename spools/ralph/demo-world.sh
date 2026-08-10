@@ -16,22 +16,28 @@ set -euo pipefail
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 ralph_root="$repo/spools/ralph"
 
+if ! mill_bin="$(command -v mill)"; then
+  echo "demo-world: required command 'mill' is missing from PATH" >&2
+  exit 1
+fi
+if ! strand_bin="$(command -v strand)"; then
+  echo "demo-world: required command 'strand' is missing from PATH" >&2
+  exit 1
+fi
+
 if [ "${1-}" = "--teardown" ]; then
   ws="${2-}"
   [ -n "$ws" ] || { echo "demo-world: --teardown needs a workspace dir" >&2; exit 2; }
-  "$repo/bin/mill" weaver stop --workspace "$ws" >/dev/null 2>&1 || true
+  "$mill_bin" weaver stop --workspace "$ws" >/dev/null 2>&1 || true
   rm -rf "$ws"
   echo "demo-world: stopped the weaver and removed $ws"
   exit 0
 fi
 
-for bin in strand mill; do
-  [ -x "$repo/bin/$bin" ] || { echo "demo-world: $repo/bin/$bin is missing; run make build" >&2; exit 1; }
-done
 [ -x "$ralph_root/bin/ralph.bin" ] || { echo "demo-world: Ralph is not built; run mill bin build ralph" >&2; exit 1; }
 
 ws="$(mktemp -d "${TMPDIR:-/tmp}/ralph-demo.XXXXXX")"
-"$repo/bin/mill" init --workspace "$ws" >/dev/null
+"$mill_bin" init --workspace "$ws" >/dev/null
 
 # Batteries is a source-root spool and those paths must be relative to the
 # config dir, so the workspace links to this checkout's copy. The kanban
@@ -73,9 +79,9 @@ cat >> "$ws/init.clj" <<'EOF'
 EOF
 
 echo "demo-world: starting a weaver for $ws"
-"$repo/bin/mill" weaver start --workspace "$ws" >/dev/null
+"$mill_bin" weaver start --workspace "$ws" >/dev/null
 
-s=("$repo/bin/strand" --workspace "$ws")
+s=("$strand_bin" --workspace "$ws")
 card_id() { python3 -c 'import json,sys; print(json.load(sys.stdin)["card"]["id"])'; }
 
 epic="$("${s[@]}" kanban add "Tidy the demo world" --type epic --priority p2 \

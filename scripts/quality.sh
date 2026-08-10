@@ -9,11 +9,8 @@ done
 
 echo "==> ralph Go"
 go_root="$root/spools/ralph"
-if command -v gofumpt >/dev/null 2>&1; then
-  test -z "$(cd "$go_root" && gofumpt -l .)"
-else
-  test -z "$(cd "$go_root" && gofmt -l .)"
-fi
+# Millstrand's Go format standard is pinned so the gate is identical on every machine.
+test -z "$(cd "$go_root" && go run mvdan.cc/gofumpt@v0.8.0 -l .)"
 go -C "$go_root" vet ./...
 go -C "$go_root" test ./...
 go -C "$go_root" build -o /dev/null .

@@ -84,7 +84,7 @@ func run() (int, error) {
 	fs.IntVar(&opts.failureLimit, "failure-limit", 3, "stop after this many consecutive failed runs")
 	fs.StringVar(&opts.logDir, "log-dir", os.Getenv("RALPH_LOG_DIR"), "transcript dir (default $TMPDIR/ralph/<epic>-<timestamp>)")
 	fs.StringVar(&opts.workspace, "workspace", os.Getenv("MILLSTRAND_WORKSPACE"), "strand workspace dir (default: the repo's own)")
-	fs.StringVar(&opts.strandBin, "strand", "", "strand binary (default: enclosing checkout, else PATH)")
+	fs.StringVar(&opts.strandBin, "strand", "", "strand binary path (default: consumer PATH)")
 	fs.BoolVar(&opts.skipPermissions, "skip-permissions", skipPermissions,
 		"bypass the harness's permission prompts (a headless run cannot answer them)")
 	fs.BoolVar(&opts.fullAuth, "full-auth", false,
@@ -185,9 +185,7 @@ func run() (int, error) {
 	return ui.Run(ctx, session)
 }
 
-// resolveStrand prefers a strand binary in an enclosing checkout before PATH.
-// Ralph is built under a spool root, so the binary is not necessarily beside
-// it; walking upwards keeps local Codethread checkouts ahead of global tools.
+// resolveStrand uses an explicitly supplied binary path or the consumer's PATH.
 func resolveStrand(explicit string) (string, error) {
 	if explicit != "" {
 		if _, err := os.Stat(explicit); err != nil {
@@ -195,22 +193,9 @@ func resolveStrand(explicit string) (string, error) {
 		}
 		return explicit, nil
 	}
-	if self, err := os.Executable(); err == nil {
-		for dir := filepath.Dir(self); ; dir = filepath.Dir(dir) {
-			for _, candidate := range []string{filepath.Join(dir, "strand"), filepath.Join(dir, "bin", "strand")} {
-				if info, err := os.Stat(candidate); err == nil && !info.IsDir() {
-					return candidate, nil
-				}
-			}
-			parent := filepath.Dir(dir)
-			if parent == dir {
-				break
-			}
-		}
-	}
 	found, err := exec.LookPath("strand")
 	if err != nil {
-		return "", errors.New("no strand binary in an enclosing checkout or on PATH (run make build or install strand)")
+		return "", errors.New("no strand binary on PATH (pass -strand or install strand)")
 	}
 	return found, nil
 }

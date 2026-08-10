@@ -43,8 +43,8 @@ var ErrGate = errors.New("epic gate")
 
 // Client invokes a strand binary and decodes its JSON.
 type Client struct {
-	// Bin is the strand executable; Ralph resolves a local checkout or PATH
-	// binary before constructing the client.
+	// Bin is the explicitly selected strand executable resolved from a path or
+	// the consumer's PATH before constructing the client.
 	Bin string
 	// Workspace selects a non-default world, passed through as --workspace.
 	Workspace string
