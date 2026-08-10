@@ -1,13 +1,13 @@
 # Codethread shared workflow spools
 
-Codethread publishes four small producer roots. The producer namespaces use the shared-spool convention `ct.spools.*`; the `codethread/*` coordinates identify this family's independently approved roots.
+Codethread publishes four producer roots. The producer namespaces use the shared-spool convention `ct.spools.*`; the `codethread/*` coordinates identify this family's independently approved roots.
 
 | Root | Namespace | Purpose |
 | --- | --- | --- |
 | `spools/agents` | `ct.spools.codethread.agents` | Harness declarations and model-seat aliases for delegation and reviews |
 | `spools/spool-bump` | `ct.spools.codethread.spool-bump` | Third-party spool bump workflow |
 | `spools/devflow-setup` | `ct.spools.codethread.devflow-setup` | Consumer composition seed for the external Devflow Kanban adapter |
-| `spools/ralph` | `ct.spools.codethread.ralph` | One-card-per-iteration Ralph workflow |
+| `spools/ralph` | `ct.spools.codethread.ralph` | One-card-per-iteration Ralph workflow plus executable |
 
 The Devflow setup root contains no Devflow implementation or guidance. Consumers approve and activate the external `codethread/devflow` and `codethread/devflow-kanban-adapter` roots, then activate this setup root after the adapter.
 
@@ -169,8 +169,12 @@ The agents root publishes harness and alias declarations, including `:luna-high`
 
 Ralph validates and hands a committed slice to the consumer-owned landing policy. It does not own landing, roster review, or evidence for a landed card, and it must not mark a card or epic done without the consumer's landing evidence.
 
+The Ralph spool publishes the `ralph` workflow plus executable. In a live Weaver, use `mill bin list` to confirm the declaration, `mill bin build ralph` to compile the local Go module, and `mill bin run ralph --help` to pass arguments to the tool. The wrapper requires `MILLSTRAND_WORKSPACE`, which `mill bin run` supplies for the selected Weaver.
+
 ## Quality
 
 Run all root-local tests with `make quality`.
+
+The quality target runs the Ralph Clojure test, the pinned gofumpt v0.8.0 format check, `go vet`, `go test ./...`, and a disposable Go build from `spools/ralph`.
 
 Focused runs are `clojure -M:test` from each root directory. Focused tests use disposable embedded runtimes and explicitly supply the provider roots needed for their activation boundaries.

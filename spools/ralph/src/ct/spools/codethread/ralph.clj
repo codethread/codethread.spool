@@ -10,7 +10,13 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [millstrand.api.format.alpha :as format-alpha]
+            [millstrand.api.millstrand.alpha :as millstrand]
             [millhouse.spools.workflow :as workflow]))
+
+(millstrand/defbin ralph
+  "Drive a Kanban epic through repeated headless agent runs."
+  {:executable [:root "bin/ralph"]
+   :build ["go" "build" "-o" "bin/ralph.bin" "."]})
 
 (defn- non-blank-string?
   "Return true when value is a non-blank string."

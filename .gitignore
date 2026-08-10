@@ -4,8 +4,8 @@
 .test-repl.pid
 
 /bin/
+spools/ralph/bin/ralph.bin
 site/
 
 .lsp/
 .clj-kondo/
-

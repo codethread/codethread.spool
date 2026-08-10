@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+
+: "${MILLSTRAND_WORKSPACE:?mill bin run did not provide MILLSTRAND_WORKSPACE}"
+
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+compiled="$script_dir/ralph.bin"
+if [ ! -x "$compiled" ]; then
+  printf '%s\n' 'ralph is not built; run: mill bin build ralph' >&2
+  exit 2
+fi
+
+exec "$compiled" "$@"
