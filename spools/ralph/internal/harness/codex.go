@@ -11,6 +11,23 @@ import (
 // Codex drives `codex exec --json`.
 type Codex struct{}
 
+var codexRecordTypes = []string{
+	"item.completed",
+	"item.started",
+	"thread.started",
+	"turn.completed",
+	"turn.failed",
+	"turn.started",
+}
+
+var codexItemTypes = []string{
+	"agent_message",
+	"command_execution",
+	"mcp_tool_call",
+	"reasoning",
+	"web_search",
+}
+
 // Name implements Harness.
 func (Codex) Name() string { return "codex" }
 
@@ -91,6 +108,9 @@ func (Codex) Decode(line []byte) ([]Event, error) {
 	now := time.Now()
 	switch parsed.Type {
 	case "item.completed":
+		if !containsType(codexItemTypes, parsed.Item.Type) {
+			return nil, unsupportedType("codex", "item.completed item", parsed.Item.Type, codexItemTypes)
+		}
 		if parsed.Item.Type != "agent_message" || firstLine(parsed.Item.Text) == "" {
 			return nil, nil
 		}
@@ -99,6 +119,9 @@ func (Codex) Decode(line []byte) ([]Event, error) {
 			Text: clip(firstLine(parsed.Item.Text), 300), Detail: parsed.Item.Text,
 		}}, nil
 	case "item.started":
+		if !containsType(codexItemTypes, parsed.Item.Type) {
+			return nil, unsupportedType("codex", "item.started item", parsed.Item.Type, codexItemTypes)
+		}
 		switch parsed.Item.Type {
 		case "command_execution":
 			return []Event{{
@@ -118,6 +141,8 @@ func (Codex) Decode(line []byte) ([]Event, error) {
 			}}, nil
 		}
 		return nil, nil
+	case "thread.started", "turn.started":
+		return nil, nil
 	case "turn.completed":
 		stats := &Stats{
 			InputTokens:  parsed.Usage.InputTokens,
@@ -136,8 +161,9 @@ func (Codex) Decode(line []byte) ([]Event, error) {
 			Text:   "turn failed: " + clip(parsed.Error.Message, 300),
 			Detail: parsed.Error.Message,
 		}}, nil
+	default:
+		return nil, unsupportedType("codex", "top-level record", parsed.Type, codexRecordTypes)
 	}
-	return nil, nil
 }
 
 // FinalMessage implements Harness. Codex writes its final message to the file

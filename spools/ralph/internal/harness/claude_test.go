@@ -9,11 +9,12 @@ import (
 
 func TestClaudeDecode(t *testing.T) {
 	cases := []struct {
-		name    string
-		line    string
-		kinds   []Kind
-		texts   []string
-		wantErr bool
+		name        string
+		line        string
+		kinds       []Kind
+		texts       []string
+		wantErr     bool
+		wantErrText []string
 	}{
 		{
 			name:  "assistant text and tool call in one message",
@@ -38,15 +39,42 @@ func TestClaudeDecode(t *testing.T) {
 			kinds: []Kind{KindError},
 		},
 		{
-			name:  "unknown line types are left to the transcript",
+			name:  "system records stay in the transcript",
 			line:  `{"type":"system","subtype":"init"}`,
 			kinds: nil,
 		},
 		{
-			name:    "malformed JSON is an error",
-			line:    `{"type":`,
-			kinds:   nil,
-			wantErr: true,
+			name:  "user tool results stay in the transcript",
+			line:  `{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"tool-1","content":"done"}]}}`,
+			kinds: nil,
+		},
+		{
+			name:        "unknown top-level type is an error",
+			line:        `{"type":"future_record"}`,
+			kinds:       nil,
+			wantErr:     true,
+			wantErrText: []string{"claude", "future_record", "allowed types"},
+		},
+		{
+			name:        "unknown assistant content type is an error",
+			line:        `{"type":"assistant","message":{"content":[{"type":"future_block"}]}}`,
+			kinds:       nil,
+			wantErr:     true,
+			wantErrText: []string{"claude", "future_block", "allowed types"},
+		},
+		{
+			name:        "unknown user content type is an error",
+			line:        `{"type":"user","message":{"content":[{"type":"future_block"}]}}`,
+			kinds:       nil,
+			wantErr:     true,
+			wantErrText: []string{"claude", "future_block", "allowed types"},
+		},
+		{
+			name:        "malformed JSON is an error",
+			line:        `{"type":`,
+			kinds:       nil,
+			wantErr:     true,
+			wantErrText: []string{"claude", "malformed JSON", "type"},
 		},
 	}
 	for _, tc := range cases {
@@ -55,8 +83,12 @@ func TestClaudeDecode(t *testing.T) {
 			if (err != nil) != tc.wantErr {
 				t.Fatalf("err = %v, want error: %v", err, tc.wantErr)
 			}
-			if tc.wantErr && (!strings.Contains(err.Error(), "claude") || !strings.Contains(err.Error(), "type")) {
-				t.Fatalf("err = %v, want harness and malformed record context", err)
+			if tc.wantErr {
+				for _, want := range tc.wantErrText {
+					if !strings.Contains(err.Error(), want) {
+						t.Fatalf("err = %v, want %q", err, want)
+					}
+				}
 			}
 			var kinds []Kind
 			for _, e := range events {

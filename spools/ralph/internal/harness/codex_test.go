@@ -61,11 +61,12 @@ func TestCodexArgs(t *testing.T) {
 
 func TestCodexDecode(t *testing.T) {
 	cases := []struct {
-		name    string
-		line    string
-		kinds   []Kind
-		text    string
-		wantErr bool
+		name        string
+		line        string
+		kinds       []Kind
+		text        string
+		wantErr     bool
+		wantErrText []string
 	}{
 		{
 			name:  "agent message",
@@ -97,10 +98,40 @@ func TestCodexDecode(t *testing.T) {
 			kinds: nil,
 		},
 		{
-			name:    "malformed JSON is an error",
-			line:    `{"type":`,
-			kinds:   nil,
-			wantErr: true,
+			name:  "thread lifecycle records stay in the transcript",
+			line:  `{"type":"thread.started","thread_id":"thread-1"}`,
+			kinds: nil,
+		},
+		{
+			name:  "turn lifecycle records stay in the transcript",
+			line:  `{"type":"turn.started"}`,
+			kinds: nil,
+		},
+		{
+			name:  "known completed tool items stay in the transcript",
+			line:  `{"type":"item.completed","item":{"type":"command_execution","command":"git status"}}`,
+			kinds: nil,
+		},
+		{
+			name:        "unknown top-level type is an error",
+			line:        `{"type":"future_record"}`,
+			kinds:       nil,
+			wantErr:     true,
+			wantErrText: []string{"codex", "future_record", "allowed types"},
+		},
+		{
+			name:        "unknown nested item type is an error",
+			line:        `{"type":"item.completed","item":{"type":"future_item"}}`,
+			kinds:       nil,
+			wantErr:     true,
+			wantErrText: []string{"codex", "future_item", "allowed types"},
+		},
+		{
+			name:        "malformed JSON is an error",
+			line:        `{"type":`,
+			kinds:       nil,
+			wantErr:     true,
+			wantErrText: []string{"codex", "malformed JSON", "type"},
 		},
 	}
 	for _, tc := range cases {
@@ -109,8 +140,12 @@ func TestCodexDecode(t *testing.T) {
 			if (err != nil) != tc.wantErr {
 				t.Fatalf("err = %v, want error: %v", err, tc.wantErr)
 			}
-			if tc.wantErr && (!strings.Contains(err.Error(), "codex") || !strings.Contains(err.Error(), "type")) {
-				t.Fatalf("err = %v, want harness and malformed record context", err)
+			if tc.wantErr {
+				for _, want := range tc.wantErrText {
+					if !strings.Contains(err.Error(), want) {
+						t.Fatalf("err = %v, want %q", err, want)
+					}
+				}
 			}
 			var kinds []Kind
 			for _, e := range events {

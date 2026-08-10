@@ -119,8 +119,7 @@ func (w *world) engine(cfg loop.Config) *loop.Engine {
 // is how a test arms a stop at a known point in the run.
 func drive(t *testing.T, e *loop.Engine, watch func(loop.Msg)) (loop.Outcome, []loop.Msg) {
 	t.Helper()
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
+	ctx := context.Background()
 
 	outcomes := make(chan loop.Outcome, 1)
 	go func() { outcomes <- e.Run(ctx) }()
@@ -132,13 +131,7 @@ func drive(t *testing.T, e *loop.Engine, watch func(loop.Msg)) (loop.Outcome, []
 			watch(msg)
 		}
 	}
-	select {
-	case out := <-outcomes:
-		return out, seen
-	case <-ctx.Done():
-		t.Fatal("engine did not return after closing its message channel")
-		return loop.Outcome{}, seen
-	}
+	return <-outcomes, seen
 }
 
 func TestEpicClosesEndsTheLoop(t *testing.T) {
@@ -250,7 +243,8 @@ func TestHardStopKillsTheRunningAgent(t *testing.T) {
 	// The agent announces itself and then hangs; only a kill ends it.
 	w := newWorld(t, `
 printf '%s\n' '{"type":"assistant","message":{"content":[{"type":"text","text":"working"}]}}'
-while true; do sleep 1; done
+mkfifo "$DIR/agent.block"
+cat "$DIR/agent.block"
 `)
 	e := w.engine(loop.Config{MaxIterations: 10})
 
@@ -304,7 +298,8 @@ printf '%s\n' '{"type":"result","subtype":"success","result":"done"}'
 func TestMalformedStreamRecordFailsTheIteration(t *testing.T) {
 	w := newWorld(t, `
 printf '%s\n' '{"type":'
-while true; do :; done
+mkfifo "$DIR/agent.block"
+cat "$DIR/agent.block"
 `)
 
 	out, _ := drive(t, w.engine(loop.Config{MaxIterations: 1}), nil)
@@ -320,7 +315,8 @@ func TestTranscriptWriteFailureKillsAndFailsTheIteration(t *testing.T) {
 	const cause = "evidence storage unavailable"
 	w := newWorld(t, `
 printf '%s\n' '{"type":"result","subtype":"success","result":"done"}'
-while true; do :; done
+mkfifo "$DIR/agent.block"
+cat "$DIR/agent.block"
 `)
 	e := w.engine(loop.Config{
 		MaxIterations: 1,

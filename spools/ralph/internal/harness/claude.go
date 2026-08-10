@@ -12,6 +12,12 @@ import (
 // output format.
 type Claude struct{}
 
+var claudeRecordTypes = []string{"assistant", "result", "system", "user"}
+
+var claudeAssistantContentTypes = []string{"text", "tool_use"}
+
+var claudeUserContentTypes = []string{"tool_result"}
+
 // Name implements Harness.
 func (Claude) Name() string { return "claude" }
 
@@ -53,12 +59,7 @@ type claudeLine struct {
 	Type    string `json:"type"`
 	Subtype string `json:"subtype"`
 	Message struct {
-		Content []struct {
-			Type  string          `json:"type"`
-			Text  string          `json:"text"`
-			Name  string          `json:"name"`
-			Input json.RawMessage `json:"input"`
-		} `json:"content"`
+		Content json.RawMessage `json:"content"`
 	} `json:"message"`
 	Result       string  `json:"result"`
 	NumTurns     int     `json:"num_turns"`
@@ -76,8 +77,12 @@ func (Claude) Decode(line []byte) ([]Event, error) {
 	now := time.Now()
 	switch parsed.Type {
 	case "assistant":
+		blocks, err := claudeContentBlocks(parsed.Message.Content)
+		if err != nil {
+			return nil, err
+		}
 		var events []Event
-		for _, block := range parsed.Message.Content {
+		for _, block := range blocks {
 			switch block.Type {
 			case "text":
 				if firstLine(block.Text) == "" {
@@ -93,9 +98,30 @@ func (Claude) Decode(line []byte) ([]Event, error) {
 					Kind: KindTool, At: now, Label: block.Name,
 					Text: input, Detail: indentJSON(block.Input),
 				})
+			default:
+				return nil, unsupportedType("claude", "assistant content", block.Type, claudeAssistantContentTypes)
 			}
 		}
 		return events, nil
+	case "system":
+		return nil, nil
+	case "user":
+		blocks, err := claudeContentBlocks(parsed.Message.Content)
+		if err != nil {
+			// User messages may carry plain text as well as tool results. Ralph
+			// ignores the record, but still rejects an unrecognised block type.
+			var text string
+			if json.Unmarshal(parsed.Message.Content, &text) == nil {
+				return nil, nil
+			}
+			return nil, err
+		}
+		for _, block := range blocks {
+			if !containsType(claudeUserContentTypes, block.Type) {
+				return nil, unsupportedType("claude", "user content", block.Type, claudeUserContentTypes)
+			}
+		}
+		return nil, nil
 	case "result":
 		kind := KindResult
 		if parsed.IsError {
@@ -114,8 +140,43 @@ func (Claude) Decode(line []byte) ([]Event, error) {
 			Final:  true,
 			Stats:  stats,
 		}}, nil
+	default:
+		return nil, unsupportedType("claude", "top-level record", parsed.Type, claudeRecordTypes)
 	}
-	return nil, nil
+}
+
+type claudeContentBlock struct {
+	Type  string          `json:"type"`
+	Text  string          `json:"text"`
+	Name  string          `json:"name"`
+	Input json.RawMessage `json:"input"`
+}
+
+func claudeContentBlocks(raw json.RawMessage) ([]claudeContentBlock, error) {
+	if len(raw) == 0 || string(raw) == "null" {
+		return nil, nil
+	}
+	var blocks []claudeContentBlock
+	if err := json.Unmarshal(raw, &blocks); err != nil {
+		return nil, fmt.Errorf("claude decode assistant content malformed JSON: %w", err)
+	}
+	return blocks, nil
+}
+
+func containsType(allowed []string, got string) bool {
+	for _, typeName := range allowed {
+		if typeName == got {
+			return true
+		}
+	}
+	return false
+}
+
+func unsupportedType(harness, scope, got string, allowed []string) error {
+	if got == "" {
+		got = "<missing>"
+	}
+	return fmt.Errorf("%s decode unsupported %s type %q; allowed types: %s", harness, scope, got, strings.Join(allowed, ", "))
 }
 
 // FinalMessage implements Harness. Claude carries its final message inline in
