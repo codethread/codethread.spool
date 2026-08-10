@@ -20,31 +20,43 @@ if ! mill_bin="$(command -v mill)"; then
   echo "demo-world: required command 'mill' is missing from PATH" >&2
   exit 1
 fi
-if ! strand_bin="$(command -v strand)"; then
-  echo "demo-world: required command 'strand' is missing from PATH" >&2
-  exit 1
-fi
 
 if [ "${1-}" = "--teardown" ]; then
   ws="${2-}"
   [ -n "$ws" ] || { echo "demo-world: --teardown needs a workspace dir" >&2; exit 2; }
   "$mill_bin" weaver stop --workspace "$ws" >/dev/null 2>&1 || true
-  rm -rf "$ws"
+  rm -rf "${ws:?}"
   echo "demo-world: stopped the weaver and removed $ws"
   exit 0
 fi
 
 [ -x "$ralph_root/bin/ralph.bin" ] || { echo "demo-world: Ralph is not built; run mill bin build ralph" >&2; exit 1; }
 
+source_root="${MILLSTRAND_SOURCE_ROOT-}"
+if [ -z "$source_root" ]; then
+  echo "demo-world: MILLSTRAND_SOURCE_ROOT is required; set it to a source root containing spools/batteries" >&2
+  exit 1
+fi
+batteries_root="$source_root/spools/batteries"
+if [ ! -d "$batteries_root" ]; then
+  echo "demo-world: rejected MILLSTRAND_SOURCE_ROOT=$source_root: missing $batteries_root; set MILLSTRAND_SOURCE_ROOT to a source root whose spools/batteries directory exists" >&2
+  exit 1
+fi
+
+if ! strand_bin="$(command -v strand)"; then
+  echo "demo-world: required command 'strand' is missing from PATH" >&2
+  exit 1
+fi
+
 ws="$(mktemp -d "${TMPDIR:-/tmp}/ralph-demo.XXXXXX")"
 "$mill_bin" init --workspace "$ws" >/dev/null
 
 # Batteries is a source-root spool and those paths must be relative to the
-# config dir, so the workspace links to this checkout's copy. The kanban
-# coordinate is lifted from the repo's own spools.edn rather than pinned here,
-# so this script cannot drift from the release the repo actually runs.
+# config dir, so the workspace links to the supplied source root's copy. The
+# kanban coordinate is lifted from the repo's own spools.edn rather than pinned
+# here, so this script cannot drift from the release the repo actually runs.
 mkdir -p "$ws/spools"
-ln -sfn "$repo/spools/batteries" "$ws/spools/batteries"
+ln -sfn "$batteries_root" "$ws/spools/batteries"
 kanban_entry="$(python3 - "$repo/.millstrand/spools.edn" <<'PY'
 import sys
 

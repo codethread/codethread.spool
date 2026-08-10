@@ -6,6 +6,8 @@ The `ralph` bin is declared by `ct.spools.codethread.ralph`. From a live Weaver,
 
 For local development, run `clojure -M:test` for the Clojure workflow publication test and run `go test ./...`, `go vet ./...`, and `go build .` from this directory. The root `make quality` target runs those checks as part of Codethread's quality gate.
 
+Try the demo world with `MILLSTRAND_SOURCE_ROOT=/path/to/skein-src spools/ralph/demo-world.sh`.
+
 ## Layout
 
 - `main.go` — flags, environment defaults, harness and strand-binary resolution, the opening epic gate. Nothing here knows how a run is rendered.
