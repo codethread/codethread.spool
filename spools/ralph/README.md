@@ -26,7 +26,7 @@ At 120 columns and wider, the preview occupies the full-height right column. Bel
 
 The engine is the only place that decides when a loop ends. If you find yourself adding a stop condition to the UI, add it to `loop.Outcome` instead and let the UI report it.
 
-Malformed harness JSON and transcript open, write, or close failures fail the iteration, so Ralph never reports success without its stream evidence.
+Malformed harness JSON, valid-but-unsupported protocol record or content types, and transcript open, write, or close failures fail the iteration, so Ralph never reports success without its stream evidence.
 
 Children are started with `Setpgid` and a hard stop signals the whole group. Killing the leader alone leaves the agent's own tool processes running.
 

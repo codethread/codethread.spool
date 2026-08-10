@@ -70,6 +70,13 @@ func TestClaudeDecode(t *testing.T) {
 			wantErrText: []string{"claude", "future_block", "allowed types"},
 		},
 		{
+			name:        "unsupported user content shape explains accepted forms",
+			line:        `{"type":"user","message":{"content":{"type":"tool_result"}}}`,
+			kinds:       nil,
+			wantErr:     true,
+			wantErrText: []string{"user content", `{"type":"tool_result"}`, "accepted forms", "string or an array of tool_result blocks"},
+		},
+		{
 			name:        "malformed JSON is an error",
 			line:        `{"type":`,
 			kinds:       nil,

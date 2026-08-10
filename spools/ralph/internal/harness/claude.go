@@ -77,7 +77,7 @@ func (Claude) Decode(line []byte) ([]Event, error) {
 	now := time.Now()
 	switch parsed.Type {
 	case "assistant":
-		blocks, err := claudeContentBlocks(parsed.Message.Content)
+		blocks, err := claudeContentBlocks(parsed.Message.Content, "assistant content")
 		if err != nil {
 			return nil, err
 		}
@@ -106,14 +106,8 @@ func (Claude) Decode(line []byte) ([]Event, error) {
 	case "system":
 		return nil, nil
 	case "user":
-		blocks, err := claudeContentBlocks(parsed.Message.Content)
+		blocks, err := claudeContentBlocks(parsed.Message.Content, "user content")
 		if err != nil {
-			// User messages may carry plain text as well as tool results. Ralph
-			// ignores the record, but still rejects an unrecognised block type.
-			var text string
-			if json.Unmarshal(parsed.Message.Content, &text) == nil {
-				return nil, nil
-			}
 			return nil, err
 		}
 		for _, block := range blocks {
@@ -152,13 +146,23 @@ type claudeContentBlock struct {
 	Input json.RawMessage `json:"input"`
 }
 
-func claudeContentBlocks(raw json.RawMessage) ([]claudeContentBlock, error) {
+func claudeContentBlocks(raw json.RawMessage, scope string) ([]claudeContentBlock, error) {
 	if len(raw) == 0 || string(raw) == "null" {
 		return nil, nil
 	}
+	if scope == "user content" {
+		var text string
+		if json.Unmarshal(raw, &text) == nil {
+			return nil, nil
+		}
+	}
 	var blocks []claudeContentBlock
 	if err := json.Unmarshal(raw, &blocks); err != nil {
-		return nil, fmt.Errorf("claude decode assistant content malformed JSON: %w", err)
+		accepted := "an array of content blocks"
+		if scope == "user content" {
+			accepted = "a string or an array of tool_result blocks"
+		}
+		return nil, fmt.Errorf("claude decode %s has unsupported shape %s; accepted forms: %s: %w", scope, raw, accepted, err)
 	}
 	return blocks, nil
 }
