@@ -2,7 +2,9 @@ package loop_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -21,6 +23,20 @@ type scriptHarness struct {
 	harness.Claude
 	bin string
 }
+
+type transcriptWriter struct {
+	writeErr error
+	closeErr error
+}
+
+func (w transcriptWriter) Write(p []byte) (int, error) {
+	if w.writeErr != nil {
+		return 0, w.writeErr
+	}
+	return len(p), nil
+}
+
+func (w transcriptWriter) Close() error { return w.closeErr }
 
 func (h scriptHarness) Binary() string { return h.bin }
 
@@ -282,5 +298,63 @@ printf '%s\n' '{"type":"result","subtype":"success","result":"done"}'
 	}
 	if !strings.Contains(lines[0], `"session_id":"abc"`) {
 		t.Errorf("first transcript line = %q", lines[0])
+	}
+}
+
+func TestMalformedStreamRecordFailsTheIteration(t *testing.T) {
+	w := newWorld(t, `
+printf '%s\n' '{"type":'
+while true; do :; done
+`)
+
+	out, _ := drive(t, w.engine(loop.Config{MaxIterations: 1}), nil)
+	if out.Reason != loop.ReasonError || out.ExitCode != loop.ExitError {
+		t.Fatalf("outcome = %+v", out)
+	}
+	if !strings.Contains(out.Detail, "claude") || !strings.Contains(out.Detail, "malformed JSON") || !strings.Contains(out.Detail, "type") {
+		t.Errorf("detail = %q, want harness and malformed-record context", out.Detail)
+	}
+}
+
+func TestTranscriptWriteFailureKillsAndFailsTheIteration(t *testing.T) {
+	const cause = "evidence storage unavailable"
+	w := newWorld(t, `
+printf '%s\n' '{"type":"result","subtype":"success","result":"done"}'
+while true; do :; done
+`)
+	e := w.engine(loop.Config{
+		MaxIterations: 1,
+		OpenTranscript: func(string) (io.WriteCloser, error) {
+			return transcriptWriter{writeErr: errors.New(cause)}, nil
+		},
+	})
+
+	out, _ := drive(t, e, nil)
+	wantPath := filepath.Join(w.logDir, "iter-1.jsonl")
+	if out.Reason != loop.ReasonError || out.ExitCode != loop.ExitError {
+		t.Fatalf("outcome = %+v", out)
+	}
+	if !strings.Contains(out.Detail, wantPath) || !strings.Contains(out.Detail, cause) {
+		t.Errorf("detail = %q, want transcript path and write cause", out.Detail)
+	}
+}
+
+func TestTranscriptCloseFailureFailsTheIteration(t *testing.T) {
+	const cause = "evidence flush failed"
+	w := newWorld(t, `printf '%s\n' '{"type":"result","subtype":"success","result":"done"}'`)
+	e := w.engine(loop.Config{
+		MaxIterations: 1,
+		OpenTranscript: func(string) (io.WriteCloser, error) {
+			return transcriptWriter{closeErr: errors.New(cause)}, nil
+		},
+	})
+
+	out, _ := drive(t, e, nil)
+	wantPath := filepath.Join(w.logDir, "iter-1.jsonl")
+	if out.Reason != loop.ReasonError || out.ExitCode != loop.ExitError {
+		t.Fatalf("outcome = %+v", out)
+	}
+	if !strings.Contains(out.Detail, wantPath) || !strings.Contains(out.Detail, cause) {
+		t.Errorf("detail = %q, want transcript path and close cause", out.Detail)
 	}
 }

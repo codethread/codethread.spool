@@ -68,10 +68,10 @@ type claudeLine struct {
 }
 
 // Decode implements Harness.
-func (Claude) Decode(line []byte) []Event {
+func (Claude) Decode(line []byte) ([]Event, error) {
 	var parsed claudeLine
 	if err := json.Unmarshal(line, &parsed); err != nil {
-		return nil
+		return nil, fmt.Errorf("claude decode malformed JSON record %q: %w", line, err)
 	}
 	now := time.Now()
 	switch parsed.Type {
@@ -95,7 +95,7 @@ func (Claude) Decode(line []byte) []Event {
 				})
 			}
 		}
-		return events
+		return events, nil
 	case "result":
 		kind := KindResult
 		if parsed.IsError {
@@ -113,9 +113,9 @@ func (Claude) Decode(line []byte) []Event {
 			Detail: parsed.Result,
 			Final:  true,
 			Stats:  stats,
-		}}
+		}}, nil
 	}
-	return nil
+	return nil, nil
 }
 
 // FinalMessage implements Harness. Claude carries its final message inline in

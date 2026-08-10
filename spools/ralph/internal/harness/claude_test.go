@@ -9,10 +9,11 @@ import (
 
 func TestClaudeDecode(t *testing.T) {
 	cases := []struct {
-		name  string
-		line  string
-		kinds []Kind
-		texts []string
+		name    string
+		line    string
+		kinds   []Kind
+		texts   []string
+		wantErr bool
 	}{
 		{
 			name:  "assistant text and tool call in one message",
@@ -42,14 +43,21 @@ func TestClaudeDecode(t *testing.T) {
 			kinds: nil,
 		},
 		{
-			name:  "malformed JSON never panics",
-			line:  `{"type":`,
-			kinds: nil,
+			name:    "malformed JSON is an error",
+			line:    `{"type":`,
+			kinds:   nil,
+			wantErr: true,
 		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			events := Claude{}.Decode([]byte(tc.line))
+			events, err := Claude{}.Decode([]byte(tc.line))
+			if (err != nil) != tc.wantErr {
+				t.Fatalf("err = %v, want error: %v", err, tc.wantErr)
+			}
+			if tc.wantErr && (!strings.Contains(err.Error(), "claude") || !strings.Contains(err.Error(), "type")) {
+				t.Fatalf("err = %v, want harness and malformed record context", err)
+			}
 			var kinds []Kind
 			for _, e := range events {
 				kinds = append(kinds, e.Kind)
@@ -67,7 +75,10 @@ func TestClaudeDecode(t *testing.T) {
 }
 
 func TestClaudeResultFinalMessage(t *testing.T) {
-	events := Claude{}.Decode([]byte(`{"type":"result","subtype":"success","result":"RALPH-STOP: cannot build"}`))
+	events, err := Claude{}.Decode([]byte(`{"type":"result","subtype":"success","result":"RALPH-STOP: cannot build"}`))
+	if err != nil {
+		t.Fatalf("Decode: %v", err)
+	}
 	if len(events) != 1 || !events[0].Final {
 		t.Fatalf("the result event must be flagged as the final message, got %+v", events)
 	}
@@ -82,7 +93,10 @@ func TestClaudeResultFinalMessage(t *testing.T) {
 }
 
 func TestClaudeResultStatsDuration(t *testing.T) {
-	events := Claude{}.Decode([]byte(`{"type":"result","duration_ms":1500}`))
+	events, err := Claude{}.Decode([]byte(`{"type":"result","duration_ms":1500}`))
+	if err != nil {
+		t.Fatalf("Decode: %v", err)
+	}
 	if len(events) != 1 || events[0].Stats == nil {
 		t.Fatal("a result event must carry stats")
 	}

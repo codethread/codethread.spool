@@ -61,10 +61,11 @@ func TestCodexArgs(t *testing.T) {
 
 func TestCodexDecode(t *testing.T) {
 	cases := []struct {
-		name  string
-		line  string
-		kinds []Kind
-		text  string
+		name    string
+		line    string
+		kinds   []Kind
+		text    string
+		wantErr bool
 	}{
 		{
 			name:  "agent message",
@@ -95,10 +96,22 @@ func TestCodexDecode(t *testing.T) {
 			line:  `{"type":"item.completed","item":{"type":"reasoning","text":"thinking"}}`,
 			kinds: nil,
 		},
+		{
+			name:    "malformed JSON is an error",
+			line:    `{"type":`,
+			kinds:   nil,
+			wantErr: true,
+		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			events := Codex{}.Decode([]byte(tc.line))
+			events, err := Codex{}.Decode([]byte(tc.line))
+			if (err != nil) != tc.wantErr {
+				t.Fatalf("err = %v, want error: %v", err, tc.wantErr)
+			}
+			if tc.wantErr && (!strings.Contains(err.Error(), "codex") || !strings.Contains(err.Error(), "type")) {
+				t.Fatalf("err = %v, want harness and malformed record context", err)
+			}
 			var kinds []Kind
 			for _, e := range events {
 				kinds = append(kinds, e.Kind)

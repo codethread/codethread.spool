@@ -119,7 +119,11 @@ type Config struct {
 	MaxIterations   int
 	FailureLimit    int
 	LogDir          string
-	Board           board.Client
+	// OpenTranscript opens the raw stream evidence for an iteration. The
+	// default uses os.Create; the hook keeps persistence failures testable
+	// without changing the child-process harness.
+	OpenTranscript func(path string) (io.WriteCloser, error)
+	Board          board.Client
 	// Pause is the breather between iterations; it keeps a crash-looping
 	// harness from hot-looping.
 	Pause time.Duration
@@ -152,6 +156,9 @@ func New(cfg Config) *Engine {
 	}
 	if cfg.PollInterval <= 0 {
 		cfg.PollInterval = 10 * time.Second
+	}
+	if cfg.OpenTranscript == nil {
+		cfg.OpenTranscript = func(path string) (io.WriteCloser, error) { return os.Create(path) }
 	}
 	return &Engine{
 		cfg:       cfg,
@@ -366,7 +373,7 @@ type iterResult struct {
 	err      error
 }
 
-func (e *Engine) iterate(ctx context.Context, n int, epic board.Strand) iterResult {
+func (e *Engine) iterate(ctx context.Context, n int, epic board.Strand) (res iterResult) {
 	spec := harness.RunSpec{
 		Prompt:          harness.Prompt(epic.ID, epic.Title, n, e.cfg.FullAuth),
 		Iteration:       n,
@@ -377,18 +384,26 @@ func (e *Engine) iterate(ctx context.Context, n int, epic board.Strand) iterResu
 	started := time.Now()
 	e.emit(IterationStarted{N: n, Transcript: spec.TranscriptPath(), At: started, Prompt: spec.Prompt})
 
-	transcript, err := os.Create(spec.TranscriptPath())
+	transcript, err := e.cfg.OpenTranscript(spec.TranscriptPath())
 	if err != nil {
-		return iterResult{err: fmt.Errorf("cannot open transcript: %w", err), duration: time.Since(started)}
+		return iterResult{err: fmt.Errorf("cannot open transcript %s: %w", spec.TranscriptPath(), err), duration: time.Since(started)}
 	}
-	defer func() { _ = transcript.Close() }()
+	defer func() {
+		if closeErr := transcript.Close(); closeErr != nil {
+			res.err = errors.Join(res.err, fmt.Errorf("cannot close transcript %s: %w", spec.TranscriptPath(), closeErr))
+		}
+	}()
 
 	stderrPath := strings.TrimSuffix(spec.TranscriptPath(), ".jsonl") + ".stderr"
 	stderr, err := os.Create(stderrPath)
 	if err != nil {
-		return iterResult{err: fmt.Errorf("cannot open stderr log: %w", err), duration: time.Since(started)}
+		return iterResult{err: fmt.Errorf("cannot open stderr log %s: %w", stderrPath, err), duration: time.Since(started)}
 	}
-	defer func() { _ = stderr.Close() }()
+	defer func() {
+		if closeErr := stderr.Close(); closeErr != nil {
+			res.err = errors.Join(res.err, fmt.Errorf("cannot close stderr log %s: %w", stderrPath, closeErr))
+		}
+	}()
 
 	cmd := exec.Command(e.cfg.Harness.Binary(), e.cfg.Harness.Args(spec, e.cfg.Settings)...)
 	// Own process group: a hard stop takes the agent's whole tool tree down,
@@ -422,14 +437,25 @@ func (e *Engine) iterate(ctx context.Context, n int, epic board.Strand) iterResu
 
 	var stats *harness.Stats
 	var streamFinal string
+	var streamErr error
 	reader := bufio.NewReaderSize(stdout, 1<<20)
 	for {
 		line, err := readLine(reader)
 		if len(line) > 0 {
 			if _, werr := transcript.Write(append(line, '\n')); werr != nil {
-				e.emit(NoticeMsg{Text: "transcript write failed: " + werr.Error(), Error: true})
+				streamErr = fmt.Errorf("cannot write transcript %s: %w", spec.TranscriptPath(), werr)
+				e.emit(NoticeMsg{Text: streamErr.Error(), Error: true})
+				e.killChild()
+				break
 			}
-			for _, ev := range e.cfg.Harness.Decode(line) {
+			events, derr := e.cfg.Harness.Decode(line)
+			if derr != nil {
+				streamErr = derr
+				e.emit(NoticeMsg{Text: streamErr.Error(), Error: true})
+				e.killChild()
+				break
+			}
+			for _, ev := range events {
 				if ev.Stats != nil {
 					stats = ev.Stats
 				}
@@ -438,6 +464,12 @@ func (e *Engine) iterate(ctx context.Context, n int, epic board.Strand) iterResu
 				}
 				e.emit(StreamMsg{N: n, Event: ev})
 			}
+			if streamErr != nil {
+				break
+			}
+		}
+		if streamErr != nil {
+			break
 		}
 		if err != nil {
 			break
@@ -449,8 +481,13 @@ func (e *Engine) iterate(ctx context.Context, n int, epic board.Strand) iterResu
 	e.cmd = nil
 	e.mu.Unlock()
 
-	res := iterResult{duration: time.Since(started), stats: stats}
+	res.duration = time.Since(started)
+	res.stats = stats
 	res.exitCode = exitCode(waitErr)
+	if streamErr != nil {
+		res.err = streamErr
+		return res
+	}
 	if res.exitCode == 0 {
 		final, err := e.cfg.Harness.FinalMessage(spec, streamFinal)
 		if err != nil {

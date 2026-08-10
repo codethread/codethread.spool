@@ -83,41 +83,41 @@ type codexLine struct {
 }
 
 // Decode implements Harness.
-func (Codex) Decode(line []byte) []Event {
+func (Codex) Decode(line []byte) ([]Event, error) {
 	var parsed codexLine
 	if err := json.Unmarshal(line, &parsed); err != nil {
-		return nil
+		return nil, fmt.Errorf("codex decode malformed JSON record %q: %w", line, err)
 	}
 	now := time.Now()
 	switch parsed.Type {
 	case "item.completed":
 		if parsed.Item.Type != "agent_message" || firstLine(parsed.Item.Text) == "" {
-			return nil
+			return nil, nil
 		}
 		return []Event{{
 			Kind: KindText, At: now, Label: "agent",
 			Text: clip(firstLine(parsed.Item.Text), 300), Detail: parsed.Item.Text,
-		}}
+		}}, nil
 	case "item.started":
 		switch parsed.Item.Type {
 		case "command_execution":
 			return []Event{{
 				Kind: KindTool, At: now, Label: "command",
 				Text: clip(parsed.Item.Command, 300), Detail: parsed.Item.Command,
-			}}
+			}}, nil
 		case "mcp_tool_call":
 			label := strings.TrimSpace(parsed.Item.Server + " " + parsed.Item.Tool)
 			return []Event{{
 				Kind: KindTool, At: now, Label: "mcp",
 				Text: clip(or(label, "mcp_tool_call"), 300), Detail: string(line),
-			}}
+			}}, nil
 		case "web_search":
 			return []Event{{
 				Kind: KindTool, At: now, Label: "web_search",
 				Text: clip(parsed.Item.Query, 300), Detail: string(line),
-			}}
+			}}, nil
 		}
-		return nil
+		return nil, nil
 	case "turn.completed":
 		stats := &Stats{
 			InputTokens:  parsed.Usage.InputTokens,
@@ -129,15 +129,15 @@ func (Codex) Decode(line []byte) []Event {
 			Text: fmt.Sprintf("finished | input %d | cached %d | output %d",
 				stats.InputTokens, stats.CachedTokens, stats.OutputTokens),
 			Stats: stats,
-		}}
+		}}, nil
 	case "turn.failed":
 		return []Event{{
 			Kind: KindError, At: now, Label: "run",
 			Text:   "turn failed: " + clip(parsed.Error.Message, 300),
 			Detail: parsed.Error.Message,
-		}}
+		}}, nil
 	}
-	return nil
+	return nil, nil
 }
 
 // FinalMessage implements Harness. Codex writes its final message to the file
