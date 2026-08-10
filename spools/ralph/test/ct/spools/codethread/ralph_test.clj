@@ -22,6 +22,13 @@
   (t/with-weaver-world [ctx {:storage :sqlite-memory
                              :spools-edn spools-edn}]
     (let [rt (:runtime ctx)]
+      (is (= {:name "ralph"
+              :doc "Drive a Kanban epic through repeated headless agent runs."
+              :executable [:root "bin/ralph"]
+              :build ["go" "build" "-o" "bin/ralph.bin" "."]
+              :provenance 'ct.spools.codethread.ralph}
+             (select-keys (var-get #'ct.spools.codethread.ralph/ralph)
+                          [:name :doc :executable :build :provenance])))
       (runtime/module! rt :millhouse/workflow {:ns 'millhouse.spools.workflow})
       (let [result (runtime/module! rt :codethread/ralph
                                     {:ns 'ct.spools.codethread.ralph})

@@ -169,8 +169,12 @@ The agents root publishes harness and alias declarations, including `:luna-high`
 
 Ralph validates and hands a committed slice to the consumer-owned landing policy. It does not own landing, roster review, or evidence for a landed card, and it must not mark a card or epic done without the consumer's landing evidence.
 
+The Ralph spool also publishes the `ralph` executable. In a live Weaver, use `mill bin list` to confirm the declaration, `mill bin build ralph` to compile the local Go module, and `mill bin run ralph -- --help` to pass arguments to the tool. The wrapper requires `MILLSTRAND_WORKSPACE`, which `mill bin run` supplies for the selected Weaver.
+
 ## Quality
 
 Run all root-local tests with `make quality`.
+
+The quality target runs the Ralph Clojure test, Go format check, `go vet`, `go test ./...`, and a disposable Go build from `spools/ralph`.
 
 Focused runs are `clojure -M:test` from each root directory. Focused tests use disposable embedded runtimes and explicitly supply the provider roots needed for their activation boundaries.
