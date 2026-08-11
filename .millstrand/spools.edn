@@ -8,6 +8,7 @@
   millhouse/spools
   {:local/root "../../millhouse.spool"
    :roots {millhouse.spools/workflow "spools/workflow"
+           millhouse.spools/millstrand-workflows "spools/millstrand-workflows"
            millhouse.spools.executors/shell "spools/shell-executor"}}
   ct.spools/agent-run
   {:local/root "../../agent-harness.spool"
