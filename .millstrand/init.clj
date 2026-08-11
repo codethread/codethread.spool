@@ -17,6 +17,12 @@
                   :spools ['millhouse.spools/workflow]
                   :after [:millhouse/spools-workflow]
                   :required? true})
+(runtime/module! runtime :millhouse/spools-millstrand-workflows
+                 {:ns 'millhouse.spools.millstrand-workflows
+                  :spools ['millhouse.spools/millstrand-workflows
+                           'millhouse.spools/workflow]
+                  :after [:millhouse/spools-workflow]
+                  :required? true})
 (runtime/module! runtime :millhouse/spools-shell
                  {:ns 'millhouse.spools.executors.shell
                   :spools ['millhouse.spools.executors/shell
@@ -95,12 +101,6 @@
                           :codethread/agents
                           :devflow
                           :devflow/kanban-adapter]
-                  :required? true})
-(runtime/module! runtime :codethread/spool-bump
-                 {:ns 'ct.spools.codethread.spool-bump
-                  :spools ['codethread/spool-bump
-                           'millhouse.spools/workflow]
-                  :after [:millhouse/spools-workflow]
                   :required? true})
 (runtime/module! runtime :codethread/devflow-setup
                  {:ns 'ct.spools.codethread.devflow-setup

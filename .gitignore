@@ -7,5 +7,6 @@
 spools/ralph/bin/ralph.bin
 site/
 
-.lsp/
-.clj-kondo/
+.lsp/*
+!.lsp/config.edn
+.clj-kondo/.cache/
