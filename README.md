@@ -27,6 +27,7 @@ The following is the trusted consumer shape for a local checkout. The consumer o
   millhouse/spools
   {:local/root "../../millhouse.spool"
    :roots {millhouse.spools/workflow "spools/workflow"
+           millhouse.spools/millstrand-workflows "spools/millstrand-workflows"
            millhouse.spools.executors/shell "spools/shell-executor"}}
   ct.spools/agent-run
   {:local/root "../../agent-harness.spool"
@@ -63,6 +64,12 @@ The following is the trusted consumer shape for a local checkout. The consumer o
 (runtime/module! runtime :millhouse/spools-workflow-cli
   {:ns 'millhouse.spools.workflow.cli
    :spools ['millhouse.spools/workflow]
+   :after [:millhouse/spools-workflow]
+   :required? true})
+(runtime/module! runtime :millhouse/spools-millstrand-workflows
+  {:ns 'millhouse.spools.millstrand-workflows
+   :spools ['millhouse.spools/millstrand-workflows
+            'millhouse.spools/workflow]
    :after [:millhouse/spools-workflow]
    :required? true})
 (runtime/module! runtime :millhouse/spools-shell
