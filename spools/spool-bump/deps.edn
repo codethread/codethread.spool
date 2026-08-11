@@ -1,6 +1,7 @@
 {:paths ["src" "resources"]
  :aliases
  {:test {:extra-paths ["test"]
-         :extra-deps {io.millstrand/millstrand {:local/root "../../../skein-src"}
+         :extra-deps {io.millstrand/millstrand {:git/url "https://github.com/codethread/millstrand.git"
+                                               :git/sha "fb6c9057d594bfa4b5ea8531b9774b5e9a23a4b4"}
                       millhouse.spools/workflow {:local/root "../../../millhouse.spool/spools/workflow"}}
          :main-opts ["-m" "ct.spools.codethread.spool-bump-test"]}}}
