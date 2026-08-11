@@ -5,7 +5,6 @@ Codethread publishes four producer roots. The producer namespaces use the shared
 | Root | Namespace | Purpose |
 | --- | --- | --- |
 | `spools/agents` | `ct.spools.codethread.agents` | Harness declarations and model-seat aliases for delegation and reviews |
-| `spools/spool-bump` | `ct.spools.codethread.spool-bump` | Third-party spool bump workflow |
 | `spools/devflow-setup` | `ct.spools.codethread.devflow-setup` | Consumer composition seed for the external Devflow Kanban adapter |
 | `spools/ralph` | `ct.spools.codethread.ralph` | One-card-per-iteration Ralph workflow plus executable |
 
@@ -23,7 +22,6 @@ The following is the trusted consumer shape for a local checkout. The consumer o
   codethread/spools
   {:local/root ".."
    :roots {codethread/agents "spools/agents"
-           codethread/spool-bump "spools/spool-bump"
            codethread/devflow-setup "spools/devflow-setup"
            codethread/ralph "spools/ralph"}}
   millhouse/spools
@@ -143,11 +141,6 @@ The following is the trusted consumer shape for a local checkout. The consumer o
            :codethread/agents
            :devflow
            :devflow/kanban-adapter]
-   :required? true})
-(runtime/module! runtime :codethread/spool-bump
-  {:ns 'ct.spools.codethread.spool-bump
-   :spools ['codethread/spool-bump 'millhouse.spools/workflow]
-   :after [:millhouse/spools-workflow]
    :required? true})
 (runtime/module! runtime :codethread/devflow-setup
   {:ns 'ct.spools.codethread.devflow-setup
