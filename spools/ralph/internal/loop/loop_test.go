@@ -295,19 +295,35 @@ printf '%s\n' '{"type":"result","subtype":"success","result":"done"}'
 	}
 }
 
-func TestMalformedStreamRecordFailsTheIteration(t *testing.T) {
+func TestMalformedStreamRecordWarnsAndDoesNotStallTheIteration(t *testing.T) {
 	w := newWorld(t, `
 printf '%s\n' '{"type":'
-mkfifo "$DIR/agent.block"
-cat "$DIR/agent.block"
+printf '%s\n' '{"type":"result","subtype":"success","result":"done"}'
 `)
 
-	out, _ := drive(t, w.engine(loop.Config{MaxIterations: 1}), nil)
-	if out.Reason != loop.ReasonError || out.ExitCode != loop.ExitError {
+	out, msgs := drive(t, w.engine(loop.Config{MaxIterations: 1}), nil)
+	if out.Reason != loop.ReasonMaxIterations || out.ExitCode != loop.ExitError {
 		t.Fatalf("outcome = %+v", out)
 	}
-	if !strings.Contains(out.Detail, "claude") || !strings.Contains(out.Detail, "malformed JSON") || !strings.Contains(out.Detail, "type") {
-		t.Errorf("detail = %q, want harness and malformed-record context", out.Detail)
+	var warned, finished bool
+	for _, msg := range msgs {
+		switch msg := msg.(type) {
+		case loop.StreamMsg:
+			if msg.Event.Kind == harness.KindNotice &&
+				strings.Contains(msg.Event.Text, "could not parse JSONL record") &&
+				strings.Contains(msg.Event.Text, "claude") &&
+				strings.Contains(msg.Event.Text, "malformed JSON") {
+				warned = true
+			}
+		case loop.IterationFinished:
+			finished = msg.Err == nil && msg.Final == "done"
+		}
+	}
+	if !warned {
+		t.Error("malformed stream record must produce a parse warning")
+	}
+	if !finished {
+		t.Error("the valid response after malformed JSON must finish the iteration")
 	}
 }
 

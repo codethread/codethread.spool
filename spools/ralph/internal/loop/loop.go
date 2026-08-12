@@ -450,10 +450,15 @@ func (e *Engine) iterate(ctx context.Context, n int, epic board.Strand) (res ite
 			}
 			events, derr := e.cfg.Harness.Decode(line)
 			if derr != nil {
-				streamErr = derr
-				e.emit(NoticeMsg{Text: streamErr.Error(), Error: true})
-				e.killChild()
-				break
+				// Agent JSONL is an evolving external protocol. Preserve an
+				// undecodable record in the transcript, warn the operator, and
+				// let the agent run complete instead of stalling the work session.
+				e.emit(StreamMsg{N: n, Event: harness.Event{
+					Kind: harness.KindNotice, At: time.Now(), Label: e.cfg.Harness.Name(),
+					Text:   "could not parse JSONL record; continuing: " + derr.Error(),
+					Detail: string(line),
+				}})
+				continue
 			}
 			for _, ev := range events {
 				if ev.Stats != nil {

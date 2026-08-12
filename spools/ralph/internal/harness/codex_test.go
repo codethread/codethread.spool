@@ -98,6 +98,11 @@ func TestCodexDecode(t *testing.T) {
 			kinds: nil,
 		},
 		{
+			name:  "file changes stay in the transcript",
+			line:  `{"type":"item.started","item":{"type":"file_change","changes":[{"path":"main.go","kind":"update"}],"status":"in_progress"}}`,
+			kinds: nil,
+		},
+		{
 			name:  "thread lifecycle records stay in the transcript",
 			line:  `{"type":"thread.started","thread_id":"thread-1"}`,
 			kinds: nil,

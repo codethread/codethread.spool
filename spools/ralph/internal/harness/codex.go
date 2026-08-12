@@ -23,6 +23,7 @@ var codexRecordTypes = []string{
 var codexItemTypes = []string{
 	"agent_message",
 	"command_execution",
+	"file_change",
 	"mcp_tool_call",
 	"reasoning",
 	"web_search",

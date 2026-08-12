@@ -350,6 +350,19 @@ func TestIterationHistoryRecordsEachRun(t *testing.T) {
 	}
 }
 
+func TestStreamNoticeRendersAsWarning(t *testing.T) {
+	m := update(t, testModel(t, 120, 40),
+		loop.StreamMsg{N: 1, Event: harness.Event{Kind: harness.KindNotice, Text: "could not parse JSONL record; continuing"}},
+	)
+	items := m.panes[paneLog].items
+	if len(items) != 1 {
+		t.Fatalf("log items = %d, want 1", len(items))
+	}
+	if items[0].gutter != "!!" || items[0].tone != toneWarn {
+		t.Errorf("notice item = %+v, want warning styling", items[0])
+	}
+}
+
 func TestLogTailsUntilTheReaderScrollsUp(t *testing.T) {
 	m := testModel(t, 120, 40)
 	for range 10 {

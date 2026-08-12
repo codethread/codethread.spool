@@ -97,9 +97,9 @@ type Harness interface {
 	// Args builds the argv (after Binary) for one iteration.
 	Args(spec RunSpec, settings Settings) []string
 	// Decode turns one raw stream line into zero or more events. Lines it does
-	// not recognise yield nothing and survive only in the transcript. A line
-	// that is not valid JSON is a broken external boundary record and returns an
-	// error.
+	// not recognise yield nothing and survive only in the transcript. It may
+	// return an error for malformed or unsupported protocol records; the loop
+	// records a warning and continues consuming the agent stream.
 	Decode(line []byte) ([]Event, error)
 	// FinalMessage returns the run's final assistant message. streamFinal is
 	// whatever the decoded stream reported, for harnesses that carry it inline.

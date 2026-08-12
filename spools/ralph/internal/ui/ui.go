@@ -126,7 +126,7 @@ func RunHeadless(ctx context.Context, s Session) int {
 				fmt.Printf("⏺ %s %s\n", msg.Event.Label, msg.Event.Text)
 			case harness.KindResult:
 				fmt.Printf("\n[ralph] %s\n", msg.Event.Text)
-			case harness.KindError:
+			case harness.KindError, harness.KindNotice:
 				fmt.Fprintf(os.Stderr, "[ralph] %s\n", msg.Event.Text)
 			}
 		case loop.NoticeMsg:
