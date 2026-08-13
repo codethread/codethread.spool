@@ -1,1 +1,11 @@
-{:copy-kondo-configs? false}
+{:project-specs [{:project-path "deps.edn"
+                  :classpath-cmd ["clojure" "-Srepro" "-Spath" "-M:lint"]}]
+ :source-aliases #{:lint}
+ :source-paths [".millstrand"
+                "spools/agents/src"
+                "spools/agents/test"
+                "spools/devflow-setup/src"
+                "spools/devflow-setup/test"
+                "spools/ralph/src"
+                "spools/ralph/test"]
+ :copy-kondo-configs? false}

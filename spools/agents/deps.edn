@@ -3,6 +3,10 @@
  {:test {:extra-paths ["test"]
          :extra-deps {io.millstrand/millstrand {:git/url "https://github.com/codethread/millstrand.git"
                                                :git/sha "fb6c9057d594bfa4b5ea8531b9774b5e9a23a4b4"}
-                      ct.spools/agent-run {:local/root "../../../agent-harness.spool/agent-run"}
-                      ct.spools/delegation {:local/root "../../../agent-harness.spool/delegation"}}
+                      ct.spools/agent-run {:git/url "https://github.com/codethread/agent-harness.spool.git"
+                                           :git/sha "abb5c15a9497d00cdbcdf024f6e73339e98841a5"
+                                           :deps/root "agent-run"}
+                      ct.spools/delegation {:git/url "https://github.com/codethread/agent-harness.spool.git"
+                                            :git/sha "abb5c15a9497d00cdbcdf024f6e73339e98841a5"
+                                            :deps/root "delegation"}}
          :main-opts ["-m" "ct.spools.codethread.agents-test"]}}}
