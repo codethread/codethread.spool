@@ -5,6 +5,7 @@
             [ct.spools.codethread.ralph]
             [millstrand.api.current.alpha :as current]
             [millstrand.api.runtime.alpha :as runtime]
+            [millstrand.api.weaver.alpha :as weaver]
             [millhouse.spools.workflow :as workflow]
             [millstrand.test.alpha :as t]))
 
@@ -36,6 +37,12 @@
                     (workflow/resolve-workflow :ralph-iterate))]
         (is (contains? #{:applied :unchanged}
                        (get-in result [:modules :codethread/ralph :status])))
+        (is (= [{:name "ralph"
+                 :spool "ct.spools.codethread.ralph"
+                 :doc "Drive a Kanban epic through repeated headless agent runs."
+                 :executable "[:root \"bin/ralph\"]"
+                 :build ["go" "build" "-o" "bin/ralph.bin" "."]}]
+               (:bins (weaver/op! rt 'bins ["list"]))))
         (is (= #{:start} (:entrypoints steps)))
         (let [definition (current/with-runtime rt
                            (workflow/resolve-workflow :ralph-iterate))]

@@ -13,7 +13,7 @@
             [millstrand.api.millstrand.alpha :as millstrand]
             [millhouse.spools.workflow :as workflow]))
 
-(millstrand/defbin ralph
+(millstrand/defbin! ralph
   "Drive a Kanban epic through repeated headless agent runs."
   {:executable [:root "bin/ralph"]
    :build ["go" "build" "-o" "bin/ralph.bin" "."]})
