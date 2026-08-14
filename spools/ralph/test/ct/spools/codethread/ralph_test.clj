@@ -19,7 +19,7 @@
     'millhouse/spools {:local/root millhouse-root
                        :roots {'millhouse.spools/workflow "spools/workflow"}}}})
 
-(deftest ralph-publishes-the-one-card-workflow-without-roster-or-landing-policy
+(deftest ralph-selects-the-one-card-workflow-without-roster-or-landing-policy
   (t/with-weaver-world [ctx {:storage :sqlite-memory
                              :spools-edn spools-edn}]
     (let [rt (:runtime ctx)]
@@ -37,6 +37,8 @@
                     (workflow/resolve-workflow :ralph-iterate))]
         (is (contains? #{:applied :unchanged}
                        (get-in result [:modules :codethread/ralph :status])))
+        (is (current/with-runtime rt
+              (contains? (set (keys (workflow/workflows))) :ralph-iterate)))
         (is (= [{:name "ralph"
                  :spool "ct.spools.codethread.ralph"
                  :doc "Drive a Kanban epic through repeated headless agent runs."

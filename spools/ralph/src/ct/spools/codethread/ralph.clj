@@ -25,7 +25,7 @@
 
 (s/def ::epic non-blank-string?)
 (s/def ::ralph-iterate-params (s/keys :req-un [::epic]))
-(workflow/defworkflow ralph-iterate
+(workflow/defworkflow! ralph-iterate
   "Run one Ralph iteration for an epic (family \"ralph\").
 
   The iteration is deliberately one-card wide: orient from the epic's live

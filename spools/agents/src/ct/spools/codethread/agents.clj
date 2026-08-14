@@ -228,6 +228,9 @@
            |provider-quota fallback for reviews of primarily Claude-authored
            |code, not frontier design or broad implementation.")}})
 
+(shuttle/use-harnesses! harness-defs)
+(shuttle/use-aliases! alias-defs)
+
 ;; The current agent-run default-contract API is not explicit-runtime, so this
-;; first release publishes only the harness and alias declarations. Consumers
-;; may bind review/task defaults in their own runtime-aware policy layer.
+;; release selects only the harness and alias declarations. Consumers may bind
+;; review/task defaults in their own runtime-aware policy layer.

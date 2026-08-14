@@ -4,15 +4,15 @@
          :extra-deps {io.millstrand/millstrand {:git/url "https://github.com/codethread/millstrand.git"
                                                :git/sha "3bbe5dc15359975a8e8203ef47b3a7514177e75b"}
                       millhouse.spools/workflow {:git/url "https://github.com/codethread/millhouse.spool.git"
-                                                 :git/sha "3c4f17c9e52e794891052c406e84f21180a47674"
+                                                 :git/sha "b0ac2268685e53510df01dcd0cc533b8fd40a25d"
                                                  :deps/root "spools/workflow"}
                       codethread/devflow {:git/url "https://github.com/codethread/devflow.spool.git"
-                                          :git/sha "76b59b65ed45abd41f8a1ee1bc73b8a880d2634c"
+                                          :git/sha "3a96415df0429c245191a22e66cc0bfc91524199"
                                           :deps/root "."}
                       codethread/devflow-kanban-adapter {:git/url "https://github.com/codethread/devflow.spool.git"
-                                                         :git/sha "76b59b65ed45abd41f8a1ee1bc73b8a880d2634c"
+                                                         :git/sha "3a96415df0429c245191a22e66cc0bfc91524199"
                                                          :deps/root "kanban-adapter"}
                       codethread/kanban {:git/url "https://github.com/codethread/kanban.spool.git"
-                                         :git/sha "a6b3a36cd5476ec5c36cd58a7f74bfec6b7e665e"
+                                         :git/sha "87f61bc2750e7026f3650235907db25f19b1536e"
                                          :deps/root "."}}
          :main-opts ["-m" "ct.spools.codethread.devflow-setup-test"]}}}
