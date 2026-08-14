@@ -161,7 +161,7 @@ The following is the trusted consumer shape for a local checkout. The consumer o
    :required? true})
 ```
 
-The external adapter owns the Kanban-bound `:decompose` workflow. The local setup root contributes only the lifecycle seed that calls `ct.spools.devflow-kanban-adapter/repoint-decompose-seed!`.
+The external adapter owns the Kanban-bound `:decompose` workflow. The local setup root contributes only the selected lifecycle seed that calls `ct.spools.devflow-kanban-adapter/repoint-decompose-seed!`; it does not import or copy the adapter implementation.
 
 The subagent executor bridges Workflow `:subagent` gates to durable `agent-run` runs, so activate it after the shared agents and external Devflow adapter modules.
 
@@ -169,7 +169,7 @@ The agents root selects its harness and alias declarations with agent-run's thre
 
 Ralph validates and hands a committed slice to the consumer-owned landing policy. It does not own landing, roster review, or evidence for a landed card, and it must not mark a card or epic done without the consumer's landing evidence.
 
-The Ralph spool publishes the `ralph` workflow plus executable. In a live Weaver, use `mill bin list` to confirm the declaration, `mill bin build ralph` to compile the local Go module, and `mill bin run ralph --help` to pass arguments to the tool. The wrapper requires `MILLSTRAND_WORKSPACE`, which `mill bin run` supplies for the selected Weaver.
+The Ralph spool publishes the selected `ralph-iterate` workflow plus executable. In a live Weaver, use `mill bin list` to confirm the declaration, `mill bin build ralph` to compile the local Go module, and `mill bin run ralph --help` to pass arguments to the tool. The wrapper requires `MILLSTRAND_WORKSPACE`, which `mill bin run` supplies for the selected Weaver.
 
 ## Quality
 
