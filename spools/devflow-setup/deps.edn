@@ -7,12 +7,12 @@
                                                  :git/sha "3c4f17c9e52e794891052c406e84f21180a47674"
                                                  :deps/root "spools/workflow"}
                       codethread/devflow {:git/url "https://github.com/codethread/devflow.spool.git"
-                                          :git/sha "76b59b65ed45abd41f8a1ee1bc73b8a880d2634c"
+                                          :git/sha "3a96415df0429c245191a22e66cc0bfc91524199"
                                           :deps/root "."}
                       codethread/devflow-kanban-adapter {:git/url "https://github.com/codethread/devflow.spool.git"
-                                                         :git/sha "76b59b65ed45abd41f8a1ee1bc73b8a880d2634c"
+                                                         :git/sha "3a96415df0429c245191a22e66cc0bfc91524199"
                                                          :deps/root "kanban-adapter"}
                       codethread/kanban {:git/url "https://github.com/codethread/kanban.spool.git"
-                                         :git/sha "a6b3a36cd5476ec5c36cd58a7f74bfec6b7e665e"
+                                         :git/sha "87f61bc2750e7026f3650235907db25f19b1536e"
                                          :deps/root "."}}
          :main-opts ["-m" "ct.spools.codethread.devflow-setup-test"]}}}

@@ -165,7 +165,7 @@ The external adapter owns the Kanban-bound `:decompose` workflow. The local setu
 
 The subagent executor bridges Workflow `:subagent` gates to durable `agent-run` runs, so activate it after the shared agents and external Devflow adapter modules.
 
-The agents root publishes harness and alias declarations, including `:luna-high` and read-only seats. The current agent-run default-contract API does not accept an explicit runtime, so this first release does not bind default worker or review contract text from shared code; a consumer may provide that runtime-aware policy separately.
+The agents root selects its harness and alias declarations with agent-run's three-form authoring API, including `:luna-high` and read-only seats. The current agent-run default-contract API does not accept an explicit runtime, so this release does not bind default worker or review contract text from shared code; a consumer may provide that runtime-aware policy separately.
 
 Ralph validates and hands a committed slice to the consumer-owned landing policy. It does not own landing, roster review, or evidence for a landed card, and it must not mark a card or epic done without the consumer's landing evidence.
 
