@@ -37,9 +37,15 @@
       (runtime/module! rt :kanban {:ns 'ct.spools.kanban})
       (runtime/module! rt :adapter {:ns 'ct.spools.devflow-kanban-adapter
                                     :after [:devflow :kanban]})
+      (runtime/module! rt :config-agents {:ns 'ct.spools.codethread.agents
+                                          :after [:agent-run]})
+      (runtime/module! rt :config-help {:ns 'ct.spools.codethread.help
+                                        :after [:batteries]})
+      (runtime/module! rt :config-devflow {:ns 'ct.spools.codethread.devflow})
       (let [result (runtime/module! rt :config
                                     {:ns 'ct.spools.codethread.config
-                                     :after [:batteries :delegation :adapter]})]
+                                     :after [:config-agents :config-help :config-devflow
+                                             :batteries :delegation :adapter]})]
         (is (contains? #{:applied :unchanged}
                        (get-in result [:modules :config :status])))
         (current/with-runtime rt

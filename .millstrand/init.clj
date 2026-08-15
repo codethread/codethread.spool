@@ -85,11 +85,28 @@
                           :millhouse/spools-workflow]
                   :required? true})
 
+(runtime/module! runtime :codethread/config-agents
+  {:ns 'ct.spools.codethread.agents
+   :spools ['codethread/config 'ct.spools/agent-run]
+   :after [:millstrand/spools-agent-run]
+   :required? true})
+(runtime/module! runtime :codethread/config-help
+  {:ns 'ct.spools.codethread.help
+   :spools ['codethread/config 'millstrand.spools/batteries]
+   :after [:millstrand/spools-batteries]
+   :required? true})
+(runtime/module! runtime :codethread/config-devflow
+  {:ns 'ct.spools.codethread.devflow
+   :spools ['codethread/config]
+   :required? true})
 (runtime/module! runtime :codethread/config
                  {:ns 'ct.spools.codethread.config
                   :spools ['codethread/config 'millstrand.spools/batteries
                            'ct.spools/agent-run 'ct.spools/delegation]
-                  :after [:millstrand/spools-batteries
+                  :after [:codethread/config-agents
+           :codethread/config-help
+           :codethread/config-devflow
+           :millstrand/spools-batteries
                           :millstrand/spools-agent-run
                           :millstrand/spools-delegation
                           :devflow/kanban-adapter]
