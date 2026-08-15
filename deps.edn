@@ -4,6 +4,7 @@
   {:extra-paths [".millstrand"
                  "spools/agents/src"
                  "spools/agents/test"
+                 "spools/config/src"
                  "spools/devflow-setup/src"
                  "spools/devflow-setup/test"
                  "spools/ralph/src"

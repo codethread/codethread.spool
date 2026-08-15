@@ -1,16 +1,17 @@
 # Codethread shared workflow spools
 
-Codethread publishes four producer roots. The producer namespaces use the shared-spool convention `ct.spools.*`; the `codethread/*` coordinates identify this family's independently approved roots.
+Codethread publishes five producer roots. The producer namespaces use the shared-spool convention `ct.spools.*`; the `codethread/*` coordinates identify this family's independently approved roots.
 
 | Root | Namespace | Purpose |
 | --- | --- | --- |
 | `spools/agents` | `ct.spools.codethread.agents` | Harness declarations and model-seat aliases for delegation and reviews |
+| `spools/config` | `ct.spools.codethread.config` | Shared workspace elections; currently Batteries help-transform rendering |
 | `spools/devflow-setup` | `ct.spools.codethread.devflow-setup` | Consumer composition seed for the external Devflow Kanban adapter |
 | `spools/ralph` | `ct.spools.codethread.ralph` | One-card-per-iteration Ralph workflow plus executable |
 
 The Devflow setup root contains no Devflow implementation or guidance. Consumers approve and activate the external `codethread/devflow` and `codethread/devflow-kanban-adapter` roots, then activate this setup root after the adapter.
 
-Each root has its own `deps.edn`, source tree, and focused test. The family manifest is advisory for tooling; consumers still record explicit approval in their own `.millstrand/spools.edn` and activate only the modules they choose.
+Each root has its own `deps.edn` and source tree. Roots that need them keep a focused test beside the source. The family manifest is advisory for tooling; consumers still record explicit approval in their own `.millstrand/spools.edn` and activate only the modules they choose.
 
 ## Activation
 
@@ -22,6 +23,7 @@ The following is the trusted consumer shape for a local checkout. The consumer o
   codethread/spools
   {:local/root ".."
    :roots {codethread/agents "spools/agents"
+           codethread/config "spools/config"
            codethread/devflow-setup "spools/devflow-setup"
            codethread/ralph "spools/ralph"}}
   millhouse/spools
@@ -55,6 +57,11 @@ The following is the trusted consumer shape for a local checkout. The consumer o
 (runtime/module! runtime :millstrand/spools-batteries
   {:ns 'millstrand.spools.batteries
    :spools ['millstrand.spools/batteries]
+   :required? true})
+(runtime/module! runtime :codethread/config
+  {:ns 'ct.spools.codethread.config
+   :spools ['codethread/config 'millstrand.spools/batteries]
+   :after [:millstrand/spools-batteries]
    :required? true})
 
 (runtime/module! runtime :millhouse/spools-workflow

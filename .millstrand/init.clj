@@ -7,6 +7,11 @@
                  {:ns 'millstrand.spools.batteries
                   :spools ['millstrand.spools/batteries]
                   :required? true})
+(runtime/module! runtime :codethread/config
+                 {:ns 'ct.spools.codethread.config
+                  :spools ['codethread/config 'millstrand.spools/batteries]
+                  :after [:millstrand/spools-batteries]
+                  :required? true})
 
 (runtime/module! runtime :millhouse/spools-workflow
                  {:ns 'millhouse.spools.workflow
