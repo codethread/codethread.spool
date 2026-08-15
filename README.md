@@ -1,17 +1,15 @@
 # Codethread shared workflow spools
 
-Codethread publishes five producer roots. The producer namespaces use the shared-spool convention `ct.spools.*`; the `codethread/*` coordinates identify this family's independently approved roots.
+Codethread publishes two producer roots. The producer namespaces use the shared-spool convention `ct.spools.*`; the `codethread/*` coordinates identify this family's independently approved roots.
 
 | Root | Namespace | Purpose |
 | --- | --- | --- |
-| `spools/agents` | `ct.spools.codethread.agents` | Harness declarations and model-seat aliases for delegation and reviews |
-| `spools/config` | `ct.spools.codethread.config` | Shared workspace elections; currently Batteries help-transform rendering |
-| `spools/devflow-setup` | `ct.spools.codethread.devflow-setup` | Consumer composition seed for the external Devflow Kanban adapter |
+| `spools/config` | `ct.spools.codethread.config` | Shared harness, help-transform, and Devflow adapter elections |
 | `spools/ralph` | `ct.spools.codethread.ralph` | One-card-per-iteration Ralph workflow plus executable |
 
-The Devflow setup root contains no Devflow implementation or guidance. Consumers approve and activate the external `codethread/devflow` and `codethread/devflow-kanban-adapter` roots, then activate this setup root after the adapter.
+The config root contains no Devflow implementation or guidance. Consumers approve and activate the external `codethread/devflow` and `codethread/devflow-kanban-adapter` roots, then activate the config module after the adapter.
 
-Each root has its own `deps.edn` and source tree. Roots that need them keep a focused test beside the source. The family manifest is advisory for tooling; consumers still record explicit approval in their own `.millstrand/spools.edn` and activate only the modules they choose.
+Each root has its own `deps.edn` and source tree with focused tests beside the source. The family manifest is advisory for tooling; consumers still record explicit approval in their own `.millstrand/spools.edn` and activate only the modules they choose.
 
 ## Activation
 
@@ -22,9 +20,7 @@ The following is the trusted consumer shape for a local checkout. The consumer o
  {millstrand.spools/batteries {:millstrand/source-root "spools/batteries"}
   codethread/spools
   {:local/root ".."
-   :roots {codethread/agents "spools/agents"
-           codethread/config "spools/config"
-           codethread/devflow-setup "spools/devflow-setup"
+   :roots {codethread/config "spools/config"
            codethread/ralph "spools/ralph"}}
   millhouse/spools
   {:local/root "../../millhouse.spool"
@@ -58,12 +54,6 @@ The following is the trusted consumer shape for a local checkout. The consumer o
   {:ns 'millstrand.spools.batteries
    :spools ['millstrand.spools/batteries]
    :required? true})
-(runtime/module! runtime :codethread/config
-  {:ns 'ct.spools.codethread.config
-   :spools ['codethread/config 'millstrand.spools/batteries]
-   :after [:millstrand/spools-batteries]
-   :required? true})
-
 (runtime/module! runtime :millhouse/spools-workflow
   {:ns 'millhouse.spools.workflow
    :spools ['millhouse.spools/workflow]
@@ -141,25 +131,23 @@ The following is the trusted consumer shape for a local checkout. The consumer o
            :millhouse/spools-workflow]
    :required? true})
 
-(runtime/module! runtime :codethread/agents
-  {:ns 'ct.spools.codethread.agents
-   :spools ['codethread/agents 'ct.spools/agent-run 'ct.spools/delegation]
-   :after [:millstrand/spools-agent-run
-           :millstrand/spools-delegation]
+(runtime/module! runtime :codethread/config
+  {:ns 'ct.spools.codethread.config
+   :spools ['codethread/config 'millstrand.spools/batteries
+            'ct.spools/agent-run 'ct.spools/delegation]
+   :after [:millstrand/spools-batteries
+           :millstrand/spools-agent-run
+           :millstrand/spools-delegation
+           :devflow/kanban-adapter]
    :required? true})
 (runtime/module! runtime :millstrand/spools-subagent
   {:ns 'ct.spools.executors.subagent
    :spools ['ct.spools/agent-run 'millhouse.spools/workflow]
    :after [:millstrand/spools-agent-run
            :millhouse/spools-workflow
-           :codethread/agents
+           :codethread/config
            :devflow
            :devflow/kanban-adapter]
-   :required? true})
-(runtime/module! runtime :codethread/devflow-setup
-  {:ns 'ct.spools.codethread.devflow-setup
-   :spools ['codethread/devflow-setup]
-   :after [:devflow/kanban-adapter]
    :required? true})
 (runtime/module! runtime :codethread/ralph
   {:ns 'ct.spools.codethread.ralph
@@ -168,11 +156,11 @@ The following is the trusted consumer shape for a local checkout. The consumer o
    :required? true})
 ```
 
-The external adapter owns the Kanban-bound `:decompose` workflow. The local setup root contributes only the selected lifecycle seed that calls `ct.spools.devflow-kanban-adapter/repoint-decompose-seed!`; it does not import or copy the adapter implementation.
+The external adapter owns the Kanban-bound `:decompose` workflow. The config root contributes the selected lifecycle seed that calls `ct.spools.devflow-kanban-adapter/repoint-decompose-seed!`; it does not import or copy the adapter implementation.
 
-The subagent executor bridges Workflow `:subagent` gates to durable `agent-run` runs, so activate it after the shared agents and external Devflow adapter modules.
+The subagent executor bridges Workflow `:subagent` gates to durable `agent-run` runs, so activate it after the shared config and external Devflow adapter modules.
 
-The agents root selects its harness and alias declarations with agent-run's three-form authoring API, including `:luna-high` and read-only seats. The current agent-run default-contract API does not accept an explicit runtime, so this release does not bind default worker or review contract text from shared code; a consumer may provide that runtime-aware policy separately.
+The config root selects its harness and alias declarations with agent-run's three-form authoring API, including `:luna-high` and read-only seats. The current agent-run default-contract API does not accept an explicit runtime, so this release does not bind default worker or review contract text from shared code; a consumer may provide that runtime-aware policy separately.
 
 Ralph validates and hands a committed slice to the consumer-owned landing policy. It does not own landing, roster review, or evidence for a landed card, and it must not mark a card or epic done without the consumer's landing evidence.
 

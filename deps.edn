@@ -2,11 +2,8 @@
  :aliases
  {:lint
   {:extra-paths [".millstrand"
-                 "spools/agents/src"
-                 "spools/agents/test"
                  "spools/config/src"
-                 "spools/devflow-setup/src"
-                 "spools/devflow-setup/test"
+                 "spools/config/test"
                  "spools/ralph/src"
                  "spools/ralph/test"]
    :extra-deps {io.millstrand/millstrand

@@ -28,7 +28,7 @@
 (def ^:private terra-rates {:input 2.5 :cache-read 0.25 :output 15.0})
 (def ^:private luna-rates {:input 1.0 :cache-read 0.1 :output 6.0})
 
-(shuttle/defharnesses ^:private harness-defs
+(shuttle/defharnesses harness-defs
   "Codethread-shared harness tools. Seats layered over them live in `alias-defs`."
   {:codex
    {:argv ["codex" "exec" "--json" "--skip-git-repo-check" "--color" "never"
@@ -70,7 +70,7 @@
           "|Claude Opus interactive TUI for HITL sessions when Fable-level depth
            |is not warranted.")}})
 
-(shuttle/defaliases ^:private alias-defs
+(shuttle/defaliases alias-defs
   "Codethread-shared seats layered over `harness-defs` and agent-run's :pi tool."
   {:luna-low
    {:alias-of :codex
@@ -227,9 +227,6 @@
           "|UNSCORED (unbenched; :coordination -). DeepSeek v4 Pro via Pi:
            |provider-quota fallback for reviews of primarily Claude-authored
            |code, not frontier design or broad implementation.")}})
-
-(shuttle/use-harnesses! harness-defs)
-(shuttle/use-aliases! alias-defs)
 
 ;; The current agent-run default-contract API is not explicit-runtime, so this
 ;; release selects only the harness and alias declarations. Consumers may bind

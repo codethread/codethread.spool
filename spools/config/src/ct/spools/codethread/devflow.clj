@@ -1,4 +1,4 @@
-(ns ct.spools.codethread.devflow-setup
+(ns ct.spools.codethread.devflow
   "Workspace composition for the external Devflow and Kanban adapter roots.
 
   This root owns no Devflow definitions or guidance. It only declares the
@@ -7,6 +7,6 @@
   activate `codethread/devflow` and `codethread/devflow-kanban-adapter`."
   (:require [millstrand.api.lifecycle.alpha :as lifecycle]))
 
-(lifecycle/defseed! devflow-kanban-adapter-binding
+(lifecycle/defseed devflow-kanban-adapter-binding
   "Route the external Devflow decompose stage through its Kanban adapter."
   {:apply 'ct.spools.devflow-kanban-adapter/repoint-decompose-seed!})

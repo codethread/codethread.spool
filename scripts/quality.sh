@@ -2,7 +2,7 @@
 set -eu
 
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-for spool in agents devflow-setup ralph; do
+for spool in config ralph; do
   echo "==> $spool"
   (cd "$root/spools/$spool" && clojure -M:test)
 done

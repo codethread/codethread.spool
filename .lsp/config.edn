@@ -2,11 +2,8 @@
                   :classpath-cmd ["clojure" "-Srepro" "-Spath" "-M:lint"]}]
  :source-aliases #{:lint}
  :source-paths [".millstrand"
-                "spools/agents/src"
-                "spools/agents/test"
                 "spools/config/src"
-                "spools/devflow-setup/src"
-                "spools/devflow-setup/test"
+                "spools/config/test"
                 "spools/ralph/src"
                 "spools/ralph/test"]
  :copy-kondo-configs? false}
