@@ -1,175 +1,73 @@
 # Codethread shared workflow spools
 
-Codethread publishes two producer roots. The producer namespaces use the shared-spool convention `ct.spools.*`; the `codethread/*` coordinates identify this family's independently approved roots.
+This repository publishes two independently activatable Millstrand roots. The
+`codethread/*` coordinates identify roots; their producer namespaces follow the
+shared-spool `ct.spools.*` convention.
+
+## Roots
 
 | Root | Namespace | Purpose |
 | --- | --- | --- |
-| `spools/config` | `ct.spools.codethread.config` | Shared harness, help-transform, and Devflow adapter elections |
-| `spools/ralph` | `ct.spools.codethread.ralph` | One-card-per-iteration Ralph workflow plus executable |
+| `spools/config` | `ct.spools.codethread.config` | Select shared harness aliases, Batteries help rendering, and the external Devflow Kanban adapter |
+| `spools/ralph` | `ct.spools.codethread.ralph` | Publish the one-card-per-iteration `ralph-iterate` workflow and `ralph` executable |
 
-The config root contains no Devflow implementation or guidance. Consumers approve and activate the external `codethread/devflow` and `codethread/devflow-kanban-adapter` roots, then activate the config module after the adapter.
-
-Each root has its own `deps.edn` and source tree with focused tests beside the source. The family manifest is advisory for tooling; consumers still record explicit approval in their own `.millstrand/spools.edn` and activate only the modules they choose.
+`spool.edn` is advisory family metadata. Consumers explicitly approve roots in
+their own `.millstrand/spools.edn` and activate the modules they need. The
+family requires agent-run v27 and Kanban v24 or newer.
 
 ## Activation
 
-The following is the trusted consumer shape for a local checkout. The consumer owns the runtime, provider approvals, and module ordering. Local roots are resolved relative to `.millstrand`, so the family checkout is `..` and sibling provider checkouts use `../../<provider>.spool`.
+For a checkout containing this repository, the family approval is:
 
 ```clojure
-{:spools
- {millstrand.spools/batteries {:millstrand/source-root "spools/batteries"}
-  codethread/spools
-  {:local/root ".."
-   :roots {codethread/config "spools/config"
-           codethread/ralph "spools/ralph"}}
-  millhouse/spools
-  {:local/root "../../millhouse.spool"
-   :roots {millhouse.spools/workflow "spools/workflow"
-           millhouse.spools/millstrand-workflows "spools/millstrand-workflows"
-           millhouse.spools.executors/shell "spools/shell-executor"}}
-  ct.spools/agent-run
-  {:local/root "../../agent-harness.spool"
-   :roots {ct.spools/agent-run "agent-run"
-           ct.spools/harness-core "harness-core"
-           ct.spools/claude-harness "claude-harness"
-           ct.spools/codex-harness "codex-harness"
-           ct.spools/pi-harness "pi-harness"
-           ct.spools/agent-cli "agent-cli"
-           ct.spools/delegation "delegation"}}
-  codethread/devflow
-  {:local/root "../../devflow.spool"
-   :roots {codethread/devflow "."
-           codethread/devflow-kanban-adapter "kanban-adapter"}}
-  codethread/kanban {:local/root "../../kanban.spool"
-                     :roots {codethread/kanban "."}}}}
+codethread/spools
+{:local/root ".."
+ :roots {codethread/config "spools/config"
+         codethread/ralph "spools/ralph"}}
 ```
 
-```clojure
-(require '[millstrand.api.current.alpha :as current]
-         '[millstrand.api.runtime.alpha :as runtime])
+The path is relative to `.millstrand`. Git consumers should use a pinned family
+coordinate instead.
 
-(def runtime (current/runtime))
+Consumers own provider approval and module ordering:
 
-(runtime/module! runtime :millstrand/spools-batteries
-  {:ns 'millstrand.spools.batteries
-   :spools ['millstrand.spools/batteries]
-   :required? true})
-(runtime/module! runtime :millhouse/spools-workflow
-  {:ns 'millhouse.spools.workflow
-   :spools ['millhouse.spools/workflow]
-   :required? true})
-(runtime/module! runtime :millhouse/spools-workflow-cli
-  {:ns 'millhouse.spools.workflow.cli
-   :spools ['millhouse.spools/workflow]
-   :after [:millhouse/spools-workflow]
-   :required? true})
-(runtime/module! runtime :millhouse/spools-millstrand-workflows
-  {:ns 'millhouse.spools.millstrand-workflows
-   :spools ['millhouse.spools/millstrand-workflows
-            'millhouse.spools/workflow]
-   :after [:millhouse/spools-workflow]
-   :required? true})
-(runtime/module! runtime :millhouse/spools-shell
-  {:ns 'millhouse.spools.executors.shell
-   :spools ['millhouse.spools.executors/shell 'millhouse.spools/workflow]
-   :after [:millhouse/spools-workflow]
-   :required? true})
+- Activate Batteries, agent-run/delegation, Millhouse Workflow, Devflow, Kanban,
+  and the Devflow Kanban adapter before `codethread/config`.
+- Activate `codethread/ralph` after Millhouse Workflow.
 
-(runtime/module! runtime :millstrand/spools-agent-run
-  {:ns 'ct.spools.agent-run
-   :spools ['ct.spools/agent-run]
-   :required? true})
-(runtime/module! runtime :millstrand/spools-delegation
-  {:ns 'ct.spools.delegation
-   :spools ['ct.spools/delegation 'ct.spools/agent-run]
-   :after [:millstrand/spools-agent-run]
-   :required? true})
-(runtime/module! runtime :millstrand/spools-harness-core
-  {:ns 'ct.spools.harness-core
-   :spools ['ct.spools/harness-core]
-   :after [:millstrand/spools-agent-run]
-   :required? true})
-(runtime/module! runtime :millstrand/spools-claude-harness
-  {:ns 'ct.spools.claude-harness
-   :spools ['ct.spools/claude-harness 'ct.spools/harness-core]
-   :after [:millstrand/spools-harness-core]
-   :required? true})
-(runtime/module! runtime :millstrand/spools-codex-harness
-  {:ns 'ct.spools.codex-harness
-   :spools ['ct.spools/codex-harness 'ct.spools/harness-core]
-   :after [:millstrand/spools-harness-core]
-   :required? true})
-(runtime/module! runtime :millstrand/spools-pi-harness
-  {:ns 'ct.spools.pi-harness
-   :spools ['ct.spools/pi-harness 'ct.spools/harness-core]
-   :after [:millstrand/spools-harness-core]
-   :required? true})
-(runtime/module! runtime :millstrand/spools-agent-cli
-  {:ns 'ct.spools.agent-cli
-   :spools ['ct.spools/agent-cli 'ct.spools/harness-core]
-   :after [:millstrand/spools-harness-core
-           :millstrand/spools-claude-harness
-           :millstrand/spools-codex-harness
-           :millstrand/spools-pi-harness]
-   :required? true})
+The config root contains no Devflow implementation. It selects the external
+adapter's Kanban-bound `:decompose` workflow alongside shared harness aliases
+and Batteries help rendering. Inspect the active aliases with
+`strand agent harnesses`.
 
-(runtime/module! runtime :devflow
-  {:ns 'ct.spools.devflow
-   :spools ['codethread/devflow 'millhouse.spools/workflow]
-   :after [:millhouse/spools-workflow]
-   :required? true})
-(runtime/module! runtime :millstrand/spools-kanban
-  {:ns 'ct.spools.kanban
-   :spools ['codethread/kanban]
-   :required? true})
-(runtime/module! runtime :devflow/kanban-adapter
-  {:ns 'ct.spools.devflow-kanban-adapter
-   :spools ['codethread/devflow-kanban-adapter
-            'codethread/devflow 'codethread/kanban
-            'millhouse.spools/workflow]
-   :after [:devflow :millstrand/spools-kanban
-           :millhouse/spools-workflow]
-   :required? true})
+Ralph validates and hands a committed slice to consumer-owned landing policy.
+It does not own landing or landing evidence. See
+[`spools/ralph/README.md`](spools/ralph/README.md) for implementation and UI
+details.
 
-(runtime/module! runtime :codethread/config
-  {:ns 'ct.spools.codethread.config
-   :spools ['codethread/config 'millstrand.spools/batteries
-            'ct.spools/agent-run 'ct.spools/delegation]
-   :after [:millstrand/spools-batteries
-           :millstrand/spools-agent-run
-           :millstrand/spools-delegation
-           :devflow/kanban-adapter]
-   :required? true})
-(runtime/module! runtime :millstrand/spools-subagent
-  {:ns 'ct.spools.executors.subagent
-   :spools ['ct.spools/agent-run 'millhouse.spools/workflow]
-   :after [:millstrand/spools-agent-run
-           :millhouse/spools-workflow
-           :codethread/config
-           :devflow
-           :devflow/kanban-adapter]
-   :required? true})
-(runtime/module! runtime :codethread/ralph
-  {:ns 'ct.spools.codethread.ralph
-   :spools ['codethread/ralph 'millhouse.spools/workflow]
-   :after [:millhouse/spools-workflow]
-   :required? true})
+Build and run Ralph through the Weaver:
+
+```text
+mill bin build ralph
+mill bin run ralph --help
 ```
 
-The external adapter owns the Kanban-bound `:decompose` workflow. The config root contributes the selected lifecycle seed that calls `ct.spools.devflow-kanban-adapter/repoint-decompose-seed!`; it does not import or copy the adapter implementation.
-
-The subagent executor bridges Workflow `:subagent` gates to durable `agent-run` runs, so activate it after the shared config and external Devflow adapter modules.
-
-The config root selects its harness and alias declarations with agent-run's three-form authoring API, including `:luna-high` and read-only seats. The current agent-run default-contract API does not accept an explicit runtime, so this release does not bind default worker or review contract text from shared code; a consumer may provide that runtime-aware policy separately.
-
-Ralph validates and hands a committed slice to the consumer-owned landing policy. It does not own landing, roster review, or evidence for a landed card, and it must not mark a card or epic done without the consumer's landing evidence.
-
-The Ralph spool publishes the selected `ralph-iterate` workflow plus executable. In a live Weaver, use `mill bin list` to confirm the declaration, `mill bin build ralph` to compile the local Go module, and `mill bin run ralph --help` to pass arguments to the tool. The wrapper requires `MILLSTRAND_WORKSPACE`, which `mill bin run` supplies for the selected Weaver.
+`mill bin run` supplies `MILLSTRAND_WORKSPACE`.
 
 ## Quality
 
-Run all root-local tests with `make quality`.
+Run the complete gate:
 
-The quality target runs the Ralph Clojure test, the pinned gofumpt v0.8.0 format check, `go vet`, `go test ./...`, and a disposable Go build from `spools/ralph`.
+```text
+make quality
+```
 
-Focused runs are `clojure -M:test` from each root directory. Focused tests use disposable embedded runtimes and explicitly supply the provider roots needed for their activation boundaries.
+Focused Clojure checks:
+
+```text
+cd spools/config && clojure -M:test
+cd spools/ralph && clojure -M:test
+```
+
+The aggregate gate also runs pinned gofumpt v0.8.0, `go vet`, Go tests, and a
+disposable Ralph build.
