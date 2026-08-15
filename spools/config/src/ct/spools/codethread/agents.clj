@@ -20,7 +20,7 @@
   Harness aliases are weaver-lifetime state. `strand agent harnesses` lists
   the live registry."
   (:require [millstrand.api.format.alpha :as format-alpha]
-            [ct.spools.agent-run :as shuttle]))
+            ))
 
 ;; gpt-5.6 rate cards, USD per 1M tokens, hand-pinned 2026-07-13 from
 ;; https://developers.openai.com/api/docs/pricing.
@@ -28,7 +28,7 @@
 (def ^:private terra-rates {:input 2.5 :cache-read 0.25 :output 15.0})
 (def ^:private luna-rates {:input 1.0 :cache-read 0.1 :output 6.0})
 
-(shuttle/defharnesses harness-defs
+(def harness-options
   "Codethread-shared harness tools. Seats layered over them live in `alias-defs`."
   {:codex
    {:argv ["codex" "exec" "--json" "--skip-git-repo-check" "--color" "never"
@@ -70,7 +70,7 @@
           "|Claude Opus interactive TUI for HITL sessions when Fable-level depth
            |is not warranted.")}})
 
-(shuttle/defaliases alias-defs
+(def alias-options
   "Codethread-shared seats layered over `harness-defs` and agent-run's :pi tool."
   {:luna-low
    {:alias-of :codex
