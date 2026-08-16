@@ -13,7 +13,8 @@ shared-spool `ct.spools.*` convention.
 
 `spool.edn` is advisory family metadata. Consumers explicitly approve roots in
 their own `.millstrand/spools.edn` and activate the modules they need. The
-family requires agent-run v27 and Kanban v24 or newer.
+family requires agent-run v27. Kanban comes from `millhouse.spools/kanban`
+(pinned via `millhouse/spools`).
 
 ## Activation
 

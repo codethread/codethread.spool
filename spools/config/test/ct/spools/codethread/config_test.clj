@@ -21,10 +21,9 @@
     'codethread/devflow {:local/root (sibling-root "devflow.spool")
                          :roots {'codethread/devflow "."
                                  'codethread/devflow-kanban-adapter "kanban-adapter"}}
-    'codethread/kanban {:local/root (sibling-root "kanban.spool")
-                        :roots {'codethread/kanban "."}}
     'millhouse/spools {:local/root (sibling-root "millhouse.spool")
-                       :roots {'millhouse.spools/workflow "spools/workflow"}}}})
+                       :roots {'millhouse.spools/workflow "spools/workflow"
+                               'millhouse.spools/kanban "spools/kanban"}}}})
 
 (deftest config-activates-shared-elections
   (t/with-weaver-world [ctx {:storage :sqlite-memory :spools-edn spools-edn}]
@@ -34,7 +33,7 @@
       (runtime/module! rt :delegation {:ns 'ct.spools.delegation :after [:agent-run]})
       (runtime/module! rt :workflow {:ns 'millhouse.spools.workflow})
       (runtime/module! rt :devflow {:ns 'ct.spools.devflow :after [:workflow]})
-      (runtime/module! rt :kanban {:ns 'ct.spools.kanban})
+      (runtime/module! rt :kanban {:ns 'millhouse.spools.kanban})
       (runtime/module! rt :adapter {:ns 'ct.spools.devflow-kanban-adapter
                                     :after [:devflow :kanban]})
       (runtime/module! rt :config-agents {:ns 'ct.spools.codethread.agents

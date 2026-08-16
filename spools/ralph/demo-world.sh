@@ -53,15 +53,16 @@ ws="$(mktemp -d "${TMPDIR:-/tmp}/ralph-demo.XXXXXX")"
 
 # Batteries is a source-root spool and those paths must be relative to the
 # config dir, so the workspace links to the supplied source root's copy. The
-# kanban coordinate is lifted from the repo's own spools.edn rather than pinned
-# here, so this script cannot drift from the release the repo actually runs.
+# millhouse/spools kanban root is lifted from the repo's own spools.edn rather
+# than pinned here, so this script cannot drift from the release the repo runs.
 mkdir -p "$ws/spools"
 ln -sfn "$batteries_root" "$ws/spools/batteries"
-kanban_entry="$(python3 - "$repo/.millstrand/spools.edn" <<'PY'
+millhouse_kanban_entry="$(python3 - "$repo/.millstrand/spools.edn" <<'PY'
+import re
 import sys
 
 text = open(sys.argv[1]).read()
-start = text.index("codethread/kanban")
+start = text.index("millhouse/spools")
 open_brace = text.index("{", start)
 depth = 0
 for i in range(open_brace, len(text)):
@@ -70,23 +71,33 @@ for i in range(open_brace, len(text)):
     elif text[i] == "}":
         depth -= 1
         if depth == 0:
-            print(text[start:i + 1])
+            entry = text[start:i + 1]
             break
 else:
-    sys.exit("demo-world: could not read the kanban entry from .millstrand/spools.edn")
+    sys.exit("demo-world: could not read millhouse/spools from .millstrand/spools.edn")
+
+url_match = re.search(r':git/url\s+"([^"]+)"', entry)
+sha_match = re.search(r':git/sha\s+"([^"]+)"', entry)
+if not url_match or not sha_match:
+    sys.exit("demo-world: millhouse/spools entry missing :git/url or :git/sha")
+
+print(f"""millhouse/spools
+{{:git/url "{url_match.group(1)}"
+ :git/sha "{sha_match.group(1)}"
+ :roots {{millhouse.spools/kanban "spools/kanban"}}}}""")
 PY
 )"
 cat > "$ws/spools.edn" <<EOF
 {:spools {millstrand.spools/batteries {:millstrand/source-root "spools/batteries"}
-          $kanban_entry}}
+          $millhouse_kanban_entry}}
 EOF
 
 cat >> "$ws/init.clj" <<'EOF'
 
 ;; Throwaway world for trying ralph: batteries plus the kanban board, nothing else.
-(runtime/module! runtime :millstrand/spools-kanban
-                 {:ns 'ct.spools.kanban
-                  :spools ['codethread/kanban]
+(runtime/module! runtime :millhouse/spools-kanban
+                 {:ns 'millhouse.spools.kanban
+                  :spools ['millhouse.spools/kanban]
                   :required? true})
 EOF
 

@@ -72,16 +72,18 @@
                   :spools ['codethread/devflow 'millhouse.spools/workflow]
                   :after [:millhouse/spools-workflow]
                   :required? true})
-(runtime/module! runtime :millstrand/spools-kanban
-                 {:ns 'ct.spools.kanban
-                  :spools ['codethread/kanban]
+(runtime/module! runtime :millhouse/spools-kanban
+                 {:ns 'millhouse.spools.kanban
+                  :spools ['millhouse.spools/kanban]
                   :required? true})
 (runtime/module! runtime :devflow/kanban-adapter
                  {:ns 'ct.spools.devflow-kanban-adapter
                   :spools ['codethread/devflow-kanban-adapter
-                           'codethread/devflow 'codethread/kanban
+                           'codethread/devflow
+                           'millhouse.spools/kanban
                            'millhouse.spools/workflow]
-                  :after [:devflow :millstrand/spools-kanban
+                  :after [:devflow
+                          :millhouse/spools-kanban
                           :millhouse/spools-workflow]
                   :required? true})
 
