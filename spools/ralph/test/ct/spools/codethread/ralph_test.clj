@@ -23,13 +23,6 @@
   (t/with-weaver-world [ctx {:storage :sqlite-memory
                              :spools-edn spools-edn}]
     (let [rt (:runtime ctx)]
-      (is (= {:name "ralph"
-              :doc "Drive a Kanban epic through repeated headless agent runs."
-              :executable [:root "bin/ralph"]
-              :build ["go" "build" "-o" "bin/ralph.bin" "."]
-              :provenance 'ct.spools.codethread.ralph}
-             (select-keys (var-get #'ct.spools.codethread.ralph/ralph)
-                          [:name :doc :executable :build :provenance])))
       (runtime/module! rt :millhouse/workflow {:ns 'millhouse.spools.workflow})
       (let [result (runtime/module! rt :codethread/ralph
                                     {:ns 'ct.spools.codethread.ralph})
@@ -46,6 +39,11 @@
                  :build ["go" "build" "-o" "bin/ralph.bin" "."]}]
                (:bins (weaver/op! rt 'bins ["list"]))))
         (is (= #{:start} (:entrypoints steps)))
+        (let [about (weaver/op! rt 'about ["ralph"])
+              prime (weaver/op! rt 'prime ["ralph"])]
+          (is (str/includes? (:about about) "Ralph does not own landing"))
+          (is (str/includes? (:prime prime) "Prepare the whole epic"))
+          (is (str/includes? (:prime prime) "strand kanban label add <epic-id> ralph")))
         (let [definition (current/with-runtime rt
                            (workflow/resolve-workflow :ralph-iterate))]
           (is (str/includes? (pr-str definition)

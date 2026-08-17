@@ -18,6 +18,81 @@
   {:executable [:root "bin/ralph"]
    :build ["go" "build" "-o" "bin/ralph.bin" "."]})
 
+(def ^:private ralph-arg-spec
+  "Declared discovery surface for Ralph."
+  {:op "ralph"
+   :doc "Explain how to prepare and run a Ralph Kanban epic."
+   :hook-class :read
+   :deadline-class :standard})
+
+(def ^:private ralph-meta
+  "Ralph's Kanban preparation and ownership guidance."
+  {:about
+   (format-alpha/prose
+    "
+     Ralph is the repeated-run driver for one active Kanban epic carrying the
+     `ralph` label. Its Go loop reads the epic between fresh headless agent
+     runs. The `ralph-iterate` workflow owns one iteration's discipline:
+     claim one feature, work and validate its tasks, then hand the committed
+     slice to the consumer's landing policy.
+
+     Ralph does not own landing. The consumer decides how review, merge, and
+     card completion work. The epic closes only after its feature frontier is
+     empty. Keep decisions and handover context on the epic, feature, and
+     doing-task notes because each iteration starts with a fresh agent.
+
+     Run `strand prime ralph` before preparing the epic. Build and start the
+     loop through `mill bin build ralph` and `mill bin run ralph <epic-id>`.
+     Remove the `ralph` label to stop new iterations after the current one.
+     "
+    {})
+   :prime
+   (format-alpha/prose
+    "
+     Prepare the whole epic before adding the `ralph` label.
+
+     1. Create one active Kanban epic with a concrete body: outcome, scope,
+        acceptance criteria, constraints, and links to the relevant design or
+        source material.
+     2. Add each independently landable slice as a feature under that epic.
+        Give every feature a body that a fresh agent can act on without asking
+        what the slice means.
+     3. Decompose each feature into ordered task cards. Record task
+        dependencies with `--depends-on`; Ralph chooses from the live ready
+        frontier, so prose-only ordering is invisible to it.
+     4. Make the consumer's landing policy and required validation discoverable
+        from the cards or their source links. Ralph validates a slice and hands
+        it off; it does not invent review or merge rules.
+     5. Put steering, decisions, blockers, and resume points in immutable
+        Kanban notes as the work changes. The doing-task's latest note is the
+        next agent's first handover.
+
+     When that graph is actionable, label only the epic:
+
+     ```sh
+     strand kanban label add <epic-id> ralph
+     mill bin build ralph
+     mill bin run ralph <epic-id>
+     ```
+
+     Do not use Ralph for an epic with unresolved refinement, missing task
+     dependencies, or work that cannot be handed to the consumer's landing
+     policy. Remove the label to prevent the next iteration from starting.
+     "
+    {})})
+
+(millstrand/defop! ralph
+  "Return the Ralph discovery entrypoint; use `strand about ralph` or `strand prime ralph`."
+  {:arg-spec ralph-arg-spec
+   :returns {:type :map
+             :required {:operation :string
+                        :next :string}}
+   :about (:about ralph-meta)
+   :prime (:prime ralph-meta)}
+  [_]
+  {:operation "ralph"
+   :next "Run strand prime ralph before preparing an epic."})
+
 (defn- non-blank-string?
   "Return true when value is a non-blank string."
   [value]
