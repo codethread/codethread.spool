@@ -8,10 +8,10 @@
                  "spools/ralph/test"]
    :extra-deps {io.millstrand/millstrand
                 {:git/url "https://github.com/codethread/millstrand.git"
-                 :git/sha "3bbe5dc15359975a8e8203ef47b3a7514177e75b"}
+                 :git/sha "9bc90d1c8e421699f72098a8ca59a058be6ff88b"}
                 millstrand.spools/batteries
                 {:git/url "https://github.com/codethread/millstrand.git"
-                 :git/sha "3bbe5dc15359975a8e8203ef47b3a7514177e75b"
+                 :git/sha "9bc90d1c8e421699f72098a8ca59a058be6ff88b"
                  :deps/root "spools/batteries"}
                 millhouse.spools/workflow
                 {:git/url "https://github.com/codethread/millhouse.spool.git"
