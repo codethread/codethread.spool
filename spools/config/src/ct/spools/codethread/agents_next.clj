@@ -17,7 +17,8 @@
                             :harness.codex/effort "medium"})
   (harness/register-alias! runtime :pi-terra :pi
                            {:harness.pi/model "openai-codex/gpt-5.6-terra"
-                            :harness.pi/effort "medium"})
+                            :harness.pi/thinking "medium"
+                            :harness.pi/extra-argv []})
   {:opened :harness-next :aliases ["opus-high" "sonnet-low" "terra-med" "pi-terra"]})
 
 (defn close-harness-next!
