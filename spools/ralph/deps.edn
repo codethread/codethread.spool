@@ -4,6 +4,6 @@
          :extra-deps {io.millstrand/millstrand {:git/url "https://github.com/codethread/millstrand.git"
                                                :git/sha "6f265f45f894859c74dfd7c6bf32a94c48cb32d0"}
                       millhouse.spools/workflow {:git/url "https://github.com/codethread/millhouse.spool.git"
-                                                 :git/sha "b0ac2268685e53510df01dcd0cc533b8fd40a25d"
+                                                 :git/sha "3af5786f06121ee6055f34b4eefddc7000a84b5a"
                                                  :deps/root "spools/workflow"}}
          :main-opts ["-m" "ct.spools.codethread.ralph-test"]}}}

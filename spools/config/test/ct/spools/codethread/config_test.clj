@@ -17,27 +17,42 @@
                         :roots {'codethread/config "spools/config"}}
     'ct.spools/agent-run {:local/root (sibling-root "agent-harness.spool")
                           :roots {'ct.spools/agent-run "agent-run"
+                                  'ct.spools/harness-core "harness-core"
+                                  'ct.spools/claude-harness "claude-harness"
+                                  'ct.spools/codex-harness "codex-harness"
+                                  'ct.spools/pi-harness "pi-harness"
                                   'ct.spools/delegation "delegation"}}
     'codethread/devflow {:local/root (sibling-root "devflow.spool")
                          :roots {'codethread/devflow "."
                                  'codethread/devflow-kanban-adapter "kanban-adapter"}}
     'millhouse/spools {:local/root (sibling-root "millhouse.spool")
                        :roots {'millhouse.spools/workflow "spools/workflow"
-                               'millhouse.spools/kanban "spools/kanban"}}}})
+                               'millhouse.spools/kanban "spools/kanban"
+                               'millhouse.spools/identity "spools/identity"}}}})
 
 (deftest config-activates-shared-elections
   (t/with-weaver-world [ctx {:storage :sqlite-memory :spools-edn spools-edn}]
     (let [rt (:runtime ctx)]
       (runtime/module! rt :batteries {:ns 'millstrand.spools.batteries})
+      (runtime/module! rt :identity {:ns 'millhouse.spools.identity})
       (runtime/module! rt :agent-run {:ns 'ct.spools.agent-run})
       (runtime/module! rt :delegation {:ns 'ct.spools.delegation :after [:agent-run]})
+      (runtime/module! rt :harness-core {:ns 'ct.spools.harness-core
+                                         :after [:identity]})
+      (runtime/module! rt :claude-harness {:ns 'ct.spools.claude-harness
+                                           :after [:harness-core]})
+      (runtime/module! rt :codex-harness {:ns 'ct.spools.codex-harness
+                                          :after [:harness-core]})
+      (runtime/module! rt :pi-harness {:ns 'ct.spools.pi-harness
+                                       :after [:harness-core]})
       (runtime/module! rt :workflow {:ns 'millhouse.spools.workflow})
       (runtime/module! rt :devflow {:ns 'ct.spools.devflow :after [:workflow]})
       (runtime/module! rt :kanban {:ns 'millhouse.spools.kanban})
       (runtime/module! rt :adapter {:ns 'ct.spools.devflow-kanban-adapter
                                     :after [:devflow :kanban]})
       (runtime/module! rt :config-agents {:ns 'ct.spools.codethread.agents
-                                          :after [:agent-run]})
+                                          :after [:agent-run :claude-harness
+                                                  :codex-harness :pi-harness]})
       (runtime/module! rt :config-help {:ns 'ct.spools.codethread.help
                                         :after [:batteries]})
       (runtime/module! rt :config-devflow {:ns 'ct.spools.codethread.devflow})
