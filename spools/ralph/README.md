@@ -71,7 +71,7 @@ Try the demo world with `MILLSTRAND_SOURCE_ROOT=/path/to/skein-src spools/ralph/
 ## Layout
 
 - `main.go` — flags, environment defaults, harness and strand-binary resolution, the opening epic gate. Nothing here knows how a run is rendered.
-- `internal/board` — every read of live state, through the `strand` binary's JSON. `Gate` is the refusal boundary: not an epic, no `ralph` label, unreadable payload. `Snapshot` adds the epic's feature cards, detailing only the ones under active work.
+- `internal/board` — every read of live state, through the `strand` binary's JSON. `Gate` is the refusal boundary: not an epic, no `ralph` label, unreadable payload. `Snapshot` adds the epic's feature cards, detailing only the ones under active work. The client requests JSON error envelopes from `strand`, exposes failures as `CommandError`, and reissues one identical read only when the structured code is `weaver/restarted`; mutation-capable calls do not use that read helper.
 - `internal/harness` — one `Harness` interface with `Claude` and `Codex` behind it: argv, stream decoding into a common `Event`, and where the run's final message comes from. The prompt addendum and the `RALPH-STOP` brake parser live here too.
 - `internal/loop` — the engine. It owns iteration control, the stop reasons and exit codes, and the child process group a hard stop kills. It emits typed messages on a channel and never renders anything.
 - `internal/ui` — the Bubble Tea dashboard and the plain headless renderer, both consuming the engine's message channel.
@@ -96,4 +96,11 @@ The log pane is a view onto one iteration's events, not a running tail of everyt
 
 The panes are hand-rolled cursor lists rather than `bubbles/list`, which brings filtering and pagination chrome that fights a live tail. A pane tails while its cursor is at the bottom and stops as soon as you scroll up.
 
-Tests use a fake `strand` script and a fake agent script, and drive the engine off its own message channel rather than sleeping. If you need a new loop behaviour covered, add a `newWorld` fixture in `internal/loop/loop_test.go` — do not reach for a timer.
+Tests use a disposable fake `strand` script and a fake agent script, and drive the engine off its own message channel rather than sleeping. Board tests exercise the subprocess error boundary, the planned-replacement read reissue, the shared timeout, cancellation, and the no-retry mutation path. If you need a new loop behaviour covered, add a `newWorld` fixture in `internal/loop/loop_test.go` — do not reach for a timer.
+
+The restart-aware client targets Millstrand candidate `db2cb4c3e1b305dc9203cdf98044ac453556a80b`. Build the `mill` and `strand` tooling from that exact checkout when running a real disposable replacement-world exercise; this spool deliberately does not advance the repository's Millstrand dependency pins. The normal Ralph gate remains:
+
+```sh
+cd spools/ralph && go test ./...
+cd ../.. && make quality
+```

@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 	"sort"
 	"strconv"
@@ -51,6 +52,35 @@ type Client struct {
 	// Timeout bounds a single strand call.
 	Timeout time.Duration
 }
+
+// CommandError is a structured failure returned by the strand command. The
+// command emits this envelope only when it exits unsuccessfully; keeping the
+// fields typed lets callers make the one recovery decision Ralph owns without
+// scraping human-readable text.
+type CommandError struct {
+	Args    []string
+	Type    string
+	Code    string
+	Message string
+	Details map[string]any
+	Err     error
+}
+
+func (e *CommandError) Error() string {
+	if e == nil {
+		return "strand command failed"
+	}
+	command := strings.Join(e.Args, " ")
+	if e.Message != "" {
+		return fmt.Sprintf("strand %s: %s", command, e.Message)
+	}
+	if e.Err != nil {
+		return fmt.Sprintf("strand %s: %v", command, e.Err)
+	}
+	return fmt.Sprintf("strand %s failed", command)
+}
+
+func (e *CommandError) Unwrap() error { return e.Err }
 
 // Strand is the lean projection every strand read returns.
 type Strand struct {
@@ -184,28 +214,95 @@ func (c Client) exec(ctx context.Context, args ...string) ([]byte, error) {
 	}
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
+	return c.run(ctx, args...)
+}
 
+func (c Client) run(ctx context.Context, args ...string) ([]byte, error) {
 	full := args
 	if c.Workspace != "" {
 		full = append([]string{"--workspace", c.Workspace}, args...)
 	}
 	cmd := exec.CommandContext(ctx, c.Bin, full...)
+	cmd.Env = jsonErrorEnvironment()
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		msg := strings.TrimSpace(stderr.String())
-		if msg == "" {
-			msg = err.Error()
+		if ctxErr := ctx.Err(); ctxErr != nil {
+			return nil, fmt.Errorf("strand %s: %w", strings.Join(args, " "), ctxErr)
 		}
-		return nil, fmt.Errorf("strand %s: %s", strings.Join(args, " "), msg)
+		return nil, parseCommandError(args, stderr.Bytes(), err)
 	}
 	return stdout.Bytes(), nil
 }
 
+// read gives a read-only command one deadline across its initial attempt and
+// the sole reissue allowed after a planned Weaver replacement. Mutation-capable
+// commands must call exec directly and therefore never inherit this policy.
+func (c Client) read(ctx context.Context, args ...string) ([]byte, error) {
+	timeout := c.Timeout
+	if timeout <= 0 {
+		timeout = 30 * time.Second
+	}
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	out, err := c.run(ctx, args...)
+	if err == nil || !restarted(err) {
+		return out, err
+	}
+	return c.run(ctx, args...)
+}
+
+func restarted(err error) bool {
+	var commandErr *CommandError
+	return errors.As(err, &commandErr) && commandErr.Code == "weaver/restarted"
+}
+
+func jsonErrorEnvironment() []string {
+	env := os.Environ()
+	filtered := env[:0]
+	for _, value := range env {
+		if !strings.HasPrefix(value, "MILLSTRAND_ERROR_FORMAT=") {
+			filtered = append(filtered, value)
+		}
+	}
+	return append(filtered, "MILLSTRAND_ERROR_FORMAT=json")
+}
+
+func parseCommandError(args []string, stderr []byte, cause error) error {
+	var envelope struct {
+		Type    string         `json:"type"`
+		Code    string         `json:"code"`
+		Message string         `json:"message"`
+		Details map[string]any `json:"details"`
+	}
+	trimmed := bytes.TrimSpace(stderr)
+	if err := json.Unmarshal(trimmed, &envelope); err != nil {
+		return &CommandError{
+			Args: args,
+			Err:  fmt.Errorf("malformed strand error envelope: %w (stderr %q)", err, string(trimmed)),
+		}
+	}
+	if envelope.Type == "" || envelope.Code == "" || envelope.Message == "" || envelope.Details == nil {
+		return &CommandError{
+			Args: args,
+			Err:  fmt.Errorf("malformed strand error envelope: required fields are missing (stderr %q)", string(trimmed)),
+		}
+	}
+	return &CommandError{
+		Args:    args,
+		Type:    envelope.Type,
+		Code:    envelope.Code,
+		Message: envelope.Message,
+		Details: envelope.Details,
+		Err:     cause,
+	}
+}
+
 // Show reads one strand.
 func (c Client) Show(ctx context.Context, id string) (Strand, error) {
-	out, err := c.exec(ctx, "show", id)
+	out, err := c.read(ctx, "show", id)
 	if err != nil {
 		return Strand{}, err
 	}
@@ -266,7 +363,7 @@ func (c Client) Snapshot(ctx context.Context, epicID string) (Snapshot, error) {
 	if err != nil {
 		return Snapshot{}, err
 	}
-	out, err := c.exec(ctx, "kanban", "board")
+	out, err := c.read(ctx, "kanban", "board")
 	if err != nil {
 		return Snapshot{}, err
 	}
@@ -314,7 +411,7 @@ func (c Client) Snapshot(ctx context.Context, epicID string) (Snapshot, error) {
 
 // CardDetail reads one card's resume view.
 func (c Client) CardDetail(ctx context.Context, id string) (Card, error) {
-	out, err := c.exec(ctx, "kanban", "card", id)
+	out, err := c.read(ctx, "kanban", "card", id)
 	if err != nil {
 		return Card{}, err
 	}
