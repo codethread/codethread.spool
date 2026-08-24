@@ -8,50 +8,54 @@
                  "spools/ralph/test"]
    :extra-deps {io.millstrand/millstrand
                 {:git/url "https://github.com/codethread/millstrand.git"
-                 :git/sha "9bc90d1c8e421699f72098a8ca59a058be6ff88b"}
+                 :git/sha "6f265f45f894859c74dfd7c6bf32a94c48cb32d0"}
                 millstrand.spools/batteries
                 {:git/url "https://github.com/codethread/millstrand.git"
-                 :git/sha "9bc90d1c8e421699f72098a8ca59a058be6ff88b"
+                 :git/sha "6f265f45f894859c74dfd7c6bf32a94c48cb32d0"
                  :deps/root "spools/batteries"}
                 millhouse.spools/workflow
                 {:git/url "https://github.com/codethread/millhouse.spool.git"
-                 :git/sha "b0ac2268685e53510df01dcd0cc533b8fd40a25d"
+                 :git/sha "3af5786f06121ee6055f34b4eefddc7000a84b5a"
                  :deps/root "spools/workflow"}
+                millhouse.spools/identity
+                {:git/url "https://github.com/codethread/millhouse.spool.git"
+                 :git/sha "3af5786f06121ee6055f34b4eefddc7000a84b5a"
+                 :deps/root "spools/identity"}
                 millhouse.spools/millstrand-workflows
                 {:git/url "https://github.com/codethread/millhouse.spool.git"
-                 :git/sha "b0ac2268685e53510df01dcd0cc533b8fd40a25d"
+                 :git/sha "3af5786f06121ee6055f34b4eefddc7000a84b5a"
                  :deps/root "spools/millstrand-workflows"}
                 millhouse.spools.executors/shell
                 {:git/url "https://github.com/codethread/millhouse.spool.git"
-                 :git/sha "b0ac2268685e53510df01dcd0cc533b8fd40a25d"
+                 :git/sha "3af5786f06121ee6055f34b4eefddc7000a84b5a"
                  :deps/root "spools/shell-executor"}
                 ct.spools/agent-run
                 {:git/url "https://github.com/codethread/agent-harness.spool.git"
-                 :git/sha "1f06dfd046828f86c262537c190f854b87d90f6f"
+                 :git/sha "85eaa606d2a8cc9200ad1098056d9f7bb94a2f20"
                  :deps/root "agent-run"}
                 ct.spools/harness-core
                 {:git/url "https://github.com/codethread/agent-harness.spool.git"
-                 :git/sha "1f06dfd046828f86c262537c190f854b87d90f6f"
+                 :git/sha "85eaa606d2a8cc9200ad1098056d9f7bb94a2f20"
                  :deps/root "harness-core"}
                 ct.spools/claude-harness
                 {:git/url "https://github.com/codethread/agent-harness.spool.git"
-                 :git/sha "1f06dfd046828f86c262537c190f854b87d90f6f"
+                 :git/sha "85eaa606d2a8cc9200ad1098056d9f7bb94a2f20"
                  :deps/root "claude-harness"}
                 ct.spools/codex-harness
                 {:git/url "https://github.com/codethread/agent-harness.spool.git"
-                 :git/sha "1f06dfd046828f86c262537c190f854b87d90f6f"
+                 :git/sha "85eaa606d2a8cc9200ad1098056d9f7bb94a2f20"
                  :deps/root "codex-harness"}
                 ct.spools/pi-harness
                 {:git/url "https://github.com/codethread/agent-harness.spool.git"
-                 :git/sha "1f06dfd046828f86c262537c190f854b87d90f6f"
+                 :git/sha "85eaa606d2a8cc9200ad1098056d9f7bb94a2f20"
                  :deps/root "pi-harness"}
                 ct.spools/agent-cli
                 {:git/url "https://github.com/codethread/agent-harness.spool.git"
-                 :git/sha "1f06dfd046828f86c262537c190f854b87d90f6f"
+                 :git/sha "85eaa606d2a8cc9200ad1098056d9f7bb94a2f20"
                  :deps/root "agent-cli"}
                 ct.spools/delegation
                 {:git/url "https://github.com/codethread/agent-harness.spool.git"
-                 :git/sha "1f06dfd046828f86c262537c190f854b87d90f6f"
+                 :git/sha "85eaa606d2a8cc9200ad1098056d9f7bb94a2f20"
                  :deps/root "delegation"}
                 codethread/devflow
                 {:git/url "https://github.com/codethread/devflow.spool.git"
@@ -63,7 +67,7 @@
                  :deps/root "kanban-adapter"}
                 millhouse.spools/kanban
                 {:git/url "https://github.com/codethread/millhouse.spool.git"
-                 :git/sha "b0ac2268685e53510df01dcd0cc533b8fd40a25d"
+                 :git/sha "3af5786f06121ee6055f34b4eefddc7000a84b5a"
                  :deps/root "spools/kanban"}
                 clj-kondo/clj-kondo {:mvn/version "2025.06.05"}}
    :main-opts ["-m" "clj-kondo.main"

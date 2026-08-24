@@ -5,9 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 // fakeStrand writes a stand-in strand binary that answers from canned payloads.
@@ -37,6 +39,17 @@ exit 1
 		t.Fatal(err)
 	}
 	return Client{Bin: bin}
+}
+
+func scriptedStrand(t *testing.T, body string) (Client, string) {
+	t.Helper()
+	dir := t.TempDir()
+	script := fmt.Sprintf("#!/bin/sh\nDIR=%q\n%s\n", dir, body)
+	bin := filepath.Join(dir, "strand")
+	if err := os.WriteFile(bin, []byte(script), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	return Client{Bin: bin}, dir
 }
 
 func flatten(key string) string {
@@ -220,5 +233,269 @@ func TestSnapshotRefusesACardWithNoID(t *testing.T) {
 	_, err := c.Snapshot(context.Background(), "e1")
 	if err == nil || !strings.Contains(err.Error(), "no id") {
 		t.Fatalf("err = %v, want a refusal for the card with no id", err)
+	}
+}
+
+func TestReadReissuesIdenticalCommandAfterPlannedReplacement(t *testing.T) {
+	c, dir := scriptedStrand(t, `
+count=0
+if [ -f "$DIR/count" ]; then count=$(sed 's/[^0-9]//g' "$DIR/count"); fi
+count=$((count + 1))
+printf '%s' "$count" > "$DIR/count"
+printf '%s\n' "$*" >> "$DIR/argv"
+printf '%s' "$MILLSTRAND_ERROR_FORMAT" > "$DIR/error-format"
+if [ "$count" -eq 1 ]; then
+  printf '%s\n' '{"type":"transport","code":"weaver/restarted","message":"replacement interrupted an admitted invocation","details":{"sent_once":true}}' >&2
+  exit 1
+fi
+printf '%s\n' '{"card":{"id":"f1","title":"Feature","state":"active","attributes":{}},"tasks":[],"ready":[]}'
+`)
+
+	card, err := c.CardDetail(context.Background(), "f1")
+	if err != nil {
+		t.Fatalf("CardDetail: %v", err)
+	}
+	if card.ID != "f1" {
+		t.Fatalf("card = %+v", card)
+	}
+	count, err := os.ReadFile(filepath.Join(dir, "count"))
+	if err != nil || string(count) != "2" {
+		t.Fatalf("calls = %q, read err = %v, want exactly two", count, err)
+	}
+	argv, err := os.ReadFile(filepath.Join(dir, "argv"))
+	if err != nil || string(argv) != "kanban card f1\nkanban card f1\n" {
+		t.Fatalf("argv = %q, read err = %v, want identical calls", argv, err)
+	}
+	format, err := os.ReadFile(filepath.Join(dir, "error-format"))
+	if err != nil || string(format) != "json" {
+		t.Fatalf("error format = %q, read err = %v, want json", format, err)
+	}
+}
+
+func TestPlannedReplacementIntegrationReadsBoardFromReplacement(t *testing.T) {
+	c, dir := scriptedStrand(t, `
+count=0
+if [ -f "$DIR/count" ]; then count=$(sed 's/[^0-9]//g' "$DIR/count"); fi
+count=$((count + 1))
+printf '%s' "$count" > "$DIR/count"
+printf '%s\n' "$*" >> "$DIR/argv"
+case "$*:$count" in
+  "show e1:1")
+    printf '%s\n' '{"type":"transport","code":"weaver/restarted","message":"replacement interrupted an admitted invocation","details":{"sent_once":true}}' >&2
+    exit 1
+    ;;
+  "show e1:2") printf '%s\n' '{"id":"e1","title":"Epic one","state":"active","attributes":{"kanban/type":"epic","kanban/card":"true","kanban.label/ralph":"true","kanban/priority":"p2"}}';;
+  "kanban board:3") printf '%s\n' '{"claimed":[],"in_review":[],"pending":[],"refinement":[]}';;
+  *) printf '%s\n' "unexpected call: $*" >&2; exit 1;;
+esac
+`)
+
+	snapshot, err := c.Snapshot(context.Background(), "e1")
+	if err != nil {
+		t.Fatalf("Snapshot through planned replacement: %v", err)
+	}
+	if snapshot.Epic.ID != "e1" || len(snapshot.Features) != 0 {
+		t.Fatalf("snapshot = %+v, want the replacement's empty board", snapshot)
+	}
+	count, err := os.ReadFile(filepath.Join(dir, "count"))
+	if err != nil || string(count) != "3" {
+		t.Fatalf("calls = %q, read err = %v, want one reissue plus board read", count, err)
+	}
+	argv, err := os.ReadFile(filepath.Join(dir, "argv"))
+	if err != nil || string(argv) != "show e1\nshow e1\nkanban board\n" {
+		t.Fatalf("argv = %q, read err = %v, want planned replacement sequence", argv, err)
+	}
+}
+
+func TestReadPreservesUnrelatedCommandErrors(t *testing.T) {
+	c, dir := scriptedStrand(t, `
+printf '%s\n' "$*" >> "$DIR/argv"
+printf '%s\n' '{"type":"transport","code":"peer/transport-failed","message":"socket closed","details":{"request_delivery":false}}' >&2
+exit 1
+`)
+
+	_, err := c.CardDetail(context.Background(), "f1")
+	if err == nil || !strings.Contains(err.Error(), "socket closed") {
+		t.Fatalf("err = %v, want structured unrelated failure", err)
+	}
+	var commandErr *CommandError
+	if !errors.As(err, &commandErr) || commandErr.Code != "peer/transport-failed" {
+		t.Fatalf("err = %T %v, want CommandError with unrelated code", err, err)
+	}
+	argv, readErr := os.ReadFile(filepath.Join(dir, "argv"))
+	if readErr != nil || string(argv) != "kanban card f1\n" {
+		t.Fatalf("argv = %q, read err = %v, want no retry", argv, readErr)
+	}
+}
+
+func TestCommandErrorRendersStructuredDiagnosticsWithoutLosingCause(t *testing.T) {
+	cause := errors.New("process exited unsuccessfully")
+	err := &CommandError{
+		Args:    []string{"show", "e1"},
+		Type:    "transport",
+		Code:    "peer/transport-failed",
+		Message: "socket closed",
+		Details: map[string]any{"request_delivery": false},
+		Err:     cause,
+	}
+
+	if got, want := err.Error(), `strand show e1: socket closed (type=transport code=peer/transport-failed details={"request_delivery":false})`; got != want {
+		t.Fatalf("error = %q, want %q", got, want)
+	}
+	if !errors.Is(err, cause) {
+		t.Fatal("structured command error lost its underlying cause")
+	}
+}
+
+func TestMalformedCommandErrorPreservesExecCause(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		stderr string
+	}{
+		{name: "malformed", stderr: "not json"},
+		{name: "absent"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			body := "exit 1"
+			if tc.stderr != "" {
+				body = fmt.Sprintf("printf '%%s\\n' %q >&2\nexit 1", tc.stderr)
+			}
+			c, _ := scriptedStrand(t, body)
+
+			_, err := c.CardDetail(context.Background(), "f1")
+			if err == nil || !strings.Contains(err.Error(), "malformed strand error envelope") {
+				t.Fatalf("err = %v, want visible malformed-envelope error", err)
+			}
+			var commandErr *CommandError
+			if !errors.As(err, &commandErr) || commandErr.Code != "" {
+				t.Fatalf("err = %T %v, want typed malformed command error without a code", err, err)
+			}
+			var exitErr *exec.ExitError
+			if !errors.As(err, &exitErr) {
+				t.Fatalf("err = %T %v, want the original exec cause", err, err)
+			}
+		})
+	}
+}
+
+func TestPublicReadsPreserveCommandErrorAndGateClassification(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		read func(Client) error
+	}{
+		{
+			name: "Gate",
+			read: func(c Client) error {
+				_, err := c.Gate(context.Background(), "e1")
+				return err
+			},
+		},
+		{
+			name: "Snapshot",
+			read: func(c Client) error {
+				_, err := c.Snapshot(context.Background(), "e1")
+				return err
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			c, _ := scriptedStrand(t, `
+printf '%s\n' '{"type":"transport","code":"peer/transport-failed","message":"socket closed","details":{"request_delivery":false}}' >&2
+exit 1
+`)
+			err := tc.read(c)
+			if err == nil || !errors.Is(err, ErrGate) {
+				t.Fatalf("err = %v, want ErrGate classification", err)
+			}
+			var commandErr *CommandError
+			if !errors.As(err, &commandErr) {
+				t.Fatalf("err = %T %v, want CommandError identity", err, err)
+			}
+			if commandErr.Code != "peer/transport-failed" || commandErr.Message != "socket closed" {
+				t.Fatalf("command error = %+v, want typed diagnostics", commandErr)
+			}
+			if got, ok := commandErr.Details["request_delivery"].(bool); !ok || got {
+				t.Fatalf("details = %#v, want request_delivery=false", commandErr.Details)
+			}
+		})
+	}
+}
+
+func TestMutationCapableCommandIsNotRetried(t *testing.T) {
+	c, dir := scriptedStrand(t, `
+count=0
+if [ -f "$DIR/count" ]; then count=$(sed 's/[^0-9]//g' "$DIR/count"); fi
+count=$((count + 1))
+printf '%s' "$count" > "$DIR/count"
+printf '%s\n' '{"type":"transport","code":"weaver/restarted","message":"replacement interrupted an admitted invocation","details":{}}' >&2
+exit 1
+`)
+
+	_, err := c.exec(context.Background(), "kanban", "label", "add", "f1", "ralph")
+	if err == nil || !restarted(err) {
+		t.Fatalf("exec err = %v, want the original restart error", err)
+	}
+	count, readErr := os.ReadFile(filepath.Join(dir, "count"))
+	if readErr != nil || string(count) != "1" {
+		t.Fatalf("calls = %q, read err = %v, want one mutation call", count, readErr)
+	}
+}
+
+func TestReadSharesOneTimeoutAcrossReplacementReissue(t *testing.T) {
+	c, dir := scriptedStrand(t, `
+count=0
+if [ -f "$DIR/count" ]; then count=$(sed 's/[^0-9]//g' "$DIR/count"); fi
+count=$((count + 1))
+printf '%s' "$count" > "$DIR/count"
+if [ "$count" -eq 1 ]; then
+  sleep 0.4
+  printf '%s\n' '{"type":"transport","code":"weaver/restarted","message":"replacement interrupted an admitted invocation","details":{}}' >&2
+  exit 1
+fi
+while :; do :; done
+`)
+	c.Timeout = 2 * time.Second
+
+	start := time.Now()
+	_, err := c.read(context.Background(), "kanban", "board")
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("err = %v, want shared timeout", err)
+	}
+	count, readErr := os.ReadFile(filepath.Join(dir, "count"))
+	if readErr != nil || string(count) != "2" {
+		t.Fatalf("calls = %q, read err = %v, want the reissue to start", count, readErr)
+	}
+	if elapsed := time.Since(start); elapsed < 800*time.Millisecond || elapsed > 2200*time.Millisecond {
+		t.Fatalf("read took %s, want the reissue to receive only the remaining timeout", elapsed)
+	}
+}
+
+func TestReadStopsAfterOnePlannedReplacementReissue(t *testing.T) {
+	c, dir := scriptedStrand(t, `
+count=0
+if [ -f "$DIR/count" ]; then count=$(sed 's/[^0-9]//g' "$DIR/count"); fi
+count=$((count + 1))
+printf '%s' "$count" > "$DIR/count"
+printf '%s\n' '{"type":"transport","code":"weaver/restarted","message":"replacement interrupted an admitted invocation","details":{}}' >&2
+exit 1
+`)
+
+	_, err := c.CardDetail(context.Background(), "f1")
+	if err == nil || !restarted(err) {
+		t.Fatalf("err = %v, want the final planned-replacement error", err)
+	}
+	count, readErr := os.ReadFile(filepath.Join(dir, "count"))
+	if readErr != nil || string(count) != "2" {
+		t.Fatalf("calls = %q, read err = %v, want exactly two attempts", count, readErr)
+	}
+}
+
+func TestReadPreservesCancellation(t *testing.T) {
+	c, _ := scriptedStrand(t, `exit 1`)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	_, err := c.read(ctx, "kanban", "board")
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("err = %v, want context cancellation", err)
 	}
 }
