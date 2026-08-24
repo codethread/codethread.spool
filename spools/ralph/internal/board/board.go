@@ -281,13 +281,13 @@ func parseCommandError(args []string, stderr []byte, cause error) error {
 	if err := json.Unmarshal(trimmed, &envelope); err != nil {
 		return &CommandError{
 			Args: args,
-			Err:  fmt.Errorf("malformed strand error envelope: %w (stderr %q)", err, string(trimmed)),
+			Err:  joinCommandCause(cause, fmt.Errorf("malformed strand error envelope: %w (stderr %q)", err, string(trimmed))),
 		}
 	}
 	if envelope.Type == "" || envelope.Code == "" || envelope.Message == "" || envelope.Details == nil {
 		return &CommandError{
 			Args: args,
-			Err:  fmt.Errorf("malformed strand error envelope: required fields are missing (stderr %q)", string(trimmed)),
+			Err:  joinCommandCause(cause, fmt.Errorf("malformed strand error envelope: required fields are missing (stderr %q)", string(trimmed))),
 		}
 	}
 	return &CommandError{
@@ -298,6 +298,13 @@ func parseCommandError(args []string, stderr []byte, cause error) error {
 		Details: envelope.Details,
 		Err:     cause,
 	}
+}
+
+func joinCommandCause(cause, diagnostic error) error {
+	if cause == nil {
+		return diagnostic
+	}
+	return errors.Join(cause, diagnostic)
 }
 
 // Show reads one strand.
@@ -326,7 +333,7 @@ func (c Client) Show(ctx context.Context, id string) (Strand, error) {
 func (c Client) Gate(ctx context.Context, id string) (Strand, error) {
 	s, err := c.Show(ctx, id)
 	if err != nil {
-		return Strand{}, fmt.Errorf("%w: cannot read epic %s: %v", ErrGate, id, err)
+		return Strand{}, fmt.Errorf("%w: cannot read epic %s: %w", ErrGate, id, err)
 	}
 	if got, malformed := s.attr(AttrType); got != "epic" {
 		return Strand{}, fmt.Errorf("%w: %s has %s=%s, expected epic", ErrGate, id, AttrType, unreadable(got, malformed))

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -327,19 +328,77 @@ exit 1
 	}
 }
 
-func TestMalformedCommandErrorFailsVisibly(t *testing.T) {
-	c, _ := scriptedStrand(t, `
-printf '%s\n' 'not json' >&2
+func TestMalformedCommandErrorPreservesExecCause(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		stderr string
+	}{
+		{name: "malformed", stderr: "not json"},
+		{name: "absent"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			body := "exit 1"
+			if tc.stderr != "" {
+				body = fmt.Sprintf("printf '%%s\\n' %q >&2\nexit 1", tc.stderr)
+			}
+			c, _ := scriptedStrand(t, body)
+
+			_, err := c.CardDetail(context.Background(), "f1")
+			if err == nil || !strings.Contains(err.Error(), "malformed strand error envelope") {
+				t.Fatalf("err = %v, want visible malformed-envelope error", err)
+			}
+			var commandErr *CommandError
+			if !errors.As(err, &commandErr) || commandErr.Code != "" {
+				t.Fatalf("err = %T %v, want typed malformed command error without a code", err, err)
+			}
+			var exitErr *exec.ExitError
+			if !errors.As(err, &exitErr) {
+				t.Fatalf("err = %T %v, want the original exec cause", err, err)
+			}
+		})
+	}
+}
+
+func TestPublicReadsPreserveCommandErrorAndGateClassification(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		read func(Client) error
+	}{
+		{
+			name: "Gate",
+			read: func(c Client) error {
+				_, err := c.Gate(context.Background(), "e1")
+				return err
+			},
+		},
+		{
+			name: "Snapshot",
+			read: func(c Client) error {
+				_, err := c.Snapshot(context.Background(), "e1")
+				return err
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			c, _ := scriptedStrand(t, `
+printf '%s\n' '{"type":"transport","code":"peer/transport-failed","message":"socket closed","details":{"request_delivery":false}}' >&2
 exit 1
 `)
-
-	_, err := c.CardDetail(context.Background(), "f1")
-	if err == nil || !strings.Contains(err.Error(), "malformed strand error envelope") {
-		t.Fatalf("err = %v, want visible malformed-envelope error", err)
-	}
-	var commandErr *CommandError
-	if !errors.As(err, &commandErr) || commandErr.Code != "" {
-		t.Fatalf("err = %T %v, want typed malformed command error without a code", err, err)
+			err := tc.read(c)
+			if err == nil || !errors.Is(err, ErrGate) {
+				t.Fatalf("err = %v, want ErrGate classification", err)
+			}
+			var commandErr *CommandError
+			if !errors.As(err, &commandErr) {
+				t.Fatalf("err = %T %v, want CommandError identity", err, err)
+			}
+			if commandErr.Code != "peer/transport-failed" || commandErr.Message != "socket closed" {
+				t.Fatalf("command error = %+v, want typed diagnostics", commandErr)
+			}
+			if got, ok := commandErr.Details["request_delivery"].(bool); !ok || got {
+				t.Fatalf("details = %#v, want request_delivery=false", commandErr.Details)
+			}
+		})
 	}
 }
 
@@ -364,26 +423,51 @@ exit 1
 }
 
 func TestReadSharesOneTimeoutAcrossReplacementReissue(t *testing.T) {
-	c, _ := scriptedStrand(t, `
+	c, dir := scriptedStrand(t, `
 count=0
 if [ -f "$DIR/count" ]; then count=$(sed 's/[^0-9]//g' "$DIR/count"); fi
 count=$((count + 1))
 printf '%s' "$count" > "$DIR/count"
 if [ "$count" -eq 1 ]; then
+  sleep 0.4
   printf '%s\n' '{"type":"transport","code":"weaver/restarted","message":"replacement interrupted an admitted invocation","details":{}}' >&2
   exit 1
 fi
 while :; do :; done
 `)
-	c.Timeout = 100 * time.Millisecond
+	c.Timeout = 2 * time.Second
 
 	start := time.Now()
 	_, err := c.read(context.Background(), "kanban", "board")
 	if !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatalf("err = %v, want shared timeout", err)
 	}
-	if elapsed := time.Since(start); elapsed > time.Second {
-		t.Fatalf("read took %s, want one timeout budget", elapsed)
+	count, readErr := os.ReadFile(filepath.Join(dir, "count"))
+	if readErr != nil || string(count) != "2" {
+		t.Fatalf("calls = %q, read err = %v, want the reissue to start", count, readErr)
+	}
+	if elapsed := time.Since(start); elapsed < 800*time.Millisecond || elapsed > 2200*time.Millisecond {
+		t.Fatalf("read took %s, want the reissue to receive only the remaining timeout", elapsed)
+	}
+}
+
+func TestReadStopsAfterOnePlannedReplacementReissue(t *testing.T) {
+	c, dir := scriptedStrand(t, `
+count=0
+if [ -f "$DIR/count" ]; then count=$(sed 's/[^0-9]//g' "$DIR/count"); fi
+count=$((count + 1))
+printf '%s' "$count" > "$DIR/count"
+printf '%s\n' '{"type":"transport","code":"weaver/restarted","message":"replacement interrupted an admitted invocation","details":{}}' >&2
+exit 1
+`)
+
+	_, err := c.CardDetail(context.Background(), "f1")
+	if err == nil || !restarted(err) {
+		t.Fatalf("err = %v, want the final planned-replacement error", err)
+	}
+	count, readErr := os.ReadFile(filepath.Join(dir, "count"))
+	if readErr != nil || string(count) != "2" {
+		t.Fatalf("calls = %q, read err = %v, want exactly two attempts", count, readErr)
 	}
 }
 

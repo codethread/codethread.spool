@@ -220,16 +220,22 @@ func startMillDaemon(t *testing.T, mill, source string) *exec.Cmd {
 	ready := make(chan string, 1)
 	go func() {
 		scanner := bufio.NewScanner(stdout)
-		var lines []string
+		var diagnostics string
+		readySent := false
 		for scanner.Scan() {
 			line := scanner.Text()
-			lines = append(lines, line)
-			if strings.Contains(line, "mill listening") {
-				ready <- strings.Join(lines, "\n")
-				return
+			// Keep consuming the live daemon stream after readiness; retaining only
+			// a bounded tail keeps startup failures diagnosable without allowing a
+			// noisy disposable daemon to fill the pipe or the test process.
+			diagnostics = appendMillDiagnostic(diagnostics, line)
+			if !readySent && strings.Contains(line, "mill listening") {
+				ready <- diagnostics
+				readySent = true
 			}
 		}
-		ready <- strings.Join(lines, "\n")
+		if !readySent {
+			ready <- diagnostics
+		}
 	}()
 	select {
 	case output := <-ready:
@@ -242,6 +248,15 @@ func startMillDaemon(t *testing.T, mill, source string) *exec.Cmd {
 		t.Fatal("mill did not become ready")
 	}
 	return cmd
+}
+
+func appendMillDiagnostic(existing, line string) string {
+	const maxDiagnostics = 32 << 10
+	existing += line + "\n"
+	if len(existing) > maxDiagnostics {
+		existing = existing[len(existing)-maxDiagnostics:]
+	}
+	return existing
 }
 
 func stopProcess(t *testing.T, cmd *exec.Cmd, timeout time.Duration) {
