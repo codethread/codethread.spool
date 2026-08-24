@@ -71,13 +71,33 @@ func (e *CommandError) Error() string {
 		return "strand command failed"
 	}
 	command := strings.Join(e.Args, " ")
+	text := ""
 	if e.Message != "" {
-		return fmt.Sprintf("strand %s: %s", command, e.Message)
+		text = fmt.Sprintf("strand %s: %s", command, e.Message)
+	} else if e.Err != nil {
+		text = fmt.Sprintf("strand %s: %v", command, e.Err)
+	} else {
+		text = fmt.Sprintf("strand %s failed", command)
 	}
-	if e.Err != nil {
-		return fmt.Sprintf("strand %s: %v", command, e.Err)
+	diagnostics := []string{}
+	if e.Type != "" {
+		diagnostics = append(diagnostics, "type="+e.Type)
 	}
-	return fmt.Sprintf("strand %s failed", command)
+	if e.Code != "" {
+		diagnostics = append(diagnostics, "code="+e.Code)
+	}
+	if len(e.Details) > 0 {
+		details, err := json.Marshal(e.Details)
+		if err != nil {
+			diagnostics = append(diagnostics, fmt.Sprintf("details=%v", e.Details))
+		} else {
+			diagnostics = append(diagnostics, "details="+string(details))
+		}
+	}
+	if len(diagnostics) > 0 {
+		text += " (" + strings.Join(diagnostics, " ") + ")"
+	}
+	return text
 }
 
 func (e *CommandError) Unwrap() error { return e.Err }

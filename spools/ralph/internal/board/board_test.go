@@ -328,6 +328,25 @@ exit 1
 	}
 }
 
+func TestCommandErrorRendersStructuredDiagnosticsWithoutLosingCause(t *testing.T) {
+	cause := errors.New("process exited unsuccessfully")
+	err := &CommandError{
+		Args:    []string{"show", "e1"},
+		Type:    "transport",
+		Code:    "peer/transport-failed",
+		Message: "socket closed",
+		Details: map[string]any{"request_delivery": false},
+		Err:     cause,
+	}
+
+	if got, want := err.Error(), `strand show e1: socket closed (type=transport code=peer/transport-failed details={"request_delivery":false})`; got != want {
+		t.Fatalf("error = %q, want %q", got, want)
+	}
+	if !errors.Is(err, cause) {
+		t.Fatal("structured command error lost its underlying cause")
+	}
+}
+
 func TestMalformedCommandErrorPreservesExecCause(t *testing.T) {
 	for _, tc := range []struct {
 		name   string

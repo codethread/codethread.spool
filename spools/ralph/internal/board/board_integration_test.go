@@ -315,7 +315,29 @@ func writeDisposableRalphWorld(t *testing.T, world, source, gateFile string) {
 (defn- mark! [path]
   (when path (spit path "entered\n" :append true)))
 (defn- wait-for! [path]
-  (while (not (exists? path)) (Thread/sleep 10)))
+  (when-not (exists? path)
+    (let [file (java.io.File. path)
+          parent (.toPath (.getParentFile file))
+          watcher (.newWatchService (java.nio.file.FileSystems/getDefault))]
+      (try
+        (.register parent watcher
+                   (into-array java.nio.file.WatchEvent$Kind
+                               [java.nio.file.StandardWatchEventKinds/ENTRY_CREATE
+                                java.nio.file.StandardWatchEventKinds/ENTRY_MODIFY]))
+        ;; Check again after registration so a release between the initial
+        ;; check and registration cannot leave this process waiting forever.
+        (loop []
+          (when-not (exists? path)
+            (let [key (.take watcher)]
+              (try
+                (.pollEvents key)
+                (finally
+                  (when-not (.reset key)
+                    (throw (ex-info "release directory watch became invalid"
+                                    {:path path}))))))
+            (recur)))
+        (finally
+          (.close watcher))))))
 
 ;; The probe gate holds the old generation admitted while the planned restart
 ;; prepares its replacement.
