@@ -6,14 +6,15 @@
            codethread/ralph "spools/ralph"}}
   millhouse/spools
   {:git/url "https://github.com/codethread/millhouse.spool.git"
-   :git/sha "7c615bd1032be0e443c36fa12e8c50143e8014ff"
+   :git/sha "3af5786f06121ee6055f34b4eefddc7000a84b5a"
    :roots {millhouse.spools/workflow "spools/workflow"
            millhouse.spools/millstrand-workflows "spools/millstrand-workflows"
            millhouse.spools.executors/shell "spools/shell-executor"
-           millhouse.spools/kanban "spools/kanban"}}
+           millhouse.spools/kanban "spools/kanban"
+           millhouse.spools/identity "spools/identity"}}
   ct.spools/agent-run
   {:git/url "https://github.com/codethread/agent-harness.spool.git"
-   :git/sha "da08fa5fa7f7bd55b67f416a9e254e20d3af65e9"
+   :git/sha "85eaa606d2a8cc9200ad1098056d9f7bb94a2f20"
    :roots {ct.spools/agent-run "agent-run"
            ct.spools/harness-core "harness-core"
            ct.spools/claude-harness "claude-harness"
