@@ -15,20 +15,12 @@
                  :deps/root "spools/batteries"}
                 millhouse.spools/workflow
                 {:git/url "https://github.com/codethread/millhouse.spool.git"
-                 :git/sha "3af5786f06121ee6055f34b4eefddc7000a84b5a"
+                 :git/sha "f1cdda3b46706b186f547251d285791be650d232"
                  :deps/root "spools/workflow"}
                 millhouse.spools/identity
                 {:git/url "https://github.com/codethread/millhouse.spool.git"
-                 :git/sha "3af5786f06121ee6055f34b4eefddc7000a84b5a"
+                 :git/sha "f1cdda3b46706b186f547251d285791be650d232"
                  :deps/root "spools/identity"}
-                millhouse.spools/millstrand-workflows
-                {:git/url "https://github.com/codethread/millhouse.spool.git"
-                 :git/sha "3af5786f06121ee6055f34b4eefddc7000a84b5a"
-                 :deps/root "spools/millstrand-workflows"}
-                millhouse.spools.executors/shell
-                {:git/url "https://github.com/codethread/millhouse.spool.git"
-                 :git/sha "3af5786f06121ee6055f34b4eefddc7000a84b5a"
-                 :deps/root "spools/shell-executor"}
                 ct.spools/agent-run
                 {:git/url "https://github.com/codethread/agent-harness.spool.git"
                  :git/sha "85eaa606d2a8cc9200ad1098056d9f7bb94a2f20"
@@ -67,7 +59,7 @@
                  :deps/root "kanban-adapter"}
                 millhouse.spools/kanban
                 {:git/url "https://github.com/codethread/millhouse.spool.git"
-                 :git/sha "3af5786f06121ee6055f34b4eefddc7000a84b5a"
+                 :git/sha "f1cdda3b46706b186f547251d285791be650d232"
                  :deps/root "spools/kanban"}
                 clj-kondo/clj-kondo {:mvn/version "2025.06.05"}}
    :main-opts ["-m" "clj-kondo.main"
