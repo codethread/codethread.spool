@@ -14,60 +14,61 @@
    {:deps
     {'millstrand.spools/batteries
      {:git/url "https://github.com/codethread/millstrand.git"
-      :git/sha "bbca5638bce72ad6a00b2ca916cabcfe99107828"
+      :git/sha "8312ad49d02f0f9f20fa167a8305e86a36f3fcae"
       :deps/root "spools/batteries"}
      'codethread/config {:local/root (str project-root "/spools/config")}
      'ct.spools/agent-run
      {:git/url "https://github.com/codethread/agent-harness.spool.git"
-      :git/sha "fd75bf50ef823e1df520ead410780961d6313474"
+      :git/sha "f3b950769a54ccf66712f1887813a1255afecdeb"
       :deps/root "agent-run"}
      'ct.spools/harness-core
      {:git/url "https://github.com/codethread/agent-harness.spool.git"
-      :git/sha "fd75bf50ef823e1df520ead410780961d6313474"
+      :git/sha "f3b950769a54ccf66712f1887813a1255afecdeb"
       :deps/root "harness-core"}
      'ct.spools/claude-harness
      {:git/url "https://github.com/codethread/agent-harness.spool.git"
-      :git/sha "fd75bf50ef823e1df520ead410780961d6313474"
+      :git/sha "f3b950769a54ccf66712f1887813a1255afecdeb"
       :deps/root "claude-harness"}
      'ct.spools/codex-harness
      {:git/url "https://github.com/codethread/agent-harness.spool.git"
-      :git/sha "fd75bf50ef823e1df520ead410780961d6313474"
+      :git/sha "f3b950769a54ccf66712f1887813a1255afecdeb"
       :deps/root "codex-harness"}
      'ct.spools/pi-harness
      {:git/url "https://github.com/codethread/agent-harness.spool.git"
-      :git/sha "fd75bf50ef823e1df520ead410780961d6313474"
+      :git/sha "f3b950769a54ccf66712f1887813a1255afecdeb"
       :deps/root "pi-harness"}
      'ct.spools/delegation
      {:git/url "https://github.com/codethread/agent-harness.spool.git"
-      :git/sha "fd75bf50ef823e1df520ead410780961d6313474"
+      :git/sha "f3b950769a54ccf66712f1887813a1255afecdeb"
       :deps/root "delegation"}
      'codethread/devflow
      {:git/url "https://github.com/codethread/devflow.spool.git"
-      :git/sha "90799b8c950b4509167137562fbf18853524d41c"
+      :git/sha "ceaa684499c6715ce0f10dba5806fd8ebef997da"
       :deps/root "."}
      'codethread/devflow-kanban-adapter
      {:git/url "https://github.com/codethread/devflow.spool.git"
-      :git/sha "90799b8c950b4509167137562fbf18853524d41c"
+      :git/sha "ceaa684499c6715ce0f10dba5806fd8ebef997da"
       :deps/root "kanban-adapter"}
      'millhouse.spools/workflow
      {:git/url "https://github.com/codethread/millhouse.spool.git"
-      :git/sha "f487eb42ea9523e8bd405e64a7c319013217d988"
+      :git/sha "e52162bda3bd2e3b806b262e216d688de5b811b5"
       :deps/root "spools/workflow"}
      'millhouse.spools/kanban
      {:git/url "https://github.com/codethread/millhouse.spool.git"
-      :git/sha "f487eb42ea9523e8bd405e64a7c319013217d988"
+      :git/sha "e52162bda3bd2e3b806b262e216d688de5b811b5"
       :deps/root "spools/kanban"}
      'millhouse.spools/identity
      {:git/url "https://github.com/codethread/millhouse.spool.git"
-      :git/sha "f487eb42ea9523e8bd405e64a7c319013217d988"
+      :git/sha "e52162bda3bd2e3b806b262e216d688de5b811b5"
       :deps/root "spools/identity"}}}))
 
-(deftest workspace-deps-compose-library-roots-and-landed-pins
+(deftest workspace-deps-compose-library-roots-and-config-pins
   (let [{:keys [deps]} (edn/read-string
                         (slurp (io/file project-root ".millstrand/deps.edn")))
         workspace-root (io/file project-root ".millstrand")
         config-root (io/file workspace-root (get-in deps ['codethread/config :local/root]))
-        ralph-root (io/file workspace-root (get-in deps ['codethread/ralph :local/root]))]
+        ralph-root (io/file workspace-root (get-in deps ['codethread/ralph :local/root]))
+        config-deps (:deps (edn/read-string (slurp (io/file config-root "deps.edn"))))]
     (is (= {:local/root "../spools/config"}
            (get deps 'codethread/config)))
     (is (= {:local/root "../spools/ralph"}
@@ -75,14 +76,14 @@
     (is (.isFile (io/file config-root "deps.edn")))
     (is (.isFile (io/file ralph-root "deps.edn")))
     (is (.isFile (io/file ralph-root "bin/ralph")))
-    (is (= "bbca5638bce72ad6a00b2ca916cabcfe99107828"
-           (get-in deps ['millstrand.spools/batteries :git/sha])))
-    (is (= "f487eb42ea9523e8bd405e64a7c319013217d988"
-           (get-in deps ['millhouse.spools/workflow :git/sha])))
-    (is (= "fd75bf50ef823e1df520ead410780961d6313474"
-           (get-in deps ['ct.spools/agent-run :git/sha])))
-    (is (= "90799b8c950b4509167137562fbf18853524d41c"
-           (get-in deps ['codethread/devflow :git/sha])))))
+    (is (= "8312ad49d02f0f9f20fa167a8305e86a36f3fcae"
+           (get-in config-deps ['millstrand.spools/batteries :git/sha])))
+    (is (= "e52162bda3bd2e3b806b262e216d688de5b811b5"
+           (get-in config-deps ['millhouse.spools/workflow :git/sha])))
+    (is (= "f3b950769a54ccf66712f1887813a1255afecdeb"
+           (get-in config-deps ['ct.spools/agent-run :git/sha])))
+    (is (= "ceaa684499c6715ce0f10dba5806fd8ebef997da"
+           (get-in config-deps ['codethread/devflow :git/sha])))))
 
 (deftest config-activates-shared-elections
   (t/with-weaver-world [ctx {:storage :sqlite-memory :deps-edn deps-edn}]

@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-const canonicalMillstrand = "bbca5638bce72ad6a00b2ca916cabcfe99107828"
+const canonicalMillstrand = "8312ad49d02f0f9f20fa167a8305e86a36f3fcae"
 
 type snapshotResult struct {
 	snapshot Snapshot
