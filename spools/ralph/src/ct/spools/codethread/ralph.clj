@@ -15,7 +15,7 @@
 
 (millstrand/defbin! ralph
   "Drive a Kanban epic through repeated headless agent runs."
-  {:executable [:root "bin/ralph"]
+  {:executable [:family "bin/ralph"]
    :build ["go" "build" "-o" "bin/ralph.bin" "."]})
 
 (def ^:private ralph-arg-spec

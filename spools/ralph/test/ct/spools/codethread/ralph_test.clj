@@ -33,7 +33,7 @@
         (is (= [{:name "ralph"
                  :spool "ct.spools.codethread.ralph"
                  :doc "Drive a Kanban epic through repeated headless agent runs."
-                 :executable "[:root \"bin/ralph\"]"
+                 :executable "[:family \"bin/ralph\"]"
                  :build ["go" "build" "-o" "bin/ralph.bin" "."]}]
                (:bins (weaver/op! rt 'bins ["list"]))))
         (is (= #{:start} (:entrypoints steps)))
