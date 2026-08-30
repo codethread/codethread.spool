@@ -11,9 +11,7 @@ shared-spool `ct.spools.*` convention.
 | `spools/config` | `ct.spools.codethread.config` | Select shared harness aliases, Batteries help rendering, and the external Devflow Kanban adapter |
 | `spools/ralph` | `ct.spools.codethread.ralph` | Publish the one-card-per-iteration `ralph-iterate` workflow and `ralph` executable |
 
-Each consumer composes the roots it needs in `.millstrand/deps.edn` and
-activates its selected modules in `.millstrand/init.clj`. Kanban comes from
-`millhouse.spools/kanban`.
+Each consumer composes the roots it needs in `.millstrand/deps.edn` and activates its selected modules in `.millstrand/init.clj`. Kanban comes from `millhouse.spools/kanban`.
 
 ## Activation
 
@@ -24,8 +22,7 @@ For a checkout containing this repository, compose the local roots with:
          "../spools/ralph/src"]}
 ```
 
-The paths are relative to `.millstrand`. Git consumers should use pinned
-`codethread/config` and `codethread/ralph` dependencies instead.
+The paths are relative to `.millstrand`. Git consumers should use pinned `codethread/config` and `codethread/ralph` dependencies instead.
 
 Consumers own module ordering:
 
