@@ -12,16 +12,14 @@
 (def ^:private project-root (.getCanonicalPath (io/file "../..")))
 (def ^:private millhouse-root
   (.getCanonicalPath (io/file "../../../millhouse.spool")))
-(def ^:private spools-edn
-  {:spools
-   {'codethread/ralph {:local/root project-root
-                       :roots {'codethread/ralph "spools/ralph"}}
-    'millhouse/spools {:local/root millhouse-root
-                       :roots {'millhouse.spools/workflow "spools/workflow"}}}})
+(def ^:private deps-edn
+  (pr-str
+   {:deps {'codethread/ralph {:local/root (str project-root "/spools/ralph")}
+           'millhouse.spools/workflow {:local/root (str millhouse-root "/spools/workflow")}}}))
 
 (deftest ralph-selects-the-one-card-workflow-without-roster-or-landing-policy
   (t/with-weaver-world [ctx {:storage :sqlite-memory
-                             :spools-edn spools-edn}]
+                             :deps-edn deps-edn}]
     (let [rt (:runtime ctx)]
       (runtime/module! rt :millhouse/workflow {:ns 'millhouse.spools.workflow})
       (let [result (runtime/module! rt :codethread/ralph

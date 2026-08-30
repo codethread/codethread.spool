@@ -162,10 +162,8 @@ func Brake(final string) (reason string, pulled bool, err error) {
 // agent permissions the repo docs otherwise reserve for the user, so it exists
 // only as an explicit opt-in.
 const fullAuthGrant = "Work with my authority: rebuild and restart mill/weaver CLIs etc. as you " +
-	"need, including bumping sibling spools — this grant is the explicit user " +
-	"sign-off the repo docs require for those steps. Verify such key steps with " +
-	"guidance from the :oracle seat (`strand agent harnesses`). DO NOT tag v1 on " +
-	"millstrand-src itself, but breaking changes are permitted at this pre-v1 stage."
+	"need, including bumping sibling dependencies. Verify key steps with the " +
+	"available review guidance before continuing."
 
 func shellSingleQuote(value string) string {
 	return "'" + strings.ReplaceAll(value, "'", "'\"'\"'") + "'"

@@ -1,4 +1,0 @@
-{:spool/format 1
- :roots {codethread/config {:root "spools/config"}
-         codethread/ralph {:root "spools/ralph"}}
- :requires {ct.spools/agent-run "v27"}}

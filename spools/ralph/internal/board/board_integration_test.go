@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-const canonicalMillstrandM0 = "6f265f45f894859c74dfd7c6bf32a94c48cb32d0"
+const canonicalMillstrand = "71c0ed3d80fcad090b74a704a8eb165a3fad996e"
 
 type snapshotResult struct {
 	snapshot Snapshot
@@ -199,8 +199,8 @@ func canonicalSourceRoot(t *testing.T) string {
 func verifyCanonicalSource(t *testing.T, source string) {
 	t.Helper()
 	out, err := runBinary("git", source, "-C", source, "rev-parse", "HEAD")
-	if err != nil || strings.TrimSpace(out) != canonicalMillstrandM0 {
-		t.Fatalf("canonical Millstrand M0 %s is required, got %q: %v", canonicalMillstrandM0, strings.TrimSpace(out), err)
+	if err != nil || strings.TrimSpace(out) != canonicalMillstrand {
+		t.Fatalf("pinned Millstrand %s is required, got %q: %v", canonicalMillstrand, strings.TrimSpace(out), err)
 	}
 }
 
@@ -300,12 +300,11 @@ func strandWithTimeout(t *testing.T, strand string, timeout time.Duration) strin
 func writeDisposableRalphWorld(t *testing.T, world, source, gateFile string) {
 	t.Helper()
 	localMillhouse := filepath.Join(filepath.Dir(source), "millhouse.spool")
-	spools := fmt.Sprintf(`{:spools {millstrand.spools/batteries {:millstrand/source-root "spools/batteries"}
-	          millhouse.spools/kanban {:local/root %q
-                                     :roots {millhouse.spools/kanban "spools/kanban"}}}}
-`, localMillhouse)
-	if err := os.WriteFile(filepath.Join(world, "spools.edn"), []byte(spools), 0o644); err != nil {
-		t.Fatalf("write disposable spools.edn: %v", err)
+	deps := fmt.Sprintf(`{:deps {millstrand.spools/batteries {:local/root %q}
+	             millhouse.spools/kanban {:local/root %q}}}
+`, filepath.Join(source, "spools", "batteries"), filepath.Join(localMillhouse, "spools", "kanban"))
+	if err := os.WriteFile(filepath.Join(world, "deps.edn"), []byte(deps), 0o644); err != nil {
+		t.Fatalf("write disposable deps.edn: %v", err)
 	}
 	fixture := `(ns ralph.integration.show-gate
   (:require [millstrand.api.weaver.alpha :as weaver]))
@@ -383,10 +382,9 @@ func writeDisposableRalphWorld(t *testing.T, world, source, gateFile string) {
 
  (runtime-api/module! runtime :millstrand/spools-batteries
                  {:ns 'millstrand.spools.batteries
-                  :spools ['millstrand.spools/batteries]})
+                  :required? true})
 (runtime-api/module! runtime :millhouse/spools-kanban
                  {:ns 'millhouse.spools.kanban
-                  :spools ['millhouse.spools/kanban]
                   :required? true})
 `, clojureString(fixture))
 	if err := os.WriteFile(initPath, []byte(initContents), 0o644); err != nil {
