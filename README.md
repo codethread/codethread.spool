@@ -11,26 +11,20 @@ shared-spool `ct.spools.*` convention.
 | `spools/config` | `ct.spools.codethread.config` | Select shared harness aliases, Batteries help rendering, and the external Devflow Kanban adapter |
 | `spools/ralph` | `ct.spools.codethread.ralph` | Publish the one-card-per-iteration `ralph-iterate` workflow and `ralph` executable |
 
-`spool.edn` is advisory family metadata. Consumers explicitly approve roots in
-their own `.millstrand/spools.edn` and activate the modules they need. The
-family requires agent-run v27. Kanban comes from `millhouse.spools/kanban`
-(pinned via `millhouse/spools`).
+Each consumer composes the roots it needs in `.millstrand/deps.edn` and activates its selected modules in `.millstrand/init.clj`. Kanban comes from `millhouse.spools/kanban`.
 
 ## Activation
 
-For a checkout containing this repository, the family approval is:
+For a checkout containing this repository, compose the local roots with:
 
 ```clojure
-codethread/spools
-{:local/root ".."
- :roots {codethread/config "spools/config"
-         codethread/ralph "spools/ralph"}}
+{:deps {codethread/config {:local/root "../spools/config"}
+        codethread/ralph {:local/root "../spools/ralph"}}}
 ```
 
-The path is relative to `.millstrand`. Git consumers should use a pinned family
-coordinate instead.
+The roots are relative to `.millstrand`. Git consumers should use pinned `codethread/config` and `codethread/ralph` dependencies instead.
 
-Consumers own provider approval and module ordering:
+Consumers own module ordering:
 
 - Activate Batteries, agent-run/delegation, Millhouse Workflow, Devflow, Kanban,
   and the Devflow Kanban adapter before `codethread/config`.

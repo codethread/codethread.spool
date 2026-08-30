@@ -1,6 +1,5 @@
-{:paths ["src"]
- :deps {io.millstrand/millstrand {:git/url "https://github.com/codethread/millstrand.git"
-                                  :git/sha "bbca5638bce72ad6a00b2ca916cabcfe99107828"}
+{:deps {codethread/config {:local/root "../spools/config"}
+        codethread/ralph {:local/root "../spools/ralph"}
         millstrand.spools/batteries {:git/url "https://github.com/codethread/millstrand.git"
                                      :git/sha "bbca5638bce72ad6a00b2ca916cabcfe99107828"
                                      :deps/root "spools/batteries"}
@@ -28,6 +27,9 @@
         ct.spools/pi-harness {:git/url "https://github.com/codethread/agent-harness.spool.git"
                                :git/sha "fd75bf50ef823e1df520ead410780961d6313474"
                                :deps/root "pi-harness"}
+        ct.spools/agent-cli {:git/url "https://github.com/codethread/agent-harness.spool.git"
+                              :git/sha "fd75bf50ef823e1df520ead410780961d6313474"
+                              :deps/root "agent-cli"}
         ct.spools/delegation {:git/url "https://github.com/codethread/agent-harness.spool.git"
                                :git/sha "fd75bf50ef823e1df520ead410780961d6313474"
                                :deps/root "delegation"}
@@ -36,6 +38,4 @@
                              :deps/root "."}
         codethread/devflow-kanban-adapter {:git/url "https://github.com/codethread/devflow.spool.git"
                                             :git/sha "90799b8c950b4509167137562fbf18853524d41c"
-                                            :deps/root "kanban-adapter"}}
- :aliases {:test {:extra-paths ["test"]
-                  :main-opts ["-m" "ct.spools.codethread.config-test"]}}}
+                                            :deps/root "kanban-adapter"}}}

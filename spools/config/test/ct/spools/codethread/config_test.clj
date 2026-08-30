@@ -1,5 +1,6 @@
 (ns ct.spools.codethread.config-test
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [ct.spools.agent-run :as shuttle]
             [millstrand.api.current.alpha :as current]
@@ -10,28 +11,47 @@
 (def ^:private project-root (.getCanonicalPath (io/file "../..")))
 (def ^:private sibling-root
   (fn [name] (.getCanonicalPath (io/file (str "../../../" name)))))
-(def ^:private spools-edn
-  {:spools
-   {'millstrand.spools/batteries {:millstrand/source-root "spools/batteries"}
-    'codethread/spools {:local/root project-root
-                        :roots {'codethread/config "spools/config"}}
-    'ct.spools/agent-run {:local/root (sibling-root "agent-harness.spool")
-                          :roots {'ct.spools/agent-run "agent-run"
-                                  'ct.spools/harness-core "harness-core"
-                                  'ct.spools/claude-harness "claude-harness"
-                                  'ct.spools/codex-harness "codex-harness"
-                                  'ct.spools/pi-harness "pi-harness"
-                                  'ct.spools/delegation "delegation"}}
-    'codethread/devflow {:local/root (sibling-root "devflow.spool")
-                         :roots {'codethread/devflow "."
-                                 'codethread/devflow-kanban-adapter "kanban-adapter"}}
-    'millhouse/spools {:local/root (sibling-root "millhouse.spool")
-                       :roots {'millhouse.spools/workflow "spools/workflow"
-                               'millhouse.spools/kanban "spools/kanban"
-                               'millhouse.spools/identity "spools/identity"}}}})
+(def ^:private deps-edn
+  (pr-str
+   {:deps
+    {'millstrand.spools/batteries {:local/root (str (sibling-root "skein-src") "/spools/batteries")}
+     'codethread/config {:local/root (str project-root "/spools/config")}
+     'ct.spools/agent-run {:local/root (str (sibling-root "agent-harness.spool") "/agent-run")}
+     'ct.spools/harness-core {:local/root (str (sibling-root "agent-harness.spool") "/harness-core")}
+     'ct.spools/claude-harness {:local/root (str (sibling-root "agent-harness.spool") "/claude-harness")}
+     'ct.spools/codex-harness {:local/root (str (sibling-root "agent-harness.spool") "/codex-harness")}
+     'ct.spools/pi-harness {:local/root (str (sibling-root "agent-harness.spool") "/pi-harness")}
+     'ct.spools/delegation {:local/root (str (sibling-root "agent-harness.spool") "/delegation")}
+     'codethread/devflow {:local/root (sibling-root "devflow.spool")}
+     'codethread/devflow-kanban-adapter {:local/root (str (sibling-root "devflow.spool") "/kanban-adapter")}
+     'millhouse.spools/workflow {:local/root (str (sibling-root "millhouse.spool") "/spools/workflow")}
+     'millhouse.spools/kanban {:local/root (str (sibling-root "millhouse.spool") "/spools/kanban")}
+     'millhouse.spools/identity {:local/root (str (sibling-root "millhouse.spool") "/spools/identity")}}}))
+
+(deftest workspace-deps-compose-library-roots-and-landed-pins
+  (let [{:keys [deps]} (edn/read-string
+                        (slurp (io/file project-root ".millstrand/deps.edn")))
+        workspace-root (io/file project-root ".millstrand")
+        config-root (io/file workspace-root (get-in deps ['codethread/config :local/root]))
+        ralph-root (io/file workspace-root (get-in deps ['codethread/ralph :local/root]))]
+    (is (= {:local/root "../spools/config"}
+           (get deps 'codethread/config)))
+    (is (= {:local/root "../spools/ralph"}
+           (get deps 'codethread/ralph)))
+    (is (.isFile (io/file config-root "deps.edn")))
+    (is (.isFile (io/file ralph-root "deps.edn")))
+    (is (.isFile (io/file ralph-root "bin/ralph")))
+    (is (= "bbca5638bce72ad6a00b2ca916cabcfe99107828"
+           (get-in deps ['millstrand.spools/batteries :git/sha])))
+    (is (= "f487eb42ea9523e8bd405e64a7c319013217d988"
+           (get-in deps ['millhouse.spools/workflow :git/sha])))
+    (is (= "fd75bf50ef823e1df520ead410780961d6313474"
+           (get-in deps ['ct.spools/agent-run :git/sha])))
+    (is (= "90799b8c950b4509167137562fbf18853524d41c"
+           (get-in deps ['codethread/devflow :git/sha])))))
 
 (deftest config-activates-shared-elections
-  (t/with-weaver-world [ctx {:storage :sqlite-memory :spools-edn spools-edn}]
+  (t/with-weaver-world [ctx {:storage :sqlite-memory :deps-edn deps-edn}]
     (let [rt (:runtime ctx)]
       (runtime/module! rt :batteries {:ns 'millstrand.spools.batteries})
       (runtime/module! rt :identity {:ns 'millhouse.spools.identity})

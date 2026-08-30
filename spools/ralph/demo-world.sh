@@ -51,45 +51,32 @@ fi
 ws="$(mktemp -d "${TMPDIR:-/tmp}/ralph-demo.XXXXXX")"
 "$mill_bin" init --workspace "$ws" >/dev/null
 
-# Batteries is a source-root spool and those paths must be relative to the
-# config dir, so the workspace links to the supplied source root's copy. The
-# millhouse/spools kanban root is lifted from the repo's own spools.edn rather
-# than pinned here, so this script cannot drift from the release the repo runs.
-mkdir -p "$ws/spools"
-ln -sfn "$batteries_root" "$ws/spools/batteries"
-millhouse_kanban_entry="$(python3 - "$repo/.millstrand/spools.edn" <<'PY'
+# The disposable workspace composes Batteries from the supplied source root.
+# Its Kanban pin comes from this checkout's workspace dependencies.
+millhouse_kanban_entry="$(python3 - "$repo/.millstrand/deps.edn" <<'PY'
 import re
 import sys
 
 text = open(sys.argv[1]).read()
-start = text.index("millhouse/spools")
-open_brace = text.index("{", start)
-depth = 0
-for i in range(open_brace, len(text)):
-    if text[i] == "{":
-        depth += 1
-    elif text[i] == "}":
-        depth -= 1
-        if depth == 0:
-            entry = text[start:i + 1]
-            break
-else:
-    sys.exit("demo-world: could not read millhouse/spools from .millstrand/spools.edn")
+match = re.search(r'millhouse\.spools/kanban\s+\{([^}]*)\}', text, re.S)
+if not match:
+    sys.exit("demo-world: could not read millhouse.spools/kanban from .millstrand/deps.edn")
+entry = match.group(1)
 
 url_match = re.search(r':git/url\s+"([^"]+)"', entry)
 sha_match = re.search(r':git/sha\s+"([^"]+)"', entry)
 if not url_match or not sha_match:
-    sys.exit("demo-world: millhouse/spools entry missing :git/url or :git/sha")
+    sys.exit("demo-world: millhouse.spools/kanban entry missing :git/url or :git/sha")
 
-print(f"""millhouse/spools
+print(f"""millhouse.spools/kanban
 {{:git/url "{url_match.group(1)}"
  :git/sha "{sha_match.group(1)}"
- :roots {{millhouse.spools/kanban "spools/kanban"}}}}""")
+ :deps/root "spools/kanban"}}""")
 PY
 )"
-cat > "$ws/spools.edn" <<EOF
-{:spools {millstrand.spools/batteries {:millstrand/source-root "spools/batteries"}
-          $millhouse_kanban_entry}}
+cat > "$ws/deps.edn" <<EOF
+{:deps {millstrand.spools/batteries {:local/root "$batteries_root"}
+        $millhouse_kanban_entry}}
 EOF
 
 cat >> "$ws/init.clj" <<'EOF'
@@ -97,7 +84,6 @@ cat >> "$ws/init.clj" <<'EOF'
 ;; Throwaway world for trying ralph: batteries plus the kanban board, nothing else.
 (runtime/module! runtime :millhouse/spools-kanban
                  {:ns 'millhouse.spools.kanban
-                  :spools ['millhouse.spools/kanban]
                   :required? true})
 EOF
 

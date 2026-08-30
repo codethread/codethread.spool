@@ -98,7 +98,7 @@ The panes are hand-rolled cursor lists rather than `bubbles/list`, which brings 
 
 Tests use a disposable fake `strand` script and a fake agent script, and drive the engine off its own message channel rather than sleeping. Board tests exercise the subprocess error boundary, the planned-replacement read reissue, the shared timeout, cancellation, and the no-retry mutation path. If you need a new loop behaviour covered, add a `newWorld` fixture in `internal/loop/loop_test.go` — do not reach for a timer.
 
-The restart-aware client and repository tooling pin canonical Millstrand M0 `6f265f45f894859c74dfd7c6bf32a94c48cb32d0`. Build the `mill` and `strand` tooling from that exact checkout when running a real disposable replacement-world exercise. The normal Ralph gate remains:
+The restart-aware client and repository tooling pin Millstrand `bbca5638bce72ad6a00b2ca916cabcfe99107828`. Build the `mill` and `strand` tooling from that exact checkout when running a real disposable replacement-world exercise. The normal Ralph gate remains:
 
 ```sh
 cd spools/ralph && go test ./...

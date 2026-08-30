@@ -84,7 +84,7 @@ func TestPromptFullAuthIsExplicit(t *testing.T) {
 	if strings.Contains(without, "Work with my authority") {
 		t.Error("full-auth grant must not appear without explicit opt-in")
 	}
-	for _, want := range []string{"Work with my authority", "DO NOT tag v1 on millstrand-src itself"} {
+	for _, want := range []string{"Work with my authority", "bumping sibling dependencies"} {
 		if !strings.Contains(with, want) {
 			t.Errorf("full-auth prompt is missing %q:\n%s", want, with)
 		}
