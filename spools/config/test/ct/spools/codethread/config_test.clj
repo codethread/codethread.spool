@@ -41,7 +41,7 @@
     (is (.isFile (io/file config-root "deps.edn")))
     (is (.isFile (io/file ralph-root "deps.edn")))
     (is (.isFile (io/file ralph-root "bin/ralph")))
-    (is (= "71c0ed3d80fcad090b74a704a8eb165a3fad996e"
+    (is (= "bbca5638bce72ad6a00b2ca916cabcfe99107828"
            (get-in deps ['millstrand.spools/batteries :git/sha])))
     (is (= "f487eb42ea9523e8bd405e64a7c319013217d988"
            (get-in deps ['millhouse.spools/workflow :git/sha])))
