@@ -9,24 +9,58 @@
             [millhouse.spools.workflow :as workflow]))
 
 (def ^:private project-root (.getCanonicalPath (io/file "../..")))
-(def ^:private sibling-root
-  (fn [name] (.getCanonicalPath (io/file (str "../../../" name)))))
 (def ^:private deps-edn
   (pr-str
    {:deps
-    {'millstrand.spools/batteries {:local/root (str (sibling-root "skein-src") "/spools/batteries")}
+    {'millstrand.spools/batteries
+     {:git/url "https://github.com/codethread/millstrand.git"
+      :git/sha "bbca5638bce72ad6a00b2ca916cabcfe99107828"
+      :deps/root "spools/batteries"}
      'codethread/config {:local/root (str project-root "/spools/config")}
-     'ct.spools/agent-run {:local/root (str (sibling-root "agent-harness.spool") "/agent-run")}
-     'ct.spools/harness-core {:local/root (str (sibling-root "agent-harness.spool") "/harness-core")}
-     'ct.spools/claude-harness {:local/root (str (sibling-root "agent-harness.spool") "/claude-harness")}
-     'ct.spools/codex-harness {:local/root (str (sibling-root "agent-harness.spool") "/codex-harness")}
-     'ct.spools/pi-harness {:local/root (str (sibling-root "agent-harness.spool") "/pi-harness")}
-     'ct.spools/delegation {:local/root (str (sibling-root "agent-harness.spool") "/delegation")}
-     'codethread/devflow {:local/root (sibling-root "devflow.spool")}
-     'codethread/devflow-kanban-adapter {:local/root (str (sibling-root "devflow.spool") "/kanban-adapter")}
-     'millhouse.spools/workflow {:local/root (str (sibling-root "millhouse.spool") "/spools/workflow")}
-     'millhouse.spools/kanban {:local/root (str (sibling-root "millhouse.spool") "/spools/kanban")}
-     'millhouse.spools/identity {:local/root (str (sibling-root "millhouse.spool") "/spools/identity")}}}))
+     'ct.spools/agent-run
+     {:git/url "https://github.com/codethread/agent-harness.spool.git"
+      :git/sha "fd75bf50ef823e1df520ead410780961d6313474"
+      :deps/root "agent-run"}
+     'ct.spools/harness-core
+     {:git/url "https://github.com/codethread/agent-harness.spool.git"
+      :git/sha "fd75bf50ef823e1df520ead410780961d6313474"
+      :deps/root "harness-core"}
+     'ct.spools/claude-harness
+     {:git/url "https://github.com/codethread/agent-harness.spool.git"
+      :git/sha "fd75bf50ef823e1df520ead410780961d6313474"
+      :deps/root "claude-harness"}
+     'ct.spools/codex-harness
+     {:git/url "https://github.com/codethread/agent-harness.spool.git"
+      :git/sha "fd75bf50ef823e1df520ead410780961d6313474"
+      :deps/root "codex-harness"}
+     'ct.spools/pi-harness
+     {:git/url "https://github.com/codethread/agent-harness.spool.git"
+      :git/sha "fd75bf50ef823e1df520ead410780961d6313474"
+      :deps/root "pi-harness"}
+     'ct.spools/delegation
+     {:git/url "https://github.com/codethread/agent-harness.spool.git"
+      :git/sha "fd75bf50ef823e1df520ead410780961d6313474"
+      :deps/root "delegation"}
+     'codethread/devflow
+     {:git/url "https://github.com/codethread/devflow.spool.git"
+      :git/sha "90799b8c950b4509167137562fbf18853524d41c"
+      :deps/root "."}
+     'codethread/devflow-kanban-adapter
+     {:git/url "https://github.com/codethread/devflow.spool.git"
+      :git/sha "90799b8c950b4509167137562fbf18853524d41c"
+      :deps/root "kanban-adapter"}
+     'millhouse.spools/workflow
+     {:git/url "https://github.com/codethread/millhouse.spool.git"
+      :git/sha "f487eb42ea9523e8bd405e64a7c319013217d988"
+      :deps/root "spools/workflow"}
+     'millhouse.spools/kanban
+     {:git/url "https://github.com/codethread/millhouse.spool.git"
+      :git/sha "f487eb42ea9523e8bd405e64a7c319013217d988"
+      :deps/root "spools/kanban"}
+     'millhouse.spools/identity
+     {:git/url "https://github.com/codethread/millhouse.spool.git"
+      :git/sha "f487eb42ea9523e8bd405e64a7c319013217d988"
+      :deps/root "spools/identity"}}}))
 
 (deftest workspace-deps-compose-library-roots-and-landed-pins
   (let [{:keys [deps]} (edn/read-string
