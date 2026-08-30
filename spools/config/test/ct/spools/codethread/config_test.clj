@@ -28,10 +28,13 @@
      'millhouse.spools/kanban {:local/root (str (sibling-root "millhouse.spool") "/spools/kanban")}
      'millhouse.spools/identity {:local/root (str (sibling-root "millhouse.spool") "/spools/identity")}}}))
 
-(deftest workspace-deps-compose-local-roots-and-landed-pins
-  (let [{:keys [paths deps]} (edn/read-string
-                              (slurp (io/file project-root ".millstrand/deps.edn")))]
-    (is (= ["../spools/config/src" "../spools/ralph/src"] paths))
+(deftest workspace-deps-compose-library-roots-and-landed-pins
+  (let [{:keys [deps]} (edn/read-string
+                        (slurp (io/file project-root ".millstrand/deps.edn")))]
+    (is (= {:local/root "../spools/config"}
+           (get deps 'codethread/config)))
+    (is (= {:local/root "../spools/ralph"}
+           (get deps 'codethread/ralph)))
     (is (= "71c0ed3d80fcad090b74a704a8eb165a3fad996e"
            (get-in deps ['millstrand.spools/batteries :git/sha])))
     (is (= "f487eb42ea9523e8bd405e64a7c319013217d988"

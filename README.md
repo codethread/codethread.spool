@@ -18,11 +18,12 @@ Each consumer composes the roots it needs in `.millstrand/deps.edn` and activate
 For a checkout containing this repository, compose the local roots with:
 
 ```clojure
-{:paths ["../spools/config/src"
-         "../spools/ralph/src"]}
+{:deps {codethread/config {:local/root "../spools/config"}
+        codethread/ralph {:local/root "../spools/ralph"}}}
 ```
 
-The paths are relative to `.millstrand`. Git consumers should use pinned `codethread/config` and `codethread/ralph` dependencies instead.
+The roots are relative to `.millstrand`. Git consumers should use pinned
+`codethread/config` and `codethread/ralph` dependencies instead.
 
 Consumers own module ordering:
 
