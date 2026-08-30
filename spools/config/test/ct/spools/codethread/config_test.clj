@@ -30,11 +30,17 @@
 
 (deftest workspace-deps-compose-library-roots-and-landed-pins
   (let [{:keys [deps]} (edn/read-string
-                        (slurp (io/file project-root ".millstrand/deps.edn")))]
+                        (slurp (io/file project-root ".millstrand/deps.edn")))
+        workspace-root (io/file project-root ".millstrand")
+        config-root (io/file workspace-root (get-in deps ['codethread/config :local/root]))
+        ralph-root (io/file workspace-root (get-in deps ['codethread/ralph :local/root]))]
     (is (= {:local/root "../spools/config"}
            (get deps 'codethread/config)))
     (is (= {:local/root "../spools/ralph"}
            (get deps 'codethread/ralph)))
+    (is (.isFile (io/file config-root "deps.edn")))
+    (is (.isFile (io/file ralph-root "deps.edn")))
+    (is (.isFile (io/file ralph-root "bin/ralph")))
     (is (= "71c0ed3d80fcad090b74a704a8eb165a3fad996e"
            (get-in deps ['millstrand.spools/batteries :git/sha])))
     (is (= "f487eb42ea9523e8bd405e64a7c319013217d988"
