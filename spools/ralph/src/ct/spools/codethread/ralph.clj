@@ -81,6 +81,7 @@
      "
     {})})
 
+#_{:clj-kondo/ignore [:redefined-var]}
 (millstrand/defop! ralph
   "Return the Ralph discovery entrypoint; use `strand about ralph` or `strand prime ralph`."
   {:arg-spec ralph-arg-spec

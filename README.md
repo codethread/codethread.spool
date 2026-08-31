@@ -49,12 +49,32 @@ mill bin run ralph --help
 
 `mill bin run` supplies `MILLSTRAND_WORKSPACE`.
 
+## Development roots
+
+Treat each Clojure root as an independent project. Editor tooling should select
+the nearest `deps.edn`:
+
+- `.millstrand/deps.edn` owns workspace configuration.
+- `spools/config/deps.edn` owns the shared config spool.
+- `spools/ralph/deps.edn` owns the Ralph spool.
+
+The repository root has no aggregate Clojure classpath. Its `Makefile`
+orchestrates project-local checks without merging their dependency graphs.
+
 ## Quality
 
-Run the complete gate:
+Install `clj-kondo` v2026.08.04, then run the complete gate:
 
 ```text
 make quality
+```
+
+`make lint` refreshes each project's dependency-provided clj-kondo imports and
+lints that project with its own classpath. The imports and tool caches are
+generated and ignored. Run only the refresh step with:
+
+```text
+make kondo-configs
 ```
 
 Focused Clojure checks:
