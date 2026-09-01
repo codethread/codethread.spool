@@ -1,0 +1,5 @@
+{:config-paths ["../spools/ralph/.clj-kondo/imports/com.github.seancorfield/next.jdbc"
+                "../spools/ralph/.clj-kondo/imports/io.millstrand/millstrand"
+                "../spools/ralph/.clj-kondo/imports/millhouse.spools/workflow"
+                "../spools/ralph/.clj-kondo/imports/rewrite-clj/rewrite-clj"
+                "../spools/config/.clj-kondo/imports/ct.spools/agent-run"]}
