@@ -21,22 +21,6 @@
      {:git/url "https://github.com/codethread/agent-harness.spool.git"
       :git/sha "f3b950769a54ccf66712f1887813a1255afecdeb"
       :deps/root "agent-run"}
-     'ct.spools/harness-core
-     {:git/url "https://github.com/codethread/agent-harness.spool.git"
-      :git/sha "f3b950769a54ccf66712f1887813a1255afecdeb"
-      :deps/root "harness-core"}
-     'ct.spools/claude-harness
-     {:git/url "https://github.com/codethread/agent-harness.spool.git"
-      :git/sha "f3b950769a54ccf66712f1887813a1255afecdeb"
-      :deps/root "claude-harness"}
-     'ct.spools/codex-harness
-     {:git/url "https://github.com/codethread/agent-harness.spool.git"
-      :git/sha "f3b950769a54ccf66712f1887813a1255afecdeb"
-      :deps/root "codex-harness"}
-     'ct.spools/pi-harness
-     {:git/url "https://github.com/codethread/agent-harness.spool.git"
-      :git/sha "f3b950769a54ccf66712f1887813a1255afecdeb"
-      :deps/root "pi-harness"}
      'ct.spools/delegation
      {:git/url "https://github.com/codethread/agent-harness.spool.git"
       :git/sha "f3b950769a54ccf66712f1887813a1255afecdeb"
@@ -92,22 +76,13 @@
       (runtime/module! rt :identity {:ns 'millhouse.spools.identity})
       (runtime/module! rt :agent-run {:ns 'ct.spools.agent-run})
       (runtime/module! rt :delegation {:ns 'ct.spools.delegation :after [:agent-run]})
-      (runtime/module! rt :harness-core {:ns 'ct.spools.harness-core
-                                         :after [:identity]})
-      (runtime/module! rt :claude-harness {:ns 'ct.spools.claude-harness
-                                           :after [:harness-core]})
-      (runtime/module! rt :codex-harness {:ns 'ct.spools.codex-harness
-                                          :after [:harness-core]})
-      (runtime/module! rt :pi-harness {:ns 'ct.spools.pi-harness
-                                       :after [:harness-core]})
       (runtime/module! rt :workflow {:ns 'millhouse.spools.workflow})
       (runtime/module! rt :devflow {:ns 'ct.spools.devflow :after [:workflow]})
       (runtime/module! rt :kanban {:ns 'millhouse.spools.kanban})
       (runtime/module! rt :adapter {:ns 'ct.spools.devflow-kanban-adapter
                                     :after [:devflow :kanban]})
       (runtime/module! rt :config-agents {:ns 'ct.spools.codethread.agents
-                                          :after [:agent-run :claude-harness
-                                                  :codex-harness :pi-harness]})
+                                          :after [:agent-run]})
       (runtime/module! rt :config-help {:ns 'ct.spools.codethread.help
                                         :after [:batteries]})
       (runtime/module! rt :config-devflow {:ns 'ct.spools.codethread.devflow})

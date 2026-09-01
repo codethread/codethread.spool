@@ -19,8 +19,7 @@
 
   Harness aliases are weaver-lifetime state. `strand agent harnesses` lists
   the live registry."
-  (:require [millstrand.api.format.alpha :as format-alpha]
-            ))
+  (:require [millstrand.api.format.alpha :as format-alpha]))
 
 ;; gpt-5.6 rate cards, USD per 1M tokens, hand-pinned 2026-07-13 from
 ;; https://developers.openai.com/api/docs/pricing.

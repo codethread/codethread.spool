@@ -1,5 +1,2 @@
 {:deps {codethread/config {:local/root "../spools/config"}
-        codethread/ralph {:local/root "../spools/ralph"}
-        ct.spools/agent-cli {:git/url "https://github.com/codethread/agent-harness.spool.git"
-                              :git/sha "f3b950769a54ccf66712f1887813a1255afecdeb"
-                              :deps/root "agent-cli"}}}
+        codethread/ralph {:local/root "../spools/ralph"}}}
