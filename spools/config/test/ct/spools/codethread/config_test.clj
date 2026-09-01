@@ -35,15 +35,15 @@
       :deps/root "kanban-adapter"}
      'millhouse.spools/workflow
      {:git/url "https://github.com/codethread/millhouse.spool.git"
-      :git/sha "e52162bda3bd2e3b806b262e216d688de5b811b5"
+      :git/sha "52f7c5df3547f6bcd0307c62f2e3783d9d093ce5"
       :deps/root "spools/workflow"}
      'millhouse.spools/kanban
      {:git/url "https://github.com/codethread/millhouse.spool.git"
-      :git/sha "e52162bda3bd2e3b806b262e216d688de5b811b5"
+      :git/sha "52f7c5df3547f6bcd0307c62f2e3783d9d093ce5"
       :deps/root "spools/kanban"}
      'millhouse.spools/identity
      {:git/url "https://github.com/codethread/millhouse.spool.git"
-      :git/sha "e52162bda3bd2e3b806b262e216d688de5b811b5"
+      :git/sha "52f7c5df3547f6bcd0307c62f2e3783d9d093ce5"
       :deps/root "spools/identity"}}}))
 
 (deftest workspace-deps-compose-library-roots-and-config-pins
@@ -62,7 +62,7 @@
     (is (.isFile (io/file ralph-root "bin/ralph")))
     (is (= "8312ad49d02f0f9f20fa167a8305e86a36f3fcae"
            (get-in config-deps ['millstrand.spools/batteries :git/sha])))
-    (is (= "e52162bda3bd2e3b806b262e216d688de5b811b5"
+    (is (= "52f7c5df3547f6bcd0307c62f2e3783d9d093ce5"
            (get-in config-deps ['millhouse.spools/workflow :git/sha])))
     (is (= "f3b950769a54ccf66712f1887813a1255afecdeb"
            (get-in config-deps ['ct.spools/agent-run :git/sha])))
