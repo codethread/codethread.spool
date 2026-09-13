@@ -330,3 +330,62 @@ after its 600-second command timeout, with no new session event or child process
 and chose exact worker stop/settlement/native continuation. A timeout alone is
 not that diagnosis; combine elapsed bounds, semantic progress, native events,
 and process custody before intervening.
+
+## Live availability versus durable startup
+
+All eight live worlds have the reviewed alias, but seven consumer dependency
+files still pin older Codethread configuration: Skein, Millhouse, Harnesses,
+Devflow, and UI at `b23d84b`; Agents and Notes at `252eeaee`. Codethread itself
+uses local roots. Live registration alone would not make a future ordinary
+start load the new source. Feature `evzz8`, Sol/Pi coordinator `7uxj0`, owns
+scoped consumer pin delivery. Its delivery task `n4vra` depends on actual source
+landing `sl9o5`; inventory task `7f2wt` can proceed independently.
+
+Use the actual accepted merge commit, preserve unrelated pins and custom
+configuration, and prove the consumer setup in a disposable world. Older direct
+Harnesses overrides in Agents/Notes require compatibility evidence, not assumed
+compatibility or a broad upgrade. Keep paired Codethread roots at the intended
+revision where applicable. Serialize heavy checks after the current host-heavy
+gates drain; repeated timeouts with live progress are a reason to coordinate
+capacity and seek direction, not to stop the Mill or manufacture a passing gate.
+
+The source refinement after the disputed review is `0f5ca2e`. Oracle `lr0az`
+invalidated the command finding and found no source P1/P2, but withheld landing
+acceptance because the required marker still named `55e79eb`. This distinction
+matters: passing a quality script directly is not necessarily the supported
+wrapper's exact-HEAD evidence. Landing coordinator `wvdeh` owns refreshing that
+evidence through the shared workflow, renewed review, and actual source landing.
+
+## Pilot acceptance and ownership wording
+
+Harnesses pilot `vlf1t` completed its bounded provider-argv assignment through
+shared land, including fresh Oracle acceptance after FIFO rebased the candidate.
+PR 8 merged as `2b2f40fc4c69f7a3413451f7a3aa271619fd5ad9`; the feature, review,
+and supervision tasks are closed, the queue is empty, the feature worktree is
+gone, and canonical main is clean. This is completed pilot evidence, rather
+than merely a successfully launched coordinator.
+
+Landing pilot `wvdeh` subsequently verified a different review finding against
+the actual alias catalog: registration replaces an existing entry by name.
+It commissioned a narrow pre-registration guard repair, preserved the proven
+raw-record calls, and obtained fresh exact-candidate review. Source continuation
+`k9294` settled at `a4805c23c0a40d228ae3bfb342715b6e375d0dba`; reviewer `wml9a`
+reports no P1/P2, with the shared quality marker matching that SHA. Source
+landing still requires its remaining supported workflow and acceptance gates.
+This is evidence that the pilot applied the earlier correction, not repeated
+failure warranting a model switch.
+
+Be precise when handing off run-pointer custody. Preserve the primary writer's
+ownership role; do not point an implementation feature at its supervising
+coordinator. Advance that feature's primary run pointer whenever the same writer
+is natively resumed, preserving the predecessor in a note. A coordinator-owned
+umbrella feature instead points at its coordinator. Earlier parent wording to
+"preserve the writer pointer" was ambiguous; distinguish role preservation from
+leaving a stopped predecessor as the current run before judging model quality.
+
+Millhouse's user-only Mill rule landed through PR 27 as
+`d2fe9e3808eca872894d9a412a9eeea55fb71cd2`: quality passed 436 tests and 3274
+assertions, basic review found no P1/P2, and canonical AGENTS.md contains the
+exact instruction. Seven active repos now have the rule; Skein remains under
+the Oracle-directed quieter-window retry. Its check must actually pass before
+that eighth source task can be accepted.
