@@ -9,30 +9,38 @@ Tracking: Codethread epic `w3oqr`, coordinator feature `x4y0z`, notes task
 `kejtr`. The user requested delegation through `strand agent`; delegated
 execution uses Pi. Built-in Codex/ChatGPT delegates were stopped.
 
-## Current handoff (21:34 UTC)
+## Current handoff (21:52 UTC)
 
 The user-reported Pi startup incident is accepted. Actual Pi from canonical
 Agents minted and recovered its native identity after a supported replacement
 of the Agents/Notes Weaver pool. The original Mill PID `64448` and start time
-remain unchanged. Devflow, Millhouse, and UI also completed their local source,
-Weaver activation, and actual Pi acceptance; their empty coordination worktrees
-were removed only after the owning runs settled. Do not resume those runs into
-deleted directories.
+remain unchanged. Devflow, Millhouse, UI, and Skein completed their local source,
+Weaver activation, and actual Pi acceptance. All seven consumer alias updates
+are accepted; parent feature `evzz8` and its tasks are closed. Its empty
+coordination worktree was removed after the owner settled. Never resume a run
+into a removed directory.
 
-Skein is now owned by Terra/high `nq6br` on task `4jtjf`, in its durable local
-coordination worktree. It has separate Sol writers for strict date repair
-(`01hbt`, candidate `9dae953e`) and the final startup pin (`38wnq`). Harnesses
-remains with local Sol coordinator `vm5zk`: startup pin PR12 has direct Oracle
-acceptance and is entering shared land; native guidance and rollout follow.
-The separate orphan reconciliation feature `0xq77` remains with Sol `0mvqk` in
-its own worktree. These are independent local owners, not one central queue.
+Skein remains locally coordinated by Terra/high `nq6br` on `4jtjf`. Its timestamp
+repair is progressing through landing, and read-only Sol audit `lri4s` identified
+obsolete archived-release blockers and current P2 follow-through. A fresh
+Devflow-local Terra/high coordinator `mds6z` now owns source feature `peytg` for
+the discovery-guidance finding. Source adoption should be combined with already
+needed consumer pin updates, then checked against the installed surface.
 
-The first orphan candidate was rejected by Oracle: live completion owners were
-not independently protected; disable/removal could race with an in-flight
-sweep; ordinary runtime shutdown erased its durable deadline; and unchanged
-first-page records could starve later candidates. Rework must prove those
-boundaries, integrate current main, and obtain fresh exact-candidate acceptance.
-The four user examples remain untouched. Hourly scheduling is a cadence, not
+Harnesses local Sol coordinator `vm5zk` owns the identity epic. Its replacement
+Weaver successfully passed actual unmanaged Pi startup checks, but older managed
+runs failed completion under the newly loaded backend because they lacked the
+new reservation metadata. P1 `b9jg1` now has sole Sol writer `qulxd`; the running
+Mill and existing run history are preserved. This is a real upgrade regression,
+not a reason to repeat all unchanged unmanaged Pi proofs.
+
+Orphan reconciliation `0xq77` has clean published candidate `fc69a46` and focused
+worker checks. Its original Sol `0mvqk` exited normally but encountered that same
+legacy completion error. Integration task `7i8o9` waits for accepted `b9jg1`,
+then needs a fresh eligible Sol run in the retained source worktree. Follow-up
+Oracle `8e3c4` used prohibited native helpers; it was stopped, and that evidence
+is excluded. Parent owns a new direct-only Oracle after final integration. The
+four user examples remain untouched. Hourly scheduling is a cadence, not
 evidence that an agent is dead.
 
 ## Recent corrections to the coordination loop
@@ -790,3 +798,26 @@ child-process custody as well as the parent run. Explicit Strand-only delegation
 must reach the source worker's prompt; globally available helper tools do not
 grant permission to use them. Do not count an unauthorized helper's review as
 acceptance evidence.
+
+## Preserve completion compatibility during a live upgrade
+
+Harnesses source and unmanaged Pi tests passed before replacement, but two
+already-running managed invocations had been created by the old backend.
+After replacement, cancelling `8e3c4` and observing exit zero from `0mvqk` both
+retained honest process settlement while recording a missing-reservation
+reconciliation failure. Their native continuations were unavailable. Track this
+as a focused compatibility repair (`b9jg1`), preserve their source artifacts,
+and use fresh eligible targets when needed. Do not fabricate reservations,
+rewrite their outcomes, or restart the Mill to make the error disappear.
+
+Deployment acceptance must include an old serialized run completing under the
+new backend as well as a fresh user session. A passing fresh-start proof cannot
+establish this boundary. Keep strict validation for new protocol invocations;
+a legacy compatibility path must be selected from retained protocol evidence.
+
+Put direct-only delegation constraints in each actual review dispatch, including
+its appended system instructions. A parent policy or an earlier note did not
+prevent the resumed Oracle from calling native helpers. Check process custody
+and exclude their evidence if this occurs; preserve independently useful source
+findings and require direct verification before acceptance. A helper's apparent
+zero exit can still wrap a REPL reader error, so read the semantic result.
