@@ -8,7 +8,7 @@ shared-spool `ct.spools.*` convention.
 
 | Root | Namespace | Purpose |
 | --- | --- | --- |
-| `spools/config` | `ct.spools.codethread.bootstrap` | Register Harnesses, shared aliases and reviewers, and the Workflow `:agent` executor |
+| `spools/config` | `ct.spools.codethread.bootstrap` | Register Harnesses, shared aliases and reviewers, then activate the Workflow `:agent` executor |
 | `spools/ralph` | `ct.spools.codethread.ralph` | Publish the one-card-per-iteration `ralph-iterate` workflow and `ralph` executable |
 
 Each consumer composes the roots it needs in `.millstrand/deps.edn` and
@@ -29,18 +29,35 @@ The roots are relative to `.millstrand`. Git consumers should use pinned
 pins `ct.spools/harnesses` directly; it has no dependency on the superseded
 `agent-harness.spool` roots.
 
-Activate the shared agent surface with one bootstrap call:
+Register the shared agent surface before consumer-specific configuration:
 
 ```clojure
 (require '[ct.spools.codethread.bootstrap :as codethread])
 (codethread/register! runtime)
 ```
 
-The bootstrap owns ordering for the Harnesses providers and command surface,
-the shared aliases, shared reviewer lenses, and the asynchronous Workflow
-`:agent` executor. It registers shared policy before opening the executor, so
-an initial scan of ready gates can resolve their seats. Repository-specific
-workflows are not activated by the bootstrap.
+`register!` owns ordering for the Harnesses providers and command surface, the
+shared aliases, and shared reviewer lenses. It deliberately does not activate
+the asynchronous Workflow `:agent` executor. Register repository-specific
+aliases, flags, and workflows next, then activate the executor last:
+
+```clojure
+(codethread/register-executor! runtime [:consumer/aliases
+                                        :consumer/workflows])
+```
+
+The optional second argument adds explicit `:after` edges for consumer modules
+that must reconcile before the executor's initial scan of restored ready
+gates. `(codethread/register-executor! runtime)` is sufficient when there are
+no consumer modules to name. The stable executor module id is
+`:millstrand/spools-agent-executor`; the bootstrap owns that module, so
+consumers must not register its namespace separately.
+
+The stable catalog module ids, in order, are
+`:millhouse/spools-identity`, `:millhouse/spools-workflow`,
+`:millstrand/spools-harnesses`, `:codethread/config-agents`, and
+`:codethread/config-reviewers`. Repository-specific workflows are not
+activated by the catalog bootstrap.
 
 The preferred role aliases are `luna`, `oracle`, `grunt`, `reviewer`, and
 `coordinator`; useful effort-specific handles such as `luna-low`, `terra-med`,

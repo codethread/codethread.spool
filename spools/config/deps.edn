@@ -1,7 +1,7 @@
 {:paths ["src"]
- :deps {millstrand.spools/batteries {:git/url "https://github.com/codethread/millstrand.git"
-                                     :git/sha "310368dff9174bd889ad21d4ed8196952684eaf9"
-                                     :deps/root "spools/batteries"}
+ :deps {io.millstrand/batteries {:git/url "https://github.com/codethread/millstrand.git"
+                                 :git/sha "310368dff9174bd889ad21d4ed8196952684eaf9"
+                                 :deps/root "spools/batteries"}
         millhouse.spools/workflow {:git/url "https://github.com/codethread/millhouse.spool.git"
                                    :git/sha "f487eb42ea9523e8bd405e64a7c319013217d988"
                                    :deps/root "spools/workflow"}
@@ -14,10 +14,10 @@
         ct.spools/harnesses {:git/url "https://github.com/codethread/harnesses.spool.git"
                              :git/sha "9548390ce621461ba0a289859fe9b0af963f5805"}
         codethread/devflow {:git/url "https://github.com/codethread/devflow.spool.git"
-                            :git/sha "ceaa684499c6715ce0f10dba5806fd8ebef997da"
+                            :git/sha "99313b48f14ab0892cb90264d100dce4ff2a25e0"
                             :deps/root "."}
         codethread/devflow-kanban-adapter {:git/url "https://github.com/codethread/devflow.spool.git"
-                                           :git/sha "ceaa684499c6715ce0f10dba5806fd8ebef997da"
+                                           :git/sha "99313b48f14ab0892cb90264d100dce4ff2a25e0"
                                            :deps/root "kanban-adapter"}}
  :aliases {:test {:extra-paths ["test"]
                   :extra-deps {io.millstrand/millstrand

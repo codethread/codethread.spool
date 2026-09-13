@@ -46,3 +46,9 @@
                  {:ns 'ct.spools.codethread.ralph
                   :after [:millhouse/spools-workflow]
                   :required? true})
+
+(codethread/register-executor!
+ runtime [:millhouse/spools-workflow-providers
+          :devflow/kanban-adapter
+          :codethread/config
+          :codethread/ralph])

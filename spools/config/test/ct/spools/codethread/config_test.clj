@@ -8,13 +8,17 @@
             [millhouse.spools.workflow :as workflow]
             [millstrand.api.current.alpha :as current]
             [millstrand.api.runtime.alpha :as runtime]
+            [millstrand.api.weaver.alpha :as weaver]
             [millstrand.test.alpha :as t]))
 
 (def ^:private project-root (.getCanonicalPath (io/file "../..")))
 (def ^:private deps-edn
   (pr-str
    {:deps
-    {'codethread/config {:local/root (str project-root "/spools/config")}}}))
+    {'codethread/config {:local/root (str project-root "/spools/config")}
+     'codethread/ralph {:local/root (str project-root "/spools/ralph")}}}))
+(def ^:private workspace-init-clj
+  (slurp (io/file project-root ".millstrand/init.clj")))
 
 (deftest workspace-deps-compose-library-roots-and-current-harnesses
   (let [{:keys [deps]} (edn/read-string
@@ -31,17 +35,21 @@
     (is (.isFile (io/file ralph-root "deps.edn")))
     (is (.isFile (io/file ralph-root "bin/ralph")))
     (is (= "310368dff9174bd889ad21d4ed8196952684eaf9"
-           (get-in config-deps ['millstrand.spools/batteries :git/sha])))
+           (get-in config-deps ['io.millstrand/batteries :git/sha])))
+    (is (not (contains? config-deps 'millstrand.spools/batteries)))
     (is (= "f487eb42ea9523e8bd405e64a7c319013217d988"
            (get-in config-deps ['millhouse.spools/workflow :git/sha])))
     (is (= "9548390ce621461ba0a289859fe9b0af963f5805"
            (get-in config-deps ['ct.spools/harnesses :git/sha])))
     (is (not-any? #{'ct.spools/agent-run 'ct.spools/delegation}
                   (keys config-deps)))
-    (is (= "ceaa684499c6715ce0f10dba5806fd8ebef997da"
-           (get-in config-deps ['codethread/devflow :git/sha])))))
+    (is (= "99313b48f14ab0892cb90264d100dce4ff2a25e0"
+           (get-in config-deps ['codethread/devflow :git/sha])))
+    (is (= "99313b48f14ab0892cb90264d100dce4ff2a25e0"
+           (get-in config-deps
+                   ['codethread/devflow-kanban-adapter :git/sha])))))
 
-(deftest bootstrap-registers-catalog-reviewers-and-agent-executor-in-order
+(deftest bootstrap-registers-catalog-and-reviewers-without-an-executor
   (t/with-weaver-world [ctx {:storage :sqlite-memory :deps-edn deps-edn}]
     (let [rt (:runtime ctx)
           expected (mapv first codethread/module-definitions)
@@ -73,9 +81,67 @@
           (is (some #{"spools/*/src/**"}
                     (:glob (some #(when (= "source-form" (:name %)) %)
                                  catalog))))))
-      (testing "the official asynchronous workflow executor opens last"
+      (testing "executor activation is deferred to the consumer"
+        (current/with-runtime rt
+          (is (not (contains? (set (keys (workflow/executors))) :agent))))))))
+
+(deftest consumer-modules-reconcile-before-explicit-executor-activation
+  (t/with-weaver-world [ctx {:storage :sqlite-memory :deps-edn deps-edn}]
+    (let [rt (:runtime ctx)]
+      (codethread/register! rt)
+      (let [consumer-result
+            (runtime/module! rt :consumer/aliases
+                             {:ns 'ct.spools.codethread.consumer-fixture
+                              :after [:codethread/config-agents]
+                              :required? true})]
+        (is (= :applied
+               (get-in consumer-result
+                       [:modules :consumer/aliases :status])))
+        (is (= :applied
+               (get-in consumer-result
+                       [:modules :consumer/aliases :lifecycle/outcomes
+                        :consumer-alias :status])))
+        (is (= "openai-codex/gpt-5.6-luna"
+               (get-in (harnesses/resolve-harness rt :consumer-luna)
+                       [:generated :harness/model]))))
+      (let [result (codethread/register-executor! rt [:consumer/aliases])
+            status (runtime/status rt)]
+        (is (= [codethread/executor-module-id] (:registered result)))
+        (is (= :consumer/aliases (last (:after result))))
+        (is (= (:after result)
+               (get-in status
+                       [:modules codethread/executor-module-id :after])))
+        (is (= :applied
+               (get-in status
+                       [:last-refresh :modules codethread/executor-module-id
+                        :lifecycle/outcomes :agent-engine :status])))
         (current/with-runtime rt
           (is (contains? (set (keys (workflow/executors))) :agent)))))))
+
+(deftest workspace-init-stages-and-activates-the-complete-cli-surface
+  (t/with-weaver-world [ctx {:storage :sqlite-memory
+                             :deps-edn deps-edn
+                             :init-clj workspace-init-clj}]
+    (let [rt (:runtime ctx)
+          status (runtime/status rt)
+          aliases (weaver/op! rt 'agent ["list"])
+          reviewer-result (weaver/op! rt 'agent ["reviewers"])
+          workflow-result (weaver/op! rt 'workflow ["list"])]
+      (is (= {:status :applied :mode :full}
+             (select-keys (:last-refresh status) [:status :mode])))
+      (is (every? #{:applied}
+                  (map :status (vals (get-in status
+                                             [:last-refresh :modules])))))
+      (is (= :applied
+             (get-in status
+                     [:last-refresh :modules codethread/executor-module-id
+                      :lifecycle/outcomes :agent-engine :status])))
+      (is (every? (set (map :name aliases))
+                  ["coordinator" "grunt" "luna" "oracle" "reviewer"]))
+      (is (= ["docs-and-tests" "runtime-correctness" "source-form"]
+             (mapv :name (:reviewers reviewer-result))))
+      (is (= #{"intake" "publish-spool-kondo" "ralph-iterate"}
+             (set (map :name (:definitions workflow-result))))))))
 
 (deftest optional-workspace-config-keeps-the-devflow-kanban-election
   (t/with-weaver-world [ctx {:storage :sqlite-memory :deps-edn deps-edn}]
@@ -103,6 +169,8 @@
                                              :devflow/kanban-adapter]})]
         (is (contains? #{:applied :unchanged}
                        (get-in result [:modules :codethread/config :status])))
+        (codethread/register-executor!
+         rt [:devflow/kanban-adapter :codethread/config])
         (current/with-runtime rt
           (is (= 'ct.spools.devflow-kanban-adapter/decompose-kanban
                  (workflow/workflow-definition :decompose))))))))
