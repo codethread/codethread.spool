@@ -5,6 +5,9 @@ Working observations from the sibling recovery and open-card execution on
 record its live trials and the operational evidence needed to refine its
 runbook. Keep adding concrete outcomes and counterexamples while work runs.
 
+Start with the concise [sub-coordinator runbook](millstrand-sub-coordinator-runbook.md)
+for the operating procedure; use this file for its observed evidence and history.
+
 Tracking: Codethread epic `w3oqr`, coordinator feature `x4y0z`, notes task
 `kejtr`. The user requested delegation through `strand agent`; delegated
 execution uses Pi. Built-in Codex/ChatGPT delegates were stopped.
