@@ -4,8 +4,8 @@ Central config and coordination spool for millstrand and its siblings:
 
 `../skein-src`: millstrand (under previous name, repo needs renaming but its millstrand source code)
 `../millhouse.spool`: experimental spools not ready for millstrand repo
-`../agent-harness.spool`: agentic handlers like agent-run spool and review rosters
-`../harnesses.spool`: supersedes agent-harness, the api is a breaking migration
+`../agent-harness.spool`: entirely deprecated and read-only; direct all updates and usage to `../harnesses.spool`
+`../harnesses.spool`: replacement for agent-harness; the api is a breaking migration
 `../devflow.spool`: custom spec driven workflow
 `../millstrand-ui/`: not a spool, a web app for viewing kanban cards within the millstrand ecosystem
 
@@ -29,6 +29,7 @@ strand --workspace ~/dev/projects/harnesses.spool/.millstrand help
 
 ## Rules
 
+- **Never launch work in or use `../agent-harness.spool`** — direct all work and usage to `../harnesses.spool`.
 - **Never restart a running weaver** without explicit user sign-off
 - **Kill by PID only** — never `pkill -f <pattern>` (prompts can quote the pattern and strafe siblings).
 - **Disposable workspaces for workspace-backed tests** (weaver-world fixtures, smoke config) — never the shared `.millstrand` world. Use `--workspace` from `mktemp -d`; guard with `${ws:?}`.
