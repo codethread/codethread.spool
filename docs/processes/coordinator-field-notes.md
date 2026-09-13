@@ -102,6 +102,13 @@ Keep implementation, review acceptance, and landing evidence distinct. Match
 the reviewed commit to HEAD, remote/PR head, and the quality marker where the
 shared workflow requires it. Changed HEAD requires review of the changed range.
 
+Dashboard audit `8502s` returned passing quality and browser checks but four
+independent P2 review findings. It left the task/feature open with a bounded
+repair recommendation. This distinguishes a completed audit from acceptance of
+the product. For a scope-ambiguous finding, ask Oracle for disposition against
+the actual card contract instead of automatically adding unrelated work or
+waiving the finding.
+
 On a concrete P1/P2 finding, record the finding and immutable reviewed commit,
 delegate a bounded repair, await settlement, then obtain the required fresh
 review. Keep the card open and preserve dependency gates until acceptance and
@@ -177,6 +184,19 @@ calling the audit completion, it created Harnesses feature `xj0mn`, linked the
 old card, prepared an isolated worktree, and delegated implementation `ce3cw`.
 The parent notified the existing Harnesses identity coordinator about possibly
 overlapping CLI/provider surfaces so integration remains explicit and ordered.
+
+The user subsequently made the boundary stricter: `agent-harness.spool` is
+entirely deprecated and read-only; all updates and usage belong in
+`harnesses.spool`. The parent stopped `v0zpb` by exact run ID, verified graceful
+settlement and absent worker PIDs, and found no process with an archive cwd.
+An old interactive registry row had no process handle and pointed at Agents;
+its stop request is recorded without inventing settlement. Do not resume or
+dispatch work through the deprecated workspace, even for further coordination.
+The repository instruction correction is feature `wtqou` with Sol/Pi `26lul`.
+Active replacement `xj0mn` and writer `ce3cw` continue in Harnesses. Parent-owned
+task `irfb7` explicitly takes over their acceptance/landing supervision and is
+a real handoff opportunity for the reviewed sub-coordinator alias. Deprecation
+must transfer the remaining outcome and its supervisor, not abandon the work.
 
 Millstrand coordinator `h1i9g` both launched implementation `are8d` for `1oks3`
 and closed two completed audit cards after checking their actual evidence.
