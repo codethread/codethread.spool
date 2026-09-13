@@ -301,3 +301,32 @@ These observations support the initial ownership/waiting gate, not a blanket
 model-quality verdict. Continue observing review/rework and actual failure
 recovery. Switch to Terra high only for repeated concrete coordination failures
 after correction, through a fresh settled handoff with the same runbook.
+
+## Adjudicate review claims against evidence
+
+Shared-land reviewer `2heu9` incorrectly claimed that top-level `strand show`
+does not exist and recommended `strand agent show`. Landing pilot `pg0pc`
+forwarded that claim as an established P2; Sol `5wow8` made the two suggested
+substitutions. Direct readback shows why that proposed fix is wrong: the
+top-level command returns the raw record with `attributes`, while the agent
+command returns a summary without them. The original eight-world proof had
+already executed the raw-record commands successfully.
+
+The parent stopped those two exact runs, verified graceful settlement, and
+delivered evidence through native continuations. Current source writer is
+`9bqwu`; landing pilot is `wvdeh`. They must preserve the raw-record calls,
+clarify the documentation, strengthen the runbook, and obtain Oracle disposition
+of the disputed finding before accepting a candidate. No incorrect replacement
+was accepted or deployed. Treat findings as claims to investigate, particularly
+when they contradict an observed API result. This is the first concrete pilot
+correction, not repeated model failure warranting Terra yet.
+
+Other pilot evidence remains useful: `vlf1t` waited for the provider-argv writer
+to settle, then dispatched fresh tracked Oracle `3qenq` for pushed candidate
+`6680740`. `8ccxd` distinguished repeated 480-second Skein test timeouts from
+assertion failures and retained a progressing test process while seeking Oracle
+direction. It separately identified the Millhouse provider boundary as stuck
+after its 600-second command timeout, with no new session event or child process,
+and chose exact worker stop/settlement/native continuation. A timeout alone is
+not that diagnosis; combine elapsed bounds, semantic progress, native events,
+and process custody before intervening.
