@@ -4,7 +4,10 @@ The shared `sub-coordinator` seat is a bounded coordination role, not another
 writer. Its alias-provided system guidance is the complete operational runbook.
 It initially resolves through Pi to `openai-codex/gpt-5.6-luna` at explicit
 `max` effort. Existing `coordinator`, Sol worker, and reviewer aliases are not
-changed.
+changed. The runbook also makes the global Mill user-controlled: an agent must
+never stop or restart it and must propagate that rule to every child. Deprecated
+`agent-harness.spool` workspaces, source, and APIs are read-only and must never
+be used; active harness work belongs in `harnesses.spool`.
 
 A process-local `seat/sub-coordinator-terra` flag selects the authorized
 fallback: Pi with `openai-codex/gpt-5.6-terra` at explicit `high` effort and the
@@ -21,9 +24,11 @@ a later ordinary activation. Until consumers update their Codethread pin, the
 candidate namespace can be loaded from a reviewed checkout and its narrow
 `register!` function called through the supported live Weaver nREPL.
 
-Parent coordinator `x4y0z` owns authorization and execution of this recipe. Run
-it only at a selected handoff boundary; the implementation worker must not
-mutate shared running worlds.
+Parent coordinator `x4y0z`, through pilot task `irfb7`, owns authorization and
+execution of this recipe. Run it only at a selected handoff boundary; the
+implementation worker must not mutate shared running worlds. The separate
+one-line repository-instruction rollout is owned by feature `7qxp9` and must not
+be duplicated here.
 
 ```nu
 let coord_ws = "/absolute/path/to/canonical/.millstrand"
@@ -66,6 +71,7 @@ if $registry_before != ($registry_after | where name != "sub-coordinator") {
 }
 
 let frozen_keys = [
+  "harness/after"
   "harness/alias"
   "harness/appended-system-prompts"
   "harness/context"
@@ -79,12 +85,17 @@ let frozen_keys = [
   "harness/mode"
   "harness/model"
   "harness/overrides"
+  "harness/prompt"
+  "harness/published"
   "harness/request-fingerprint"
   "harness/request-id"
+  "harness/resumes"
   "harness/root-targets"
+  "harness/run"
   "harness/session-id"
   "harness/target"
   "identity/id"
+  "identity/prompt"
 ]
 
 let frozen_before = (

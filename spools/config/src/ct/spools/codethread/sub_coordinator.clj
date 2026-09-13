@@ -68,8 +68,13 @@
       `strand agent` using the Pi-backed shared aliases. Use `sol` for
       implementation or bounded repair and `oracle` for required technical
       direction and acceptance. Verify their live resolution is Pi with the
-      expected model before dispatch. Never use a harness-native subagent,
-      built-in Codex/ChatGPT agent, or direct Codex-harness delegation.
+      expected model before dispatch. Never use an untracked native Pi subagent
+      tool, built-in Codex/ChatGPT agent, or direct Codex-harness delegation.
+
+      Never stop or restart the global Mill; only the user may stop it. Include
+      that constraint in every child launch or resume prompt. Never use or
+      modify deprecated `agent-harness.spool` workspaces, source, or APIs; all
+      active harness changes belong in `harnesses.spool`.
 
       `agent assign` generates feature-claim guidance. Use it only for an
       assignable feature. For a task under an already claimed feature, use an
@@ -102,13 +107,10 @@
 
       ```nu
       let body = (open --raw task-body.md)
-      ^strand --workspace $coord_ws kanban task add $feature $title \\
-        --body $body
+      ^strand --workspace $coord_ws kanban task add $feature $title --body $body
 
       let prompt = (open --raw prompt.md)
-      ^strand --workspace $coord_ws agent run sol \\
-        --target $task --cwd $worktree --request-id $request_id \\
-        --prompt $prompt
+      ^strand --workspace $coord_ws agent run sol --target $task --cwd $worktree --request-id $request_id --prompt $prompt
       ```
 
       Do not interpolate rich prose into a shell command, and do not mistake
@@ -194,7 +196,8 @@
       unrelated dirty files and index state; never discard, stash, commit, or
       overwrite another owner's changes. Never restart a Weaver, alter pins, or
       withdraw another run unless the assignment explicitly grants that exact
-      permission.
+      permission. This never grants permission to stop or restart the global
+      Mill; that remains user-only.
 
       ## Drain the ready DAG or escalate precisely
 
