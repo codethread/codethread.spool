@@ -502,3 +502,39 @@ Also distinguish direct and inherited alias resolution: `sol-high` selects
 `sol`, which selects Pi. A preflight that requires every alias's immediate
 parent to be `pi` incorrectly rejects this valid Sol/Pi route. Follow the selected
 alias chain to the available concrete harness, then verify the published run.
+
+## Accept actual outcomes and keep independent defects visible
+
+Terra continuation `90onc` completed the corrected acceptance assignment. It
+dispatched required Oracle `1uzjw` against dedicated task `fa2se`, retained the
+owned audit checkout until settlement, and received explicit **ACCEPT FOR
+CONTINUED ROLLOUT**, with no P1/P2, for exact `92b4363..6e8cf5b` and merged
+`3dcf5f0`. The trees match `6d47a66`. It then cleaned its own audit resources and
+closed only `fa2se` and `negj4`, leaving parent-owned tasks alone. This is an
+accepted Terra fallback outcome after correcting the parent's target contract.
+
+The parent accepted and closed `sl9o5`, the live-pilot task `ibudy`, and source
+feature `jxvxu`. Merged source hash `5ed2b8f3ec824af6752b66057eed9129a9936befd923046415f77425b1b9d362`
+matches the refined alias already proved live in all eight worlds. Pin delivery
+feature `evzz8` is independently active: native Luna continuation `8djua` resumes
+`ah23n` in its verified existing cwd with frozen Luna/max settings. Its first
+source workers are `b2uk1` for Agents task `12vie` and `y8osn` for Notes task
+`2biz1`, both tracked Sol/Pi, targeting the accepted merge `3dcf5f0`.
+
+Sol diagnosis `17u1h` established that exact `process/malformed-launch` is a
+typed pre-reservation rejection: Skein validates cwd before reserving custody,
+and the still-running original Mill has no `pe45i/attempt-1` record. The existing
+Harnesses crash-window marker nevertheless leaves the run unsettled. Current
+CLI recovery cannot resolve it, and hand-supplying a custody fact would violate
+the settlement contract. That old record remains untouched and visibly unresolved;
+source acceptance does not pretend to settle it.
+
+The narrow forward fix is now Harnesses feature `qlfu6`, epic `8qqa1`, assigned
+to sole Sol/Pi writer `dgzpl` in its recorded isolated worktree. Only the exact
+typed malformed-launch rejection may settle as launch failure; control loss and
+generic/possibly post-reservation errors must remain ambiguous. The assignment
+requires focused classification coverage and a disposable admitted missing-cwd
+fixture proving the provider never starts and the run settles. It excludes
+historical error-string repair, live reloads, shared service lifecycle actions,
+and the identity epic's active branches. Parent coordinates the `execution.clj`
+overlap and final review/landing; the implementation is not yet accepted.
