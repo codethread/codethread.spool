@@ -132,6 +132,55 @@
                              :harness/model))))
           (is (= coordinator-before
                  (harnesses/resolve-harness rt :coordinator)))))
+      (testing "the Sol sub-coordinator resolves independently with sustained guidance"
+        (let [coordinator-before (harnesses/resolve-harness rt :coordinator)
+              sol-before (harnesses/resolve-harness rt :sol)
+              bounded-before (harnesses/resolve-harness rt :sub-coordinator)
+              sustained (harnesses/resolve-harness rt :sub-coordinator-sol)
+              guidance (get-in sustained
+                               [:generated :harness/appended-system-prompts])
+              sustained-run (harnesses/create!
+                             rt {:harness :sub-coordinator-sol
+                                 :mode :interactive
+                                 :cwd "/tmp"
+                                 :title "Frozen Sol sub-coordinator run"})]
+          (is (= "pi" (:harness sustained)))
+          (is (= "openai-codex/gpt-5.6-sol"
+                 (get-in sustained [:generated :harness/model])))
+          (is (= "high" (get-in sustained [:generated :harness/effort])))
+          (is (= 1 (count guidance)))
+          (doseq [contract-fragment
+                  ["# Sustained Sol sub-coordinator runbook"
+                   "canonical coordination repository"
+                   "one source writer per feature worktree"
+                   "--timeout 10m"
+                   "agent show --request REQUEST"
+                   "request ID and actual child runs"
+                   "agent-run-terminal"
+                   "agent-run-settled"
+                   "Terminal means"
+                   "Settled additionally proves"
+                   "Accepted means"
+                   "notes before every dispatch"
+                   "P1/P2 findings"
+                   "ordinary basic-review"
+                   "FIFO land"
+                   "repeated optional full-review loops"
+                   "acknowledged next owner"
+                   "failed closed-target"
+                   "owned work pending"
+                   "not a universal"]]
+            (is (str/includes? (first guidance) contract-fragment)))
+          (is (= "openai-codex/gpt-5.6-sol"
+                 (attr-get sustained-run :harness/model)))
+          (is (= "high" (attr-get sustained-run :harness/effort)))
+          (is (= guidance
+                 (attr-get sustained-run :harness/appended-system-prompts)))
+          (is (= coordinator-before
+                 (harnesses/resolve-harness rt :coordinator)))
+          (is (= sol-before (harnesses/resolve-harness rt :sol)))
+          (is (= bounded-before
+                 (harnesses/resolve-harness rt :sub-coordinator)))))
       (testing "provider defaults preserve the authoritative workspace policy"
         (is (false? (harnesses/flag rt :harness/claude)))
         (is (false? (harnesses/flag rt :harness/cursor)))
@@ -181,6 +230,59 @@
         (is (= "coordinator" (attr-get run-after :harness/alias)))
         (is (= "openai-codex/gpt-5.6-sol"
                (attr-get run-after :harness/model)))
+        (is (= "alias" (:kind added)))
+        (is (true? (:available added)))))))
+
+(deftest live-sol-sub-coordinator-registration-is-additive
+  (t/with-weaver-world [ctx {:storage :sqlite-memory :deps-edn deps-edn}]
+    (let [rt (:runtime ctx)]
+      (codethread/register! rt)
+      (is (true? (harnesses/unregister-alias!
+                  rt sub-coordinator/sol-alias-name)))
+      (let [registry-before (harnesses/harnesses rt)
+            flags-before (harnesses/flags rt)
+            modules-before (runtime/status rt)
+            resolutions-before
+            (into {}
+                  (map (fn [alias]
+                         [alias (harnesses/resolve-harness rt alias)]))
+                  [:sol :coordinator :sub-coordinator])
+            existing-runs
+            (mapv #(harnesses/create!
+                    rt {:harness %
+                        :mode :interactive
+                        :cwd "/tmp"
+                        :title (str "Frozen existing " (name %) " run")})
+                  [:coordinator :sub-coordinator])
+            runs-before (mapv #(harnesses/run rt (:id %)) existing-runs)
+            registration (sub-coordinator/register-sol! rt)
+            registry-after (harnesses/harnesses rt)
+            runs-after (mapv #(harnesses/run rt (:id %)) existing-runs)
+            resolutions-after
+            (into {}
+                  (map (fn [alias]
+                         [alias (harnesses/resolve-harness rt alias)]))
+                  [:sol :coordinator :sub-coordinator])
+            added (some #(when (= "sub-coordinator-sol" (:name %)) %)
+                        registry-after)
+            resolved (harnesses/resolve-harness rt :sub-coordinator-sol)]
+        (is (= "sub-coordinator-sol" (:alias registration)))
+        (is (= 1 (count (:candidates registration))))
+        (is (= registry-before
+               (filterv #(not= "sub-coordinator-sol" (:name %))
+                        registry-after)))
+        (is (= flags-before (harnesses/flags rt)))
+        (is (= modules-before (runtime/status rt)))
+        (is (= resolutions-before resolutions-after))
+        (is (= runs-before runs-after))
+        (is (= "openai-codex/gpt-5.6-sol"
+               (attr-get (first runs-after) :harness/model)))
+        (is (= "openai-codex/gpt-5.6-luna"
+               (attr-get (second runs-after) :harness/model)))
+        (is (= "pi" (:harness resolved)))
+        (is (= "openai-codex/gpt-5.6-sol"
+               (get-in resolved [:generated :harness/model])))
+        (is (= "high" (get-in resolved [:generated :harness/effort])))
         (is (= "alias" (:kind added)))
         (is (true? (:available added)))))))
 
@@ -239,7 +341,7 @@
                       :lifecycle/outcomes :agent-engine :status])))
       (is (every? (set (map :name aliases))
                   ["coordinator" "grunt" "luna" "oracle" "reviewer"
-                   "sub-coordinator"]))
+                   "sub-coordinator" "sub-coordinator-sol"]))
       (is (= ["docs-and-tests" "runtime-correctness" "source-form"]
              (mapv :name (:reviewers reviewer-result))))
       (is (= #{"intake" "land" "publish-spool-kondo" "ralph-iterate" "review"}

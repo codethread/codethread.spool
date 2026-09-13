@@ -147,6 +147,8 @@
 
    :sub-coordinator sub-coordinator/alias-descriptor
 
+   :sub-coordinator-sol sub-coordinator/sol-alias-descriptor
+
    :tui
    {:doc "Primary interactive user seat."
     :parent :sol
