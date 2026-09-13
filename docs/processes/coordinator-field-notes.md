@@ -538,3 +538,63 @@ fixture proving the provider never starts and the run settles. It excludes
 historical error-string repair, live reloads, shared service lifecycle actions,
 and the identity epic's active branches. Parent coordinates the `execution.clj`
 overlap and final review/landing; the implementation is not yet accepted.
+
+## Keep repo execution local and coordinate integration explicitly
+
+The current recovery has local coordinators for Skein (`2gs5l`), Millhouse
+(`7tx9h`), and Harnesses (native continuation `ml88n`). Codethread's `8djua`
+coordinates the shared alias pins across seven consumers. That is a mixed
+topology, not a coordinator in every repository. Report that distinction plainly:
+source workers in separate worktrees do not by themselves establish independent
+repo-level scheduling. The parent owns cross-repo compatibility and must avoid
+becoming a serial review or polling bottleneck.
+
+Millhouse's handoff preserved writer `87d98`, its source checkout and FIFO entry
+`jeo7o`. The new coordinator has its own durable checkout, so source landing
+cannot delete its cwd. The writer completed `59504f5` with docs and quality
+passing; fresh Oracle and CI accepted that SHA before the existing failed gate
+was retried. The subsequent executor-owned quality process is real capacity use.
+A failed gate whose process has ended is not: do not block unrelated checks
+merely because its workflow remains active. Keep the merge reservation and CPU
+capacity concepts separate.
+
+Consumer proofs found actual compatibility requirements. Notes needed the shared
+config pin plus Workflow `3132c8f`; Agents additionally needed removal of its
+redundant local Kanban registration. Oracle bounded those repairs, preserving
+other pins and registration order. Notes PR3 merged as `ac1e5f7`, and Agents PR5
+as `04c4e7e`, through their available normal GitHub path because those worlds have
+no registered land workflow. Their disposable readiness and alias proofs are
+evidence for those contracts only.
+
+## A linked checkout is an activation surface
+
+The user subsequently reported that direct `pi` startup in
+`~/dev/projects/agents` failed with unknown `identity startup`; the live command
+offered only `bind` and `show`. A read-only audit confirmed the same missing
+operation in all eight worlds. Global Pi settings load extensions directly from
+the Agents checkout. Advancing that checkout to the accepted Pi hook therefore
+activated the caller immediately, while the already-running Weavers retained
+the older identity implementation. The source acceptance did not establish live
+compatibility. This was a rollout gap, not merely a missing optional desktop
+test.
+
+Track at least these separate facts before declaring an integration working:
+
+1. The caller and backend source commits were reviewed and landed.
+2. Each consumer resolves the intended compatible dependency combination.
+3. The running process has loaded that combination and registered its commands.
+4. The actual entry path used by the user succeeds against that runtime.
+
+Alias visibility and general workspace readiness cannot stand in for native
+identity startup. Treat a source fast-forward as deployment when a user's tool
+loads directly from that checkout. Arrange compatible backend availability
+before advancing the caller, or prepare a reviewed transition strategy.
+
+Incident task `wj46k` owns the immediate Pi recovery. Tracked Oracle `i5qoq`
+is evaluating the minimum supported path; recovery is not yet accepted. Parent
+steered the existing Harnesses coordinator at a verified read-only wait boundary,
+settled only `in4r1`, and resumed its existing session as `ml88n`. Independently
+tracked child reviews and all shared services remained running. Long sleeps
+prevented timely intake of task notes; use bounded named awaits and read the
+coordination task after each wait. Prioritize a reported broken user entry point
+over completing unrelated downstream migration scope.
