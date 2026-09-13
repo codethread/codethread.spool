@@ -35,6 +35,10 @@ let coord_ws = "/absolute/path/to/canonical/.millstrand"
 let candidate = "/absolute/path/to/reviewed/codethread/spools/config/src/ct/spools/codethread/sub_coordinator.clj"
 
 let registry_before = (^strand --workspace $coord_ws agent list --full | from json)
+if (($registry_before | where name == "sub-coordinator" | length) != 0) {
+  error make {msg: "sub-coordinator is already registered; refusing to replace it"}
+}
+
 let active_ids = (
   ^strand --workspace $coord_ws agent runs --active
   | from json
@@ -139,11 +143,14 @@ returns the full raw strand with the `attributes` map consumed by the frozen
 settings proof. `strand agent show RUN_ID` returns a lifecycle summary and omits
 that map; substituting it would break the proof.
 
-The registry comparison expects `sub-coordinator` to be absent before the first
-live registration. If it is already present, stop and compare its descriptor to
-the reviewed candidate rather than replacing it casually. Lifecycle fields can
-change naturally while runs execute, so the proof compares their frozen launch
-settings rather than whole run records.
+The pre-registration guard fails before `register!` when `sub-coordinator`
+already exists. Run it only at a safe handoff where the parent owns alias
+registration and has excluded concurrent registrants. The catalog API replaces
+by name and does not offer an atomic create-only operation, so this procedure
+must not invent one or claim safety while another owner can race the guard.
+Compare an existing descriptor to the reviewed candidate and escalate instead
+of replacing it. Lifecycle fields can change naturally while runs execute, so
+the proof compares their frozen launch settings rather than whole run records.
 
 ## Pilot and fallback
 
