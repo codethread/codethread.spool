@@ -1,13 +1,16 @@
 (ns ct.spools.codethread.config-test
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [ct.spools.codethread.bootstrap :as codethread]
+            [ct.spools.codethread.sub-coordinator :as sub-coordinator]
             [ct.spools.harnesses :as harnesses]
             [ct.spools.harnesses.reviewers :as reviewers]
             [millhouse.spools.workflow :as workflow]
             [millstrand.api.current.alpha :as current]
             [millstrand.api.runtime.alpha :as runtime]
+            [millstrand.api.spool.alpha :refer [attr-get]]
             [millstrand.api.weaver.alpha :as weaver]
             [millstrand.test.alpha :as t]))
 
@@ -76,6 +79,56 @@
         (is (= "low"
                (get-in (harnesses/resolve-harness rt :luna-low)
                        [:generated :harness/effort]))))
+      (testing "the bounded sub-coordinator carries its Luna-first runbook"
+        (let [coordinator-before (harnesses/resolve-harness rt :coordinator)
+              luna (harnesses/resolve-harness rt :sub-coordinator)
+              luna-guidance (get-in luna
+                                    [:generated
+                                     :harness/appended-system-prompts])
+              luna-run (harnesses/create!
+                        rt {:harness :sub-coordinator
+                            :mode :interactive
+                            :cwd "/tmp"
+                            :title "Frozen Luna sub-coordinator run"})]
+          (is (= "pi" (:harness luna)))
+          (is (= "openai-codex/gpt-5.6-luna"
+                 (get-in luna [:generated :harness/model])))
+          (is (= "max" (get-in luna [:generated :harness/effort])))
+          (is (= 1 (count luna-guidance)))
+          (doseq [contract-fragment
+                  ["# Bounded sub-coordinator runbook"
+                   "canonical coordination workspace"
+                   "agent assign sol"
+                   "agent run sol"
+                   "agent show --request"
+                   "open --raw task-body.md"
+                   "agent-run-terminal"
+                   "agent-run-settled"
+                   "stop-on-complete"
+                   "agent resume --run-id"
+                   "explicit direction or acceptance verdict"
+                   "every gate when repairing a failure"
+                   "seat/sub-coordinator-terra"]]
+            (is (str/includes? (first luna-guidance)
+                               contract-fragment)))
+          (is (= "openai-codex/gpt-5.6-luna"
+                 (attr-get luna-run :harness/model)))
+          (is (= luna-guidance
+                 (attr-get luna-run :harness/appended-system-prompts)))
+          (harnesses/set-flag! rt :seat/sub-coordinator-terra true)
+          (let [terra (harnesses/resolve-harness rt :sub-coordinator)]
+            (is (= "pi" (:harness terra)))
+            (is (= "openai-codex/gpt-5.6-terra"
+                   (get-in terra [:generated :harness/model])))
+            (is (= "high" (get-in terra [:generated :harness/effort])))
+            (is (= luna-guidance
+                   (get-in terra
+                           [:generated :harness/appended-system-prompts])))
+            (is (= "openai-codex/gpt-5.6-luna"
+                   (attr-get (harnesses/run rt (:id luna-run))
+                             :harness/model))))
+          (is (= coordinator-before
+                 (harnesses/resolve-harness rt :coordinator)))))
       (testing "provider defaults preserve the authoritative workspace policy"
         (is (false? (harnesses/flag rt :harness/claude)))
         (is (false? (harnesses/flag rt :harness/cursor)))
@@ -93,6 +146,40 @@
           (is (some? (workflow/workflow-definition :review)))
           (is (some? (workflow/workflow-definition :land)))
           (is (not (contains? (set (keys (workflow/executors))) :agent))))))))
+
+(deftest live-sub-coordinator-registration-is-additive
+  (t/with-weaver-world [ctx {:storage :sqlite-memory :deps-edn deps-edn}]
+    (let [rt (:runtime ctx)]
+      (codethread/register! rt)
+      (is (true? (harnesses/unregister-alias!
+                  rt sub-coordinator/alias-name)))
+      (let [registry-before (harnesses/harnesses rt)
+            flags-before (harnesses/flags rt)
+            modules-before (runtime/status rt)
+            existing-run (harnesses/create!
+                          rt {:harness :coordinator
+                              :mode :interactive
+                              :cwd "/tmp"
+                              :title "Frozen existing coordinator run"})
+            run-before (harnesses/run rt (:id existing-run))
+            registration (sub-coordinator/register! rt)
+            registry-after (harnesses/harnesses rt)
+            run-after (harnesses/run rt (:id existing-run))
+            added (some #(when (= "sub-coordinator" (:name %)) %)
+                        registry-after)]
+        (is (= "sub-coordinator" (:alias registration)))
+        (is (= 2 (count (:candidates registration))))
+        (is (= registry-before
+               (filterv #(not= "sub-coordinator" (:name %))
+                        registry-after)))
+        (is (= flags-before (harnesses/flags rt)))
+        (is (= modules-before (runtime/status rt)))
+        (is (= run-before run-after))
+        (is (= "coordinator" (attr-get run-after :harness/alias)))
+        (is (= "openai-codex/gpt-5.6-sol"
+               (attr-get run-after :harness/model)))
+        (is (= "alias" (:kind added)))
+        (is (true? (:available added)))))))
 
 (deftest consumer-modules-reconcile-before-explicit-executor-activation
   (t/with-weaver-world [ctx {:storage :sqlite-memory :deps-edn deps-edn}]
@@ -148,7 +235,8 @@
                      [:last-refresh :modules codethread/executor-module-id
                       :lifecycle/outcomes :agent-engine :status])))
       (is (every? (set (map :name aliases))
-                  ["coordinator" "grunt" "luna" "oracle" "reviewer"]))
+                  ["coordinator" "grunt" "luna" "oracle" "reviewer"
+                   "sub-coordinator"]))
       (is (= ["docs-and-tests" "runtime-correctness" "source-form"]
              (mapv :name (:reviewers reviewer-result))))
       (is (= #{"intake" "land" "publish-spool-kondo" "ralph-iterate" "review"}

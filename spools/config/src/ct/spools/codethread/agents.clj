@@ -4,7 +4,8 @@
   The base aliases follow the authoritative Harnesses workspace catalog.
   Compatibility variants retain useful model/effort handles from the previous
   config without retaining the legacy agent-harness API."
-  (:require [ct.spools.harnesses :as harnesses]
+  (:require [ct.spools.codethread.sub-coordinator :as sub-coordinator]
+            [ct.spools.harnesses :as harnesses]
             [millstrand.api.format.alpha :as format-alpha]
             [millstrand.api.lifecycle.alpha :as lifecycle]))
 
@@ -143,6 +144,8 @@
    {:doc "Default seat for delegated coordination and work decomposition."
     :parent :sol
     :attributes {}}
+
+   :sub-coordinator sub-coordinator/alias-descriptor
 
    :tui
    {:doc "Primary interactive user seat."
