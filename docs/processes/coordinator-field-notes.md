@@ -9,7 +9,7 @@ Tracking: Codethread epic `w3oqr`, coordinator feature `x4y0z`, notes task
 `kejtr`. The user requested delegation through `strand agent`; delegated
 execution uses Pi. Built-in Codex/ChatGPT delegates were stopped.
 
-## Current handoff (21:52 UTC)
+## Current handoff (22:21 UTC)
 
 The user-reported Pi startup incident is accepted. Actual Pi from canonical
 Agents minted and recovered its native identity after a supported replacement
@@ -20,19 +20,31 @@ are accepted; parent feature `evzz8` and its tasks are closed. Its empty
 coordination worktree was removed after the owner settled. Never resume a run
 into a removed directory.
 
-Skein remains locally coordinated by Terra/high `nq6br` on `4jtjf`. Its timestamp
-repair is progressing through landing, and read-only Sol audit `lri4s` identified
-obsolete archived-release blockers and current P2 follow-through. A fresh
-Devflow-local Terra/high coordinator `mds6z` now owns source feature `peytg` for
-the discovery-guidance finding. Source adoption should be combined with already
-needed consumer pin updates, then checked against the installed surface.
+Skein is locally coordinated by Sol/high `x6qtq` on `0yu6i`. Terra attempts
+`nq6br` and `idjf4` delivered useful work but both exited while owned children
+still required coordination. The second exited after a 45-second timeout despite
+an explicit continuation instruction. The new Sol seat adopts sole writer
+`xwpgl` on `yb7yg` / `1dhjs`; it owns acceptance and the remaining eligible P2s.
+The timestamp repair is accepted and landed as PR478 / `ddc63972`. Oracle
+`eq993` accepted closure of obsolete maintained-dependency wrappers and bounded
+the remaining local review-policy work.
+
+Devflow's local coordinator completed discovery source feature `peytg`: PR26 /
+`47cf5f3` corrects two unsupported prime pointers. Its source and empty coordinator
+worktrees are cleaned. Root task `666xq` still owns installed adoption, preferably
+combined with the already needed Harnesses `ta2ip` consumer wave after checking
+the full dependency range. Source completion does not establish installed help.
 
 Harnesses local Sol coordinator `vm5zk` owns the identity epic. Its replacement
 Weaver successfully passed actual unmanaged Pi startup checks, but older managed
 runs failed completion under the newly loaded backend because they lacked the
-new reservation metadata. P1 `b9jg1` now has sole Sol writer `qulxd`; the running
-Mill and existing run history are preserved. This is a real upgrade regression,
-not a reason to repeat all unchanged unmanaged Pi proofs.
+new reservation metadata. P1 `b9jg1` is now explicitly owned by local `vm5zk`
+through rework, review, normal land, and compatible Weaver-only deployment.
+Direct Oracle `121ja` rejected candidate `bf177b95` for a legacy native-resume
+regression and insufficient durable invocation fencing. Sole Sol `tqaho` on
+`vh9jx` is repairing those findings. Preserve the recovered standalone source
+checkout and backup; confirm the landing branch/main layout after writers and
+reviewers settle. The running Mill and historical run outcomes remain intact.
 
 Orphan reconciliation `0xq77` has clean published candidate `fc69a46` and focused
 worker checks. Its original Sol `0mvqk` exited normally but encountered that same
@@ -821,3 +833,51 @@ prevent the resumed Oracle from calling native helpers. Check process custody
 and exclude their evidence if this occurs; preserve independently useful source
 findings and require direct verification before acceptance. A helper's apparent
 zero exit can still wrap a REPL reader error, so read the semantic result.
+
+## Require continuity from the coordinator seat
+
+Terra successfully delivered the bounded Devflow discovery correction and
+Skein's activation and timestamp repair. However, Skein `nq6br` finalized with
+its review still pending. Resumed `idjf4` received an explicit instruction to
+continue through acceptance, launched a policy writer, then finalized after one
+45-second timeout while that writer was running. Its honest exit zero describes
+the coordinator process; it does not mean the coordination task was fulfilled.
+
+After the second occurrence the parent selected a fresh Sol/high coordinator,
+`x6qtq`, on open task `0yu6i`. A frozen Terra continuation would retain its model
+and original target. The parent updated the feature's ordinary owner/run pointer
+and closed predecessor coordinator tasks as superseded, preserving their notes
+and every source worker. This changed one failing seat based on observed behavior.
+
+The loop needs an explicit exit condition: after a bounded wait, inspect current
+run status, latest task notes, source progress and workflow readiness; then act
+or await again. Finalize only when eligible work is accepted and cleaned or each
+remaining item has a concrete blocker, with no child or workflow still needing
+the coordinator's next action. A list of active children is a handoff only when
+another coordinator has actually accepted ownership.
+
+## Transfer checkout ownership before cleanup
+
+The parent launched Harnesses compatibility work from a scratch repository that
+the local coordinator still considered disposable after its earlier feature.
+That coordinator removed the scratch root while the new linked source worktree
+was active, breaking its Git metadata. Notes asking for retention did not create
+an acknowledged ownership transfer. The source files were backed up and the
+checkout recovered as a standalone repository; the worker later committed and
+pushed its candidate. The parent takes responsibility for reusing a checkout
+whose cleanup owner had not accepted the handoff.
+
+Before sharing such a root, establish one cleanup owner and record all dependent
+worktrees and active runs. Prefer a new worktree rooted in the canonical repo.
+Before removal, recheck current ownership and Git common-directory dependencies,
+not just the completed feature's old notes. Preserve source and backups until
+acceptance. Recovery that changes a linked checkout into a standalone repository
+must also trigger a landing-layout check: the configured feature branch and
+canonical main need to satisfy the shared workflow's normal contracts.
+
+A separate review race was stopped by the target reservation: local `vm5zk`
+already had direct Oracle `121ja` running when the parent attempted another
+publication. The parent inspected and adopted that review, explicitly handed
+the whole compatibility feature to the local owner, and removed only its unused
+extra checkout. Reservation rejection is useful coordination evidence; it does
+not justify another reviewer on a different target.
