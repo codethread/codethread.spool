@@ -4,11 +4,15 @@
   Inert on its own: `ct.spools.codethread.config` elects it with `use-resource!`."
   (:require [millstrand.api.runtime.help-transform.alpha :as help-transform]))
 
-(defn reconcile-help-transform [{:keys [runtime]}]
+(defn reconcile-help-transform
+  "Register Batteries' default help transform in the module runtime."
+  [{:keys [runtime]}]
   (help-transform/register-builtin! runtime)
   {:registered :help-transform})
 
-(defn close-help-transform! [{:keys [runtime]}]
+(defn close-help-transform!
+  "Remove the Batteries default help transform from the module runtime."
+  [{:keys [runtime]}]
   (help-transform/unregister-default-help-transform! runtime 'millstrand.spools.batteries)
   {:unregistered :help-transform})
 

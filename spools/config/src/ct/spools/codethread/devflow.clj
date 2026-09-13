@@ -3,8 +3,8 @@
 
   This root owns no Devflow definitions or guidance. It only declares the
   consumer election that routes the external adapter's Kanban-bound decompose
-  workflow through the external lifecycle seed. Consumers still approve and
-  activate `codethread/devflow` and `codethread/devflow-kanban-adapter`.")
+  workflow through the external lifecycle seed. Consumers still activate the
+  Devflow and Kanban adapter modules before selecting this election.")
 
 (def devflow-kanban-adapter-binding-options
   "Route the external Devflow decompose stage through its Kanban adapter."

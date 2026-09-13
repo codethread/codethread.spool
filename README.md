@@ -8,10 +8,12 @@ shared-spool `ct.spools.*` convention.
 
 | Root | Namespace | Purpose |
 | --- | --- | --- |
-| `spools/config` | `ct.spools.codethread.config` | Select shared harness aliases, Batteries help rendering, and the external Devflow Kanban adapter |
+| `spools/config` | `ct.spools.codethread.bootstrap` | Register Harnesses, shared aliases and reviewers, and the Workflow `:agent` executor |
 | `spools/ralph` | `ct.spools.codethread.ralph` | Publish the one-card-per-iteration `ralph-iterate` workflow and `ralph` executable |
 
-Each consumer composes the roots it needs in `.millstrand/deps.edn` and activates its selected modules in `.millstrand/init.clj`. Kanban comes from `millhouse.spools/kanban`.
+Each consumer composes the roots it needs in `.millstrand/deps.edn` and
+activates its selected modules in `.millstrand/init.clj`. Kanban comes from
+`millhouse.spools/kanban`.
 
 ## Activation
 
@@ -22,18 +24,50 @@ For a checkout containing this repository, compose the local roots with:
         codethread/ralph {:local/root "../spools/ralph"}}}
 ```
 
-The roots are relative to `.millstrand`. Git consumers should use pinned `codethread/config` and `codethread/ralph` dependencies instead.
+The roots are relative to `.millstrand`. Git consumers should use pinned
+`codethread/config` and `codethread/ralph` dependencies instead. The config root
+pins `ct.spools/harnesses` directly; it has no dependency on the superseded
+`agent-harness.spool` roots.
 
-Consumers own module ordering:
+Activate the shared agent surface with one bootstrap call:
 
-- Activate Batteries, agent-run/delegation, Millhouse Workflow, Devflow, Kanban,
-  and the Devflow Kanban adapter before `codethread/config`.
-- Activate `codethread/ralph` after Millhouse Workflow.
+```clojure
+(require '[ct.spools.codethread.bootstrap :as codethread])
+(codethread/register! runtime)
+```
 
-The config root contains no Devflow implementation. It selects the external
-adapter's Kanban-bound `:decompose` workflow alongside shared harness aliases
-and Batteries help rendering. Inspect the active aliases with
-`strand agent harnesses`.
+The bootstrap owns ordering for the Harnesses providers and command surface,
+the shared aliases, shared reviewer lenses, and the asynchronous Workflow
+`:agent` executor. It registers shared policy before opening the executor, so
+an initial scan of ready gates can resolve their seats. Repository-specific
+workflows are not activated by the bootstrap.
+
+The preferred role aliases are `luna`, `oracle`, `grunt`, `reviewer`, and
+`coordinator`; useful effort-specific handles such as `luna-low`, `terra-med`,
+and `sol-high` remain available. Claude and Cursor are registered but disabled
+by default, matching the Harnesses workspace policy. A consumer can explicitly
+enable them after startup with `strand agent config set harness/claude true` or
+the equivalent Cursor flag. This is process-local configuration.
+
+Inspect the resulting surface with:
+
+```text
+strand agent list
+strand agent reviewers
+```
+
+The optional `ct.spools.codethread.config` module still selects this
+repository's Batteries help rendering and the external Devflow Kanban adapter.
+Consumers that want it must activate Batteries, Devflow, Kanban, and the
+adapter first. This election stays outside the bootstrap so a catalog consumer
+does not inherit Devflow workflows merely by selecting shared agents.
+
+Headless Workflow gates use waiter `:agent` with `harness/alias` and an
+optional `harness/prompt` and `harness/cwd`. The executor creates a tracked run
+and closes the gate only after it delivers a successful non-blank result.
+Waiting is done through `strand await` queries, not an `agent await` command.
+
+Activate `codethread/ralph` separately after Millhouse Workflow.
 
 Ralph validates and hands a committed slice to consumer-owned landing policy.
 It does not own landing or landing evidence. See
