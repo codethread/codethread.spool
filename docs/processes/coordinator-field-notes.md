@@ -389,3 +389,48 @@ assertions, basic review found no P1/P2, and canonical AGENTS.md contains the
 exact instruction. Seven active repos now have the rule; Skein remains under
 the Oracle-directed quieter-window retry. Its check must actually pass before
 that eighth source task can be accepted.
+
+## Complete instruction rollout and refine the live seat
+
+Skein's authorized quieter-window retry passed the full quality contract, then
+normal review and land merged PR 473 as
+`bfce35e1b89dc4b6c14426b56ac0c636373033d1`. The exact user-only Mill instruction
+is now independently verified in canonical AGENTS.md across all eight active
+repos: Codethread, Skein, Millhouse, Harnesses, Devflow, UI, Agents, and Notes.
+The deprecated archive was not used or edited.
+
+Oracle `6beyy` accepted exact alias source `a4805c2`. The parent then refreshed
+only its own previously registered alias in every active world. Each preflight
+required an exact match to the saved reviewed `55e79eb` descriptor, followed by
+a second in-REPL descriptor guard before registration. The parent exclusively
+owned live registration; delegated scopes excluded it. All eight postchecks
+proved the intended review-verification paragraph was the only candidate change,
+other aliases and flags were unchanged, and captured runs retained their frozen
+launch settings. Evidence is under
+`/var/folders/6w/lnly9x394flgz3q7zty955500000gn/T/sub-coordinator-refinement-20260913-zcn1aq2_/`.
+Existing sessions keep frozen guidance; this refinement applies to new runs.
+
+The new guidance is being exercised by pilot `ah23n` (`young-young-stoat`),
+Pi/Luna max, coordinating durable startup-pin feature `evzz8`. Its predecessor
+Sol `7uxj0` completed inventory and settled through exact managed cancellation
+at a bounded read-only await. No pin writer was active. The new feature owner
+and run pointer were recorded immediately, with predecessor and seven prepared
+consumer tasks preserved. Its prompt explicitly separates umbrella coordinator
+ownership from per-source writer pointers and serializes heavy checks.
+
+## Observe automatic workflow boundaries before promising a hold
+
+Shared land rebased the accepted alias candidate to `6e8cf5b`, then its executor
+merged PR 15 as `3dcf5f051842512d444b9d111d3998f4078081f6` at 18:41:28 UTC.
+The coordinator's proposed instruction to hold the squash step for fresh
+exact-SHA review was recorded at 18:41:37, after the merge. A note is not an
+executor pause. Inspect the actual workflow graph before promising a review
+boundary between automatically advancing steps.
+
+Keep the evidence chronology honest: prior review of `a4805c2` is not a fresh
+pre-merge review of `6e8cf5b`. Landing owner `wvdeh` retains task `sl9o5` for
+exact-range review and Oracle adjudication of the rebased/merged result, with
+patch/tree equivalence and preservation of the user-only Mill rule. Consumer
+pins remain blocked until that acceptance is real. Do not fabricate a paused
+gate, forge a past acceptance, or revert an otherwise valid result merely to
+make the historical workflow resemble the intended sequence.
