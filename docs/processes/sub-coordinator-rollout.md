@@ -15,14 +15,32 @@ same runbook. Use that fallback only after repeated, recorded coordination
 mistakes persist under clear corrective guidance. Provider/runtime failures,
 timeouts, and one slow response are not model-quality evidence.
 
+The additive `sub-coordinator-sol` seat instead resolves directly through Pi to
+`openai-codex/gpt-5.6-sol` at explicit `high` effort. It has self-contained
+sustained-coordination guidance and does not change the Luna default, Terra
+switch, ordinary `coordinator`, or `sol` aliases. Persistent Sol seats sustained
+particular coordination assignments after Luna failed closed-target launch
+recovery and Terra twice finalized with owned work pending. That evidence
+explains this additional choice but is not a universal model ranking.
+
 ## Additive registration in a running world
 
 `ct.spools.harnesses/register-alias!` changes one runtime-local registry entry
 immediately. It does not refresh modules, alter flags, mutate existing runs, or
 restart the Weaver. The checked-in startup module registers the alias durably on
 a later ordinary activation. Until consumers update their Codethread pin, the
-candidate namespace can be loaded from a reviewed checkout and its narrow
-`register!` function called through the supported live Weaver nREPL.
+candidate namespace can be loaded from a reviewed checkout and one narrow
+registration function called through the supported live Weaver nREPL:
+
+| Alias | Function |
+| --- | --- |
+| `sub-coordinator` | `ct.spools.codethread.sub-coordinator/register!` |
+| `sub-coordinator-sol` | `ct.spools.codethread.sub-coordinator/register-sol!` |
+
+Register `sub-coordinator-sol` only after its exact source commit passes required
+quality and review. The parent owns any staged runtime adoption; source workers
+must not perform registration, refresh a runtime, restart a process, change a
+flag, update a source pin, or start a pilot.
 
 Parent coordinator `x4y0z`, through pilot task `irfb7`, owns authorization and
 execution of this recipe. Run it only at a selected handoff boundary; the
@@ -151,6 +169,20 @@ must not invent one or claim safety while another owner can race the guard.
 Compare an existing descriptor to the reviewed candidate and escalate instead
 of replacing it. Lifecycle fields can change naturally while runs execute, so
 the proof compares their frozen launch settings rather than whole run records.
+
+For reviewed `sub-coordinator-sol` adoption, use the same guarded proof with
+exactly these substitutions:
+
+- guard and postcheck the alias name `sub-coordinator-sol`;
+- resolve and call
+  `ct.spools.codethread.sub-coordinator/register-sol!`;
+- require every pre-existing alias, flag, module status, and captured run's
+  frozen launch settings to remain unchanged; and
+- verify the new alias resolves to Pi, `openai-codex/gpt-5.6-sol`, and `high`.
+
+Do not call both registration functions, change
+`seat/sub-coordinator-terra`, or replace an existing descriptor as part of that
+additive registration.
 
 ## Pilot and fallback
 
