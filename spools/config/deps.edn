@@ -12,7 +12,7 @@
                                  :git/sha "f487eb42ea9523e8bd405e64a7c319013217d988"
                                  :deps/root "spools/kanban"}
         ct.spools/harnesses {:git/url "https://github.com/codethread/harnesses.spool.git"
-                             :git/sha "9548390ce621461ba0a289859fe9b0af963f5805"}
+                             :git/sha "e8a26477852216bca2579b050a2356c86af132b7"}
         codethread/devflow {:git/url "https://github.com/codethread/devflow.spool.git"
                             :git/sha "99313b48f14ab0892cb90264d100dce4ff2a25e0"
                             :deps/root "."}

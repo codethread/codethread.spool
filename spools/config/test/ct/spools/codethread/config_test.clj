@@ -39,7 +39,7 @@
     (is (not (contains? config-deps 'millstrand.spools/batteries)))
     (is (= "f487eb42ea9523e8bd405e64a7c319013217d988"
            (get-in config-deps ['millhouse.spools/workflow :git/sha])))
-    (is (= "9548390ce621461ba0a289859fe9b0af963f5805"
+    (is (= "e8a26477852216bca2579b050a2356c86af132b7"
            (get-in config-deps ['ct.spools/harnesses :git/sha])))
     (is (not-any? #{'ct.spools/agent-run 'ct.spools/delegation}
                   (keys config-deps)))
