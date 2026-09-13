@@ -687,3 +687,58 @@ observed, represent orphaning or abandonment explicitly; never fabricate an
 exit code, call a private completion hook as a repair, or edit live database
 rows. Source work and private fixtures precede applying the accepted operation
 to the user's actual records. The Mill remains running throughout.
+
+
+## Live Pi acceptance and the next local handoff
+
+Incident `wj46k` is accepted. Agents PR6 landed as `ae8a97b` after normal review
+found one hygiene issue: the new identity guard retained an unignored state lock.
+Sol added the existing Notes convention, `state/`, and proved that an actual
+startup-created lock left the worktree clean. Fresh focused Oracle accepted
+`e57a294`; no unchanged broad proof was repeated. Notes remained at `431d8bf`.
+
+The parent replaced the two-member Agents/Notes `dev` pool through the supported
+Agents Weaver restart. PID `64450` became `74343`; both new generations expose
+Identity `b1955a96` startup. Actual global Pi `0.85.1`, launched from canonical
+Agents with managed and identity overrides absent, minted `tidy-merry-bison` for
+native session `01a09c91-b380-72da-939f-caa6bfac6ae4`. A fresh Pi process reopened
+the exact session header emitted by Pi and recovered that binding. Another
+materialized exactly one identity prompt block. These debug checks exited before
+a model request. Mill PID/start time and existing Agents/Notes dirty-file hashes
+were unchanged. In Pi JSON mode the diagnostic is on stderr; inspect both streams
+before treating absent stdout as a product failure.
+
+A managed Oracle initially failed after source rebase because its Pi `0.84.4`
+registry lacked Astra for the project's newly selected Prose agent. The actual
+user Pi `0.85.1` did list Astra. A read-only review from the known-working durable
+coordination cwd accepted the source without substituting the user's model.
+Record executable/version/catalog differences as launch compatibility evidence;
+do not infer that the user's selection is wrong from one worker environment.
+
+Native resume has another preflight: the original target must remain eligible.
+Repair continuation `mvx63` inherited closed target `imz0v` and never launched.
+It was honestly settled as never-launched; fresh Sol `fgott` used open repair
+task `e5gvx`. A prompt naming a different task does not retarget a frozen run.
+
+The remaining activation feature `k3mob` now uses local coordinators: existing
+Skein `2gs5l` and Harnesses `vm5zk`, plus Terra/high through Pi in Millhouse
+(`e1ow1`, continued as `tg8xs`), Devflow (`f90jw`) and UI (`ba2wv`). Each new seat
+has a durable coordination checkout and delegates a separate Sol source writer.
+Codethread tracks dependencies and evidence; each seat owns its repository's
+source, FIFO and permitted Weaver activation.
+
+A zero-byte shared landing acquisition file blocked one coordinator's worktree
+setup. Preserve the file and its inode; adding its exact generated path to local
+Git `info/exclude` is a reversible way to satisfy checkout hygiene without
+removing a shared lock or changing tracked source. Devflow handled this itself;
+Millhouse unnecessarily escalated and exited, so the parent supplied that narrow
+metadata fix and resumed it. The same model can make different operational
+judgments: record the concrete failure and correction rather than declaring a
+whole model good or bad.
+
+Millhouse then detected a Sol writer invoking an untracked native Pi scout,
+stopped the exact writer and resumed direct implementation. Follow up on actual
+child-process custody as well as the parent run. Explicit Strand-only delegation
+must reach the source worker's prompt; globally available helper tools do not
+grant permission to use them. Do not count an unauthorized helper's review as
+acceptance evidence.
