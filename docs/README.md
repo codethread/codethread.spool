@@ -11,6 +11,9 @@ for its own layout and links back to this documentation.
 - [Shared review and landing](processes/shared-landing.md): Kanban/worktree
   discipline, review evidence, FIFO landing, consumer activation, and rollout
   verification.
+- [Sub-coordinator alias rollout](processes/sub-coordinator-rollout.md): bounded
+  role guidance, additive live registration, frozen-setting proof, pilot
+  criteria, and the supported model fallback.
 
 Processes describe the maintained contract, the decisions a repository needs
 to make, and how to verify the result. Add a process here when several
