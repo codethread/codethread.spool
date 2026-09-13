@@ -12,7 +12,10 @@ Tracking: Codethread epic `w3oqr`, coordinator feature `x4y0z`, notes task
 `kejtr`. The user requested delegation through `strand agent`; delegated
 execution uses Pi. Built-in Codex/ChatGPT delegates were stopped.
 
-## Current handoff (22:21 UTC)
+## Handoff snapshot (23:02 UTC)
+
+Read the latest note on `x4y0z` and the local coordinator tasks before acting.
+Their current run and workflow state takes precedence over this dated snapshot.
 
 The user-reported Pi startup incident is accepted. Actual Pi from canonical
 Agents minted and recovered its native identity after a supported replacement
@@ -26,26 +29,36 @@ into a removed directory.
 Skein is locally coordinated by Sol/high `x6qtq` on `0yu6i`. Terra attempts
 `nq6br` and `idjf4` delivered useful work but both exited while owned children
 still required coordination. The second exited after a 45-second timeout despite
-an explicit continuation instruction. The new Sol seat adopts sole writer
-`xwpgl` on `yb7yg` / `1dhjs`; it owns acceptance and the remaining eligible P2s.
+an explicit continuation instruction. The Sol seat owns acceptance and the
+remaining eligible P2s. Policy source reached `dd51e2de` with quality passing;
+sole Sol `giptn` now repairs the remaining review findings and the generated
+review-command timeout. Markdown source `991e3995` is accepted at task level and
+awaits shared land. Repeated optional full-review setup failures remain honest;
+the coordinator is aligning delivery with the declared shared land/basic-review
+requirements instead of repeating the same failed setup.
 The timestamp repair is accepted and landed as PR478 / `ddc63972`. Oracle
 `eq993` accepted closure of obsolete maintained-dependency wrappers and bounded
 the remaining local review-policy work.
 
 Devflow's local coordinator completed discovery source feature `peytg`: PR26 /
 `47cf5f3` corrects two unsupported prime pointers. Its source and empty coordinator
-worktrees are cleaned. Root task `666xq` still owns installed adoption, preferably
-combined with the already needed Harnesses `ta2ip` consumer wave after checking
-the full dependency range. Source completion does not establish installed help.
+worktrees are cleaned. Its installed guidance is also accepted after the exact
+Devflow Weaver replacement `27934` to `96600`. All other observed Weaver PIDs and
+the Mill stayed unchanged. Root task `666xq` still owns remaining consumer
+adoption, preferably with Harnesses `ta2ip`. Audit `99ce6` identifies the paired
+Devflow pins and full source range; Skein consumes them through Codethread config.
 
 Harnesses local Sol coordinator `vm5zk` owns the identity epic. Its replacement
 Weaver successfully passed actual unmanaged Pi startup checks, but older managed
 runs failed completion under the newly loaded backend because they lacked the
 new reservation metadata. P1 `b9jg1` is now explicitly owned by local `vm5zk`
 through rework, review, normal land, and compatible Weaver-only deployment.
-Direct Oracle `121ja` rejected candidate `bf177b95` for a legacy native-resume
-regression and insufficient durable invocation fencing. Sole Sol `tqaho` on
-`vh9jx` is repairing those findings. Preserve the recovered standalone source
+Candidate `0029f553` repaired the native-resume and invocation-fencing findings.
+Fresh direct Oracle `t2eme` found one remaining P2: invalid legacy identity still
+blocks honest negative custody settlement. Sole Sol `duz60`, continuing `tqaho`
+on reopened task `vh9jx`, is repairing it. Audit `ywp6w` separately maps remaining
+native-guidance transport work in `g23us`; startup identity is already shipped.
+Preserve the recovered standalone source
 checkout and backup; confirm the landing branch/main layout after writers and
 reviewers settle. The running Mill and historical run outcomes remain intact.
 
@@ -54,7 +67,9 @@ worker checks. Its original Sol `0mvqk` exited normally but encountered that sam
 legacy completion error. Integration task `7i8o9` waits for accepted `b9jg1`,
 then needs a fresh eligible Sol run in the retained source worktree. Follow-up
 Oracle `8e3c4` used prohibited native helpers; it was stopped, and that evidence
-is excluded. Parent owns a new direct-only Oracle after final integration. The
+is excluded. Parent owns the waiting feature and a new direct-only Oracle after
+final integration. Source task `6wndt` records only implementation; old review
+task `f265p` is superseded, and validation `q8zbg` now depends on integration. The
 four user examples remain untouched. Hourly scheduling is a cadence, not
 evidence that an agent is dead.
 

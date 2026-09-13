@@ -35,6 +35,11 @@ evidence is in [coordinator-field-notes.md](coordinator-field-notes.md).
    blockers against maintained current source. Do not promote refinement or
    pursue the P3/P4 tail without a reason tied to the requested outcome.
 
+Assignment policies are frozen worker guidance. The shipped `stop-on-complete`
+and `close-on-complete` policies do not automatically close a target or restart
+an agent that exits early. An alias alone therefore cannot guarantee continuity;
+the coordinator must verify completion or arrange an acknowledged handoff.
+
 ## Sustain the loop
 
 Use a bounded await, normally 45 seconds with a longer request deadline. After
@@ -64,6 +69,13 @@ or contract decision unresolved. Give it an exact question and immutable source
 range. Use the required ordinary review and quality gates; do not add repeated
 reviews or unchanged suites without a new concern. Reject helper-based evidence
 when the task requires a direct review.
+
+Check the actual declared acceptance path. An optional review workflow must not
+become an invented prerequisite for the required shared land/basic-review path.
+Keep failed workflow history honest and resolve material findings either way.
+If generated review setup times out, inspect the generated command: increasing
+the parent's await deadline does not change a child's invocation deadline.
+Candidate template edits also do not update an already loaded Weaver definition.
 
 Inspect the installed shared `land` and merge-queue procedures. Drive their
 quality, review, resolution/sign-off, FIFO merge, card completion, and cleanup.
