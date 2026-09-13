@@ -18,9 +18,6 @@
                  {:ns 'ct.spools.devflow
                   :after [:millhouse/spools-workflow]
                   :required? true})
-(runtime/module! runtime :millhouse/spools-kanban
-                 {:ns 'millhouse.spools.kanban
-                  :required? true})
 (runtime/module! runtime :devflow/kanban-adapter
                  {:ns 'ct.spools.devflow-kanban-adapter
                   :after [:devflow

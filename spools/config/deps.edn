@@ -3,14 +3,17 @@
                                  :git/sha "310368dff9174bd889ad21d4ed8196952684eaf9"
                                  :deps/root "spools/batteries"}
         millhouse.spools/workflow {:git/url "https://github.com/codethread/millhouse.spool.git"
-                                   :git/sha "f487eb42ea9523e8bd405e64a7c319013217d988"
+                                   :git/sha "3132c8f7f10455c893da28fef0e9ca0047560f82"
                                    :deps/root "spools/workflow"}
         millhouse.spools/identity {:git/url "https://github.com/codethread/millhouse.spool.git"
-                                   :git/sha "f487eb42ea9523e8bd405e64a7c319013217d988"
+                                   :git/sha "89e5e32f8a948547c233d5dd183bb73f9c5abe4a"
                                    :deps/root "spools/identity"}
         millhouse.spools/kanban {:git/url "https://github.com/codethread/millhouse.spool.git"
-                                 :git/sha "f487eb42ea9523e8bd405e64a7c319013217d988"
+                                 :git/sha "3132c8f7f10455c893da28fef0e9ca0047560f82"
                                  :deps/root "spools/kanban"}
+        millhouse.spools/land {:git/url "https://github.com/codethread/millhouse.spool.git"
+                               :git/sha "89e5e32f8a948547c233d5dd183bb73f9c5abe4a"
+                               :deps/root "spools/land"}
         ct.spools/harnesses {:git/url "https://github.com/codethread/harnesses.spool.git"
                              :git/sha "e8a26477852216bca2579b050a2356c86af132b7"}
         codethread/devflow {:git/url "https://github.com/codethread/devflow.spool.git"
@@ -23,4 +26,12 @@
                   :extra-deps {io.millstrand/millstrand
                                {:git/url "https://github.com/codethread/millstrand.git"
                                 :git/sha "310368dff9174bd889ad21d4ed8196952684eaf9"}}
-                  :main-opts ["-m" "ct.spools.codethread.config-test"]}}}
+                  :main-opts ["-m" "ct.spools.codethread.config-test"]}
+           :consumer-smoke
+           {:extra-paths ["test"]
+            :extra-deps {io.millstrand/millstrand
+                         {:git/url "https://github.com/codethread/millstrand.git"
+                          :git/sha "310368dff9174bd889ad21d4ed8196952684eaf9"}}
+            :main-opts
+            ["-m"
+             "ct.spools.codethread.shared-landing-consumer-smoke"]}}}

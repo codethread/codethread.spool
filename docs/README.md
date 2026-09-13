@@ -8,6 +8,9 @@ for its own layout and links back to this documentation.
 
 - [Clojure lint and editor configuration](processes/kondo-and-lsp.md): macro
   exports, dependency imports, Make commands, and clojure-lsp verification.
+- [Shared review and landing](processes/shared-landing.md): Kanban/worktree
+  discipline, review evidence, FIFO landing, consumer activation, and rollout
+  verification.
 
 Processes describe the maintained contract, the decisions a repository needs
 to make, and how to verify the result. Add a process here when several
