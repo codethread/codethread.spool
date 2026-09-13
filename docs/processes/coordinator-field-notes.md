@@ -434,3 +434,71 @@ patch/tree equivalence and preservation of the user-only Mill rule. Consumer
 pins remain blocked until that acceptance is real. Do not fabricate a paused
 gate, forge a past acceptance, or revert an otherwise valid result merely to
 make the historical workflow resemble the intended sequence.
+
+## Exercise the refined role and make a bounded fallback
+
+Skein's Sol coordinator `3qdbe` reached a read-only worker await after rebasing
+the formatting candidate onto the landed user-only Mill instruction. The parent
+settled that coordinator and handed repository coordination to refined Luna
+pilot `2gs5l` (`merry-smart-yak`), preserving source writer `ocx6k`, quality gate
+`43ov6`, reviews and worktrees. Its first observations correctly distinguished
+native semantic progress from a stale registry timestamp and timed-out await.
+The umbrella and coordination task pointers were advanced immediately.
+
+The alias landing pilot received a bounded Terra fallback after repeated
+review-evidence corrections. It had first forwarded a false API review claim,
+then later cancelled required Oracle `7u47g` as "optional" and ended without its
+verdict. That Oracle had actual read/bash activity followed by an untracked
+native subagent wait; `process-phase=starting` did not establish provider failure.
+The Oracle's opening statement was not acceptance. Record these concrete events
+without generalizing them into a claim that every Luna assignment fails: the
+provider-argv and eight-repo instruction pilots completed accepted work.
+
+The fresh fallback is task `negj4`, initially run `1mehk`, Pi/Terra high with the
+same refined shared runbook. The parent selected the existing fallback candidate
+only for publication, verified the frozen Terra/high launch, and restored the
+prior runtime flags. Other worlds and successful Luna sessions were not changed.
+The fallback must produce an actual required Oracle verdict, retain the honest
+post-landing chronology, and clean its own audit checkout only after settlement.
+
+## Preflight native continuation and announce ownership first
+
+A verified usable native session does not prove that its frozen working
+directory still exists. After land removed the source checkout, pin coordinator
+`ah23n` resumed the settled source coordinator as `pe45i`. The launch failed
+before any provider started because its retained cwd was gone. It retained a
+pending process handle and `no-terminal-evidence`; exact stop did not establish
+settlement. Do not forge that evidence or apply `retry!` blindly: current
+Harnesses rejects unsettled and request-bound in-place retries. Bounded Sol
+diagnostic `17u1h`, task `zotlf`, owns read-only recovery/source-contract diagnosis.
+
+Before native resume, check both the reported session eligibility and the actual
+cwd, required checkout/ref and remaining owner resources. Restore an owned
+disposable cwd only through a supported, evidenced recovery; otherwise use an
+explicitly authorized fresh task/assignment in an available workspace. Preserve
+the original failure record and separate its custody issue from source acceptance.
+
+The parent was preparing its fallback while the pin coordinator attempted that
+source recovery. The parent should have published exclusive handoff ownership
+before dispatching. Record this as a coordination race, not a model-quality
+failure. Once the parent took ownership, `ah23n` preserved the correct pin gate,
+stopped further recovery attempts, and reported the concrete external blocker.
+
+## Concurrent roles need distinct tracked targets
+
+One active managed run owns a target. The parent's first Terra prompt explicitly
+required its Oracle to use the coordinator's own `negj4` target; the runtime
+correctly rejected that concurrent assignment. Terra read the request back,
+preserved its healthy coordinator and audit checkout, and reported the conflict.
+That was correct behavior under an over-specific parent instruction.
+
+Create a real reviewer child task before dispatch. Dedicated target `fa2se` now
+belongs to the required Oracle, while the Terra continuation owns `negj4`.
+Context records the relationship; it does not replace `--target`. Do not drop the
+target or stop the healthy coordinator to work around exclusivity. Keep each
+task's current run pointer and the parent feature's primary ownership distinct.
+
+Also distinguish direct and inherited alias resolution: `sol-high` selects
+`sol`, which selects Pi. A preflight that requires every alias's immediate
+parent to be `pi` incorrectly rejects this valid Sol/Pi route. Follow the selected
+alias chain to the available concrete harness, then verify the published run.
