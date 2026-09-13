@@ -37,8 +37,15 @@
     (is (= "310368dff9174bd889ad21d4ed8196952684eaf9"
            (get-in config-deps ['io.millstrand/batteries :git/sha])))
     (is (not (contains? config-deps 'millstrand.spools/batteries)))
-    (is (= "f487eb42ea9523e8bd405e64a7c319013217d988"
-           (get-in config-deps ['millhouse.spools/workflow :git/sha])))
+    (doseq [[library sha] [['millhouse.spools/workflow
+                            "3132c8f7f10455c893da28fef0e9ca0047560f82"]
+                           ['millhouse.spools/identity
+                            "89e5e32f8a948547c233d5dd183bb73f9c5abe4a"]
+                           ['millhouse.spools/kanban
+                            "3132c8f7f10455c893da28fef0e9ca0047560f82"]
+                           ['millhouse.spools/land
+                            "89e5e32f8a948547c233d5dd183bb73f9c5abe4a"]]]
+      (is (= sha (get-in config-deps [library :git/sha]))))
     (is (= "e8a26477852216bca2579b050a2356c86af132b7"
            (get-in config-deps ['ct.spools/harnesses :git/sha])))
     (is (not-any? #{'ct.spools/agent-run 'ct.spools/delegation}
@@ -81,8 +88,10 @@
           (is (some #{"spools/*/src/**"}
                     (:glob (some #(when (= "source-form" (:name %)) %)
                                  catalog))))))
-      (testing "executor activation is deferred to the consumer"
+      (testing "landing is active while executor activation stays deferred"
         (current/with-runtime rt
+          (is (some? (workflow/workflow-definition :review)))
+          (is (some? (workflow/workflow-definition :land)))
           (is (not (contains? (set (keys (workflow/executors))) :agent))))))))
 
 (deftest consumer-modules-reconcile-before-explicit-executor-activation
@@ -126,7 +135,9 @@
           status (runtime/status rt)
           aliases (weaver/op! rt 'agent ["list"])
           reviewer-result (weaver/op! rt 'agent ["reviewers"])
-          workflow-result (weaver/op! rt 'workflow ["list"])]
+          workflow-result (weaver/op! rt 'workflow ["list"])
+          land-result (weaver/op! rt 'workflow ["show" "land"])
+          op-names (set (map :name (weaver/ops rt)))]
       (is (= {:status :applied :mode :full}
              (select-keys (:last-refresh status) [:status :mode])))
       (is (every? #{:applied}
@@ -140,8 +151,11 @@
                   ["coordinator" "grunt" "luna" "oracle" "reviewer"]))
       (is (= ["docs-and-tests" "runtime-correctness" "source-form"]
              (mapv :name (:reviewers reviewer-result))))
-      (is (= #{"intake" "publish-spool-kondo" "ralph-iterate"}
-             (set (map :name (:definitions workflow-result))))))))
+      (is (= #{"intake" "land" "publish-spool-kondo" "ralph-iterate" "review"}
+             (set (map :name (:definitions workflow-result)))))
+      (is (= "land" (:name land-result)))
+      (is (= "reviewer" (get-in land-result [:params :defaults :reviewer])))
+      (is (contains? op-names "merge-queue")))))
 
 (deftest optional-workspace-config-keeps-the-devflow-kanban-election
   (t/with-weaver-world [ctx {:storage :sqlite-memory :deps-edn deps-edn}]
@@ -151,8 +165,6 @@
       (codethread/register! rt)
       (runtime/module! rt :devflow {:ns 'ct.spools.devflow
                                     :after [:millhouse/spools-workflow]})
-      (runtime/module! rt :millhouse/spools-kanban
-                       {:ns 'millhouse.spools.kanban})
       (runtime/module! rt :devflow/kanban-adapter
                        {:ns 'ct.spools.devflow-kanban-adapter
                         :after [:devflow :millhouse/spools-kanban

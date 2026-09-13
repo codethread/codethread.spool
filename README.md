@@ -11,12 +11,13 @@ Sibling repositories should implement and link to these procedures according to
 their own layout:
 
 - [Clojure lint and editor configuration](docs/processes/kondo-and-lsp.md)
+- [Shared review and landing](docs/processes/shared-landing.md)
 
 ## Roots
 
 | Root | Namespace | Purpose |
 | --- | --- | --- |
-| `spools/config` | `ct.spools.codethread.bootstrap` | Register Harnesses, shared aliases and reviewers, then activate the Workflow `:agent` executor |
+| `spools/config` | `ct.spools.codethread.bootstrap` | Register Harnesses, shared aliases and reviewers, shared landing, then activate the Workflow `:agent` executor |
 | `spools/ralph` | `ct.spools.codethread.ralph` | Publish the one-card-per-iteration `ralph-iterate` workflow and `ralph` executable |
 
 Each consumer composes the roots it needs in `.millstrand/deps.edn` and
@@ -37,7 +38,8 @@ The roots are relative to `.millstrand`. Git consumers should use pinned
 pins `ct.spools/harnesses` directly; it has no dependency on the superseded
 `agent-harness.spool` roots.
 
-Register the shared agent surface before consumer-specific configuration:
+Register the shared agent and landing surface before consumer-specific
+configuration:
 
 ```clojure
 (require '[ct.spools.codethread.bootstrap :as codethread])
@@ -45,9 +47,10 @@ Register the shared agent surface before consumer-specific configuration:
 ```
 
 `register!` owns ordering for the Harnesses providers and command surface, the
-shared aliases, and shared reviewer lenses. It deliberately does not activate
-the asynchronous Workflow `:agent` executor. Register repository-specific
-aliases, flags, and workflows next, then activate the executor last:
+shared aliases and reviewer lenses, and the shared Millhouse landing workflow.
+It deliberately does not activate the asynchronous Workflow `:agent` executor.
+Register repository-specific aliases, flags, and workflows next, then activate
+the executor last:
 
 ```clojure
 (codethread/register-executor! runtime [:consumer/aliases
@@ -63,9 +66,16 @@ consumers must not register its namespace separately.
 
 The stable catalog module ids, in order, are
 `:millhouse/spools-identity`, `:millhouse/spools-workflow`,
-`:millstrand/spools-harnesses`, `:codethread/config-agents`, and
-`:codethread/config-reviewers`. Repository-specific workflows are not
-activated by the catalog bootstrap.
+`:millstrand/spools-harnesses`, `:codethread/config-agents`,
+`:codethread/config-reviewers`, `:millhouse/spools-kanban`, and
+`:millhouse/spools-land`.
+Repository-specific workflows are not activated by the catalog bootstrap.
+
+Consumers that need landing without the Codethread agent catalog can depend on
+the independent `millhouse.spools/land` root and register
+`millhouse.spools.land.spool` after Millhouse Workflow and Kanban. The root
+does not depend on Harnesses provider code; its reviewer seat is ordinary
+workflow data, and the consumer supplies the `:agent` executor.
 
 The preferred role aliases are `luna`, `oracle`, `grunt`, `reviewer`, and
 `coordinator`; useful effort-specific handles such as `luna-low`, `terra-med`,
@@ -79,12 +89,30 @@ Inspect the resulting surface with:
 ```text
 strand agent list
 strand agent reviewers
+strand workflow list
+strand workflow show land
+strand help merge-queue
 ```
+
+The rollout smoke evaluates actual consumer `.millstrand/deps.edn`,
+`.millstrand/init.clj`, and referenced workspace files in disposable in-memory
+worlds. It applies local dependency overrides only inside those worlds and
+checks module activation, the queue command, mandatory basic review, and all
+three landing definitions:
+
+```text
+cd spools/config
+clojure -M:consumer-smoke MILLHOUSE CODETHREAD HARNESSES DEVFLOW CONSUMER...
+```
+
+The first four paths identify producer checkouts. Pass each consumer checkout
+as a remaining argument. The smoke never starts or mutates a canonical Weaver.
 
 The optional `ct.spools.codethread.config` module still selects this
 repository's Batteries help rendering and the external Devflow Kanban adapter.
-Consumers that want it must activate Batteries, Devflow, Kanban, and the
-adapter first. This election stays outside the bootstrap so a catalog consumer
+Consumers that want it must activate Batteries, Devflow, and the adapter first;
+Kanban is already part of the bootstrap. This election stays outside the
+bootstrap so a catalog consumer
 does not inherit Devflow workflows merely by selecting shared agents.
 
 Headless Workflow gates use waiter `:agent` with `harness/alias` and an

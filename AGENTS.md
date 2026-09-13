@@ -21,7 +21,11 @@ strand --workspace ~/dev/projects/harnesses.spool/.millstrand help
 
 ## Working here
 
-- Always track work through a kanban card, in a worktree — `strand prime kanban`.
+- Run `strand prime kanban`, claim a feature card, and use its recorded worktree.
+- Never edit `main` or push directly to `main`; feature-branch pushes are expected.
+- Inspect `strand workflow show land` and `strand prime merge-queue`, then drive
+  shared `land` for quality, one basic review, FIFO merge, card completion, and
+  branch/worktree cleanup.
 
 ## Rules
 
