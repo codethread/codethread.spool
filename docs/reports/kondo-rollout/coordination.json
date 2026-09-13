@@ -1,0 +1,111 @@
+{
+  "epic": "qnmh1",
+  "coordinator": "alri9",
+  "goal": "Every sibling spool has passing Kondo exports/import/lint/editor proof, reviewed main changes and restarted affected workers",
+  "tasks": {
+    "research": "qflyz",
+    "review": "img2u",
+    "landing": "t6guj",
+    "restarts": "lr2mx",
+    "report": "av1ws"
+  },
+  "initial_runs": {
+    "millstrand": "ask2p",
+    "millhouse": "2jvqe",
+    "research": "zei0s"
+  },
+  "repositories": [
+    {
+      "repo": "skein-src",
+      "card": "cilg3",
+      "worktree": "/Users/ct/dev/projects/skein-src__kondo-rollout",
+      "branch": "rollout/kondo",
+      "state": "review_correction",
+      "runs": [
+        "ask2p",
+        "t8hvl"
+      ]
+    },
+    {
+      "repo": "millhouse.spool",
+      "card": "1bmv4",
+      "worktree": "/Users/ct/dev/projects/millhouse.spool__kondo-rollout",
+      "branch": "rollout/kondo",
+      "state": "implementation_review",
+      "runs": [
+        "2jvqe"
+      ]
+    },
+    {
+      "repo": "codethread.spool",
+      "card": "kkoky",
+      "worktree": "/Users/ct/dev/projects/codethread.spool__kondo-consumer",
+      "branch": "rollout/kondo",
+      "state": "landed",
+      "main_commit": "872026f15b8a85fec8f7a3534fe65f1574814c96",
+      "runs": [
+        "sjjzj",
+        "zjg78"
+      ],
+      "restart": "pending"
+    },
+    {
+      "repo": "harnesses.spool",
+      "card": "i01vo",
+      "worktree": "/Users/ct/dev/projects/harnesses.spool__kondo-rollout",
+      "branch": "rollout/kondo",
+      "state": "queued"
+    },
+    {
+      "repo": "agent-harness.spool",
+      "card": "pttl5",
+      "worktree": "/Users/ct/dev/projects/agent-harness.spool__kondo-rollout",
+      "branch": "rollout/kondo",
+      "state": "queued"
+    },
+    {
+      "repo": "devflow.spool",
+      "card": "mzs31",
+      "worktree": "/Users/ct/dev/projects/devflow.spool__kondo-rollout",
+      "branch": "rollout/kondo",
+      "state": "queued"
+    },
+    {
+      "repo": "dresser.spool",
+      "card": "xgh7s",
+      "worktree": "/Users/ct/dev/projects/dresser.spool__kondo-rollout",
+      "branch": "rollout/kondo",
+      "state": "implementation",
+      "runs": [
+        "phv4g"
+      ]
+    },
+    {
+      "repo": "notebook.spool",
+      "card": "scr01",
+      "worktree": "/Users/ct/dev/projects/notebook.spool__kondo-rollout",
+      "branch": "rollout/kondo",
+      "state": "queued"
+    },
+    {
+      "repo": "standup.spool",
+      "card": "2qqqf",
+      "worktree": "/Users/ct/dev/projects/standup.spool__kondo-rollout",
+      "branch": "rollout/kondo",
+      "state": "queued"
+    },
+    {
+      "repo": "tidy.spool",
+      "card": "88k4i",
+      "worktree": "/Users/ct/dev/projects/tidy.spool__kondo-rollout",
+      "branch": "rollout/kondo",
+      "state": "queued"
+    }
+  ],
+  "common_instructions": "This is implementation under ecosystem epic qnmh1, coordinated by feature alri9. Track via strand --workspace /Users/ct/dev/projects/codethread.spool/.millstrand. Read repository AGENTS.md and applicable Clojure/review/test/robustness skills. Claim your assigned feature (your generated identity), create task slices before execution and keep detailed task notes plus lean feature handover. Work ONLY in your supplied worktree and do not edit sibling repositories. No new agents unless coordinator explicitly asks; do your bounded repo work yourself. User authorizes source fixes, commits, dependency updates, all-main landing and restarts, but coordinator sequences main landing and shared restarts: commit on your branch, do not merge/push main or restart any shared worker. Never tag Millstrand V1. Workspace tests must use disposable mktemp dirs with explicit --workspace, never shared .millstrand. Kill only exact owned PIDs. Preserve unrelated changes. Finish by leaving feature in review, return commit(s), concise source changes, exact validation results/limits and required downstream pins; do not close feature until coordinator accepts.\nCommon contract: root Make targets kondo-import (resolved-classpath --copy-configs), kondo-lint (lint relevant source/test/workspace using imports), kondo (ordered import then lint). Only macro-owning package roots need resources/clj-kondo.exports containing their own mappings; pure consumers must not add empty exports or duplicate producer mappings. Cover nested package roots and relevant aliases/workspace bases deliberately; avoid importing from unrelated classpaths or stale user caches. Do not blindly suppress new lint failures. Keep existing quality meaningful and include Kondo where appropriate. Use actual producer APIs in clean consumer proof, including generated handler names. Prior investigation /Users/ct/dev/projects/codethread.spool__kondo-investigation/docs/reports/kondo-investigation/recommendation.md proves packaging already works; erroneous initial hook defect was withdrawn (Chime <name>-rule and executor <name>-stalled?). Research task qflyz will provide headless LSP guidance; read its latest notes later. Prefer clear small scripts and existing tooling over new frameworks. All aggregate loops must stop on any failed root. Classpath assignments must succeed before Kondo runs. Use -Srepro -Spath before the selected -M alias. make -j kondo must complete all imports before lint; kondo-lint is source-only. See editor-verification.md for isolated per-package LSP checks.",
+  "updated_at": "2026-09-13T09:45:00Z",
+  "continuations": {
+    "millstrand_review": "t8hvl",
+    "codethread_review": "zjg78"
+  }
+}

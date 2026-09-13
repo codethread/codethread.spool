@@ -78,7 +78,7 @@ clojure-lsp diagnostics --raw \
 `-Srepro` prevents user-level tools.deps configuration from altering the
 resolved dependency graph. For linting test sources, change only the declared
 classpath command to the package's existing test alias (for example
-`["clojure" "-Srepro" "-M:test" "-Spath"]`) and lint the matching `test`
+`["clojure" "-Srepro" "-Spath" "-M:test"]`) and lint the matching `test`
 directory. Do not add source paths by hand when `deps.edn` already expresses
 them; use `:source-aliases` only for a declared alias whose extra source paths
 are required by the editor.
@@ -91,20 +91,21 @@ project-specific `:project-specs` and `:source-aliases` in that package root's
 
 ## Common Make contract
 
-Every Clojure-bearing package root should expose the following root-local
-semantics, with recipe paths chosen deliberately for that root:
+Every Clojure-bearing repository should expose the following semantics, with
+recipe paths chosen deliberately for each package root:
 
 | Target | Required behavior |
 | --- | --- |
 | `kondo-import` | Create `.clj-kondo`, resolve that package's selected classpath with `clojure -Srepro -Spath` (or its declared test alias), clear only `.clj-kondo/imports`, then run `clj-kondo --repro --lint "$classpath" --copy-configs --skip-lint`. |
-| `kondo-lint` | Depend on `kondo-import`; lint exactly the package source and relevant test/workspace paths with `clj-kondo --repro --parallel --lint`. |
-| `kondo` | Ordered aggregate: `kondo-import kondo-lint`. |
+| `kondo-lint` | Lint exactly the package source and relevant test/workspace paths with existing imports and `clj-kondo --repro --parallel --lint`. |
+| `kondo` | Complete `kondo-import` before invoking `kondo-lint`, including under parallel Make. Import each selected basis once. |
 
 A repository-level aggregate may invoke these targets once per nested package
 root. It must not resolve one unrelated root's classpath and import its configs
 into another root. The import target is a refresh operation: it is required
-when an effective dependency/export changes, while ordinary source-only lint
-still runs the import first for deterministic CI.
+when an effective dependency/export changes. CI and ordinary quality should
+invoke `kondo` so import happens before lint; `kondo-lint` permits a deliberate
+source-only rerun against existing imports.
 
 Owner roots expose only their own macro mappings under
 `resources/clj-kondo.exports/<group>/<artifact>/`. Consumer roots only retain
