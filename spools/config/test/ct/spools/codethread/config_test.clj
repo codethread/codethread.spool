@@ -43,7 +43,7 @@
     (doseq [[library sha] [['millhouse.spools/workflow
                             "3132c8f7f10455c893da28fef0e9ca0047560f82"]
                            ['millhouse.spools/identity
-                            "89e5e32f8a948547c233d5dd183bb73f9c5abe4a"]
+                            "b1955a96ad91bf2909a407859fca1565ec4b9fdb"]
                            ['millhouse.spools/kanban
                             "3132c8f7f10455c893da28fef0e9ca0047560f82"]
                            ['millhouse.spools/land
