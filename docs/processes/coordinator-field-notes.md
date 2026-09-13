@@ -636,3 +636,54 @@ preserved. Terra inspected the actual records: `qp1gc` was already passed,
 It advanced the real reviewer/sign-off frontier and observed the actual final
 quality process. Record this concrete scheduling improvement; full consumer
 delivery still needs its own final acceptance.
+
+
+## Source acceptance, activation and continued custody
+
+Shared config feature `cb0vb` passed its fresh Oracle and normal review and landed
+as Codethread PR17, `45a49d5`. Parent then replaced only the Codethread Weaver:
+PID `64461` became `11489`, generation `ded2b3d7`. Live command help now exposes
+`identity startup` from immutable Identity `b1955a96`. Mill PID `64448` and its
+start time remained unchanged. This is successful backend activation in one
+world; it does not establish that the reported Agents entry point is fixed.
+
+Notes direct pin PR4 landed as `431d8bf` with the original dirty-file manifest
+preserved. Agents PR6 candidate `5508d47a` independently passed real native Pi
+mint, recovery, one prompt block and no-write conflict checks in a private
+backend. Its fresh Oracle accepted it before normal landing began. Both members
+must be prepared before replacing their shared `dev` pool, followed by an
+ordinary unmanaged Pi startup from the user's actual Agents directory.
+
+Do not repeat expensive proofs merely because another workflow seat is reading
+the same immutable change. Carry the accepted evidence forward and rerun only
+what a changed commit, failed check or new finding requires. On this 10-CPU,
+16-GiB host, measured load exceeded 24 with about 10 GiB of swap in use. Admit
+heavy suites according to actual process custody; keep lightweight review,
+publication and cleanup moving while an existing suite finishes.
+
+Terra pilot `pcjya` correctly repaired stale-gate scheduling but then exited with
+remaining consumer delivery unfinished. Its authoritative settlement preceded
+the Codethread Weaver replacement. Parent verified its durable cwd and resumed
+the same frozen Terra/high session as `50tho`, with an explicit instruction to
+continue through healthy bounded timeouts. A final message claiming continued
+activity cannot substitute for a live run. Record the exit honestly; do not blame
+the later service replacement or silently recreate lost custody.
+
+## Orphaned interactive runs need a supported lifecycle outcome
+
+The user's four examples remain active after stop was requested because their
+interactive launchers are gone and cannot submit completion. Harnesses feature
+`0xq77` now owns the repair, with Sol/Pi `0mvqk` in its own recorded worktree and
+tracked Oracle direction on task `f265p`. Three examples belong to Harnesses;
+`p9a8g` belongs to Millhouse. Repository-local inspection matters even when the
+user lists them together.
+
+The proposed default sweep cadence is 60 minutes. Cadence or age alone does not
+prove process death. Reconciliation must protect live or idle agents, resumed
+sessions, reused PIDs and cases with unknown remote custody. Provide a supported
+inspect/dry-run/reconcile path with idempotent, auditable outcomes. Retain run and
+identity history while pruning stale active projections. When no exit was
+observed, represent orphaning or abandonment explicitly; never fabricate an
+exit code, call a private completion hook as a repair, or edit live database
+rows. Source work and private fixtures precede applying the accepted operation
+to the user's actual records. The Mill remains running throughout.
