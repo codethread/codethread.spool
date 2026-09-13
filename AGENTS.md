@@ -29,6 +29,7 @@ strand --workspace ~/dev/projects/harnesses.spool/.millstrand help
 
 ## Rules
 
+- Never stop the mill; only the user may stop it.
 - **Never launch work in or use `../agent-harness.spool`** — direct all work and usage to `../harnesses.spool`.
 - **Never restart a running weaver** without explicit user sign-off
 - **Kill by PID only** — never `pkill -f <pattern>` (prompts can quote the pattern and strafe siblings).
