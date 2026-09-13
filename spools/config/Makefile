@@ -10,7 +10,7 @@ kondo-import:
 	@echo "==> spools/config clj-kondo imports"
 	@rm -rf .clj-kondo/imports
 	@mkdir -p .clj-kondo
-	@classpath="$$(clojure -Srepro -Spath -A:test)"; \
+	@classpath="$$(clojure -Srepro -Spath -M:test)" && \
 	$(CLJ_KONDO) --repro --lint "$$classpath" --copy-configs --skip-lint
 
 kondo-lint:

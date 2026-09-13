@@ -10,7 +10,7 @@ kondo-import:
 	@echo "==> .millstrand clj-kondo imports"
 	@rm -rf .clj-kondo/imports
 	@mkdir -p .clj-kondo
-	@classpath="$$(clojure -Srepro -Spath)"; \
+	@classpath="$$(clojure -Srepro -Spath)" && \
 	$(CLJ_KONDO) --repro --lint "$$classpath" --copy-configs --skip-lint
 
 kondo-lint:

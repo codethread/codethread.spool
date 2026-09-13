@@ -15,12 +15,14 @@ kondo:
 	$(MAKE) kondo-lint
 
 kondo-import: check-clj-kondo
-	@for root in $(PROJECT_ROOTS); do \
+	@set -e; \
+	for root in $(PROJECT_ROOTS); do \
 		$(MAKE) -C "$$root" kondo-import; \
 	done
 
 kondo-lint: check-clj-kondo
-	@for root in $(PROJECT_ROOTS); do \
+	@set -e; \
+	for root in $(PROJECT_ROOTS); do \
 		$(MAKE) -C "$$root" kondo-lint; \
 	done
 
@@ -48,6 +50,7 @@ check-clj-kondo:
 	fi
 
 clean-kondo:
-	@for root in $(PROJECT_ROOTS); do \
+	@set -e; \
+	for root in $(PROJECT_ROOTS); do \
 		$(MAKE) -C "$$root" clean-kondo; \
 	done
