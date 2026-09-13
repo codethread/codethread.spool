@@ -20,21 +20,45 @@
       "card": "cilg3",
       "worktree": "/Users/ct/dev/projects/skein-src__kondo-rollout",
       "branch": "rollout/kondo",
-      "state": "review_correction",
+      "state": "landed",
       "runs": [
         "ask2p",
         "t8hvl"
-      ]
+      ],
+      "main_commit": "2c08ef3461fb525ec45095f834227e49aaf8aa1f",
+      "restart": "pending",
+      "validation": {
+        "kondo_roots": 4,
+        "lsp_errors": 0,
+        "lsp_warnings": 0,
+        "tests": 794,
+        "assertions": 4911,
+        "focused_tests": 12,
+        "focused_assertions": 86,
+        "other": "Go tests, E2E, formatting, strict lint, reflection, docs and CI config passed; make -j8 kondo independently passed on main"
+      }
     },
     {
       "repo": "millhouse.spool",
       "card": "1bmv4",
       "worktree": "/Users/ct/dev/projects/millhouse.spool__kondo-rollout",
       "branch": "rollout/kondo",
-      "state": "implementation_review",
+      "state": "landed",
       "runs": [
         "2jvqe"
-      ]
+      ],
+      "main_commit": "f1cd55b2f59dd99df6a36dcf64317406ed5024b1",
+      "restart": "pending",
+      "validation": {
+        "kondo_roots": 7,
+        "lsp_errors": 0,
+        "lsp_warnings": 0,
+        "tests": 395,
+        "assertions": 2982,
+        "focused_tests": 3,
+        "focused_assertions": 34,
+        "other": "make quality and make -j8 kondo passed; actual seven-root LSP diagnostics passed"
+      }
     },
     {
       "repo": "codethread.spool",
@@ -47,21 +71,35 @@
         "sjjzj",
         "zjg78"
       ],
-      "restart": "pending"
+      "restart": "pending",
+      "validation": {
+        "kondo_roots": 3,
+        "lsp_errors": 0,
+        "lsp_warnings": 0,
+        "tests": 6,
+        "assertions": 52,
+        "other": "Go format/vet/tests/build, parallel Kondo, controlled resolver and recursive failure checks passed; coordinator reran Kondo on main"
+      }
     },
     {
       "repo": "harnesses.spool",
       "card": "i01vo",
       "worktree": "/Users/ct/dev/projects/harnesses.spool__kondo-rollout",
       "branch": "rollout/kondo",
-      "state": "queued"
+      "state": "implementation",
+      "runs": [
+        "yfrjy"
+      ]
     },
     {
       "repo": "agent-harness.spool",
       "card": "pttl5",
       "worktree": "/Users/ct/dev/projects/agent-harness.spool__kondo-rollout",
       "branch": "rollout/kondo",
-      "state": "queued"
+      "state": "implementation",
+      "runs": [
+        "1t0u5"
+      ]
     },
     {
       "repo": "devflow.spool",
@@ -103,9 +141,11 @@
     }
   ],
   "common_instructions": "This is implementation under ecosystem epic qnmh1, coordinated by feature alri9. Track via strand --workspace /Users/ct/dev/projects/codethread.spool/.millstrand. Read repository AGENTS.md and applicable Clojure/review/test/robustness skills. Claim your assigned feature (your generated identity), create task slices before execution and keep detailed task notes plus lean feature handover. Work ONLY in your supplied worktree and do not edit sibling repositories. No new agents unless coordinator explicitly asks; do your bounded repo work yourself. User authorizes source fixes, commits, dependency updates, all-main landing and restarts, but coordinator sequences main landing and shared restarts: commit on your branch, do not merge/push main or restart any shared worker. Never tag Millstrand V1. Workspace tests must use disposable mktemp dirs with explicit --workspace, never shared .millstrand. Kill only exact owned PIDs. Preserve unrelated changes. Finish by leaving feature in review, return commit(s), concise source changes, exact validation results/limits and required downstream pins; do not close feature until coordinator accepts.\nCommon contract: root Make targets kondo-import (resolved-classpath --copy-configs), kondo-lint (lint relevant source/test/workspace using imports), kondo (ordered import then lint). Only macro-owning package roots need resources/clj-kondo.exports containing their own mappings; pure consumers must not add empty exports or duplicate producer mappings. Cover nested package roots and relevant aliases/workspace bases deliberately; avoid importing from unrelated classpaths or stale user caches. Do not blindly suppress new lint failures. Keep existing quality meaningful and include Kondo where appropriate. Use actual producer APIs in clean consumer proof, including generated handler names. Prior investigation /Users/ct/dev/projects/codethread.spool__kondo-investigation/docs/reports/kondo-investigation/recommendation.md proves packaging already works; erroneous initial hook defect was withdrawn (Chime <name>-rule and executor <name>-stalled?). Research task qflyz will provide headless LSP guidance; read its latest notes later. Prefer clear small scripts and existing tooling over new frameworks. All aggregate loops must stop on any failed root. Classpath assignments must succeed before Kondo runs. Use -Srepro -Spath before the selected -M alias. make -j kondo must complete all imports before lint; kondo-lint is source-only. See editor-verification.md for isolated per-package LSP checks.",
-  "updated_at": "2026-09-13T09:45:00Z",
+  "updated_at": "2026-09-13T09:55:00Z",
   "continuations": {
     "millstrand_review": "t8hvl",
     "codethread_review": "zjg78"
-  }
+  },
+  "pin_feature": "ytciv",
+  "pin_plan": "Publish Harnesses assignment macro export; update/publish Codethread config, then current runtime workspace Harnesses/config pins. Preserve historical library pins and unrelated Agents/Notes dirty files using clean worktrees."
 }
