@@ -233,3 +233,71 @@ from infrastructure failures and ordinary long-running checks. Record specific
 mistakes, corrective guidance, and the outcome. Do not persevere indefinitely
 with a model that keeps failing these duties. A model change needs a supported
 fresh handoff after settlement; native resume preserves prior model/settings.
+
+## User ownership of mill shutdown
+
+The user explicitly required this line in every active repository's `AGENTS.md`:
+"Never stop the mill; only the user may stop it." This supersedes older broad
+coordinator permissions to stop or restart the global mill. A restart includes
+a stop, so agents must not use it as a workaround. Feature `7qxp9`, Sol/Pi
+coordinator `iabiu`, owns the eight-repository instruction rollout. Preserve
+existing user edits, especially the dirty Agents and Notes instruction files;
+the deprecated archive remains read-only and unused.
+
+For reliable delivery to running coordinators, the parent stopped only their
+exact agent runs, verified graceful settlement, and resumed their native
+sessions with the user rule in the actual prompt. Implementation children kept
+running. Current continuations are alias worker `jjrt0`, Millstrand `3qdbe`,
+Millhouse `56pqt`, and Harnesses identity coordinator `in4r1`; their standard card
+and task run pointers were updated. Never confuse pausing a coordinator agent
+with stopping its world or the global mill.
+
+## Review the executable runbook
+
+Alias candidate `3980f78` passed focused tests and aggregate quality but Oracle
+`rk78g` rejected its Nushell examples: Bash-style backslash continuations were
+invalid in the advertised shell. Luna reviewer `vrx1i` separately found that
+the live-registration proof omitted frozen prompt and lineage attributes.
+Validate rendered command examples in their actual shell, and compare all
+relevant immutable launch bindings when proving existing runs are unchanged.
+These are implementation/review findings, not evidence against the new Luna
+coordinator role, whose live trial has not yet started. Apply the concrete
+findings, review the new exact commit, and only then deploy the candidate.
+
+## Additive live rollout and initial trials
+
+Oracle `vbi6w` accepted revised alias commit `55e79eb`. Its rendered Nushell
+examples parse, aggregate quality passes, and the config suite has 6 tests and
+88 assertions. The parent loaded an immutable copy of its source blob and called
+the documented narrow `register!` through each live Weaver nREPL. All eight
+active worlds now resolve `sub-coordinator` to Pi/Luna max: Codethread, Skein,
+Millhouse, Harnesses, Devflow, UI, Agents, and Notes. Every existing alias entry
+and captured run's frozen launch bindings remained unchanged. No world or Mill
+restart, broad bootstrap reload, flag change, or deprecated archive usage was
+needed. The Mill remained PID `64448`.
+
+Per-world before/after evidence is stored under
+`/var/folders/6w/lnly9x394flgz3q7zty955500000gn/T/sub-coordinator-live-20260913-b_uaavy0/`.
+The source blob's SHA-256 is recorded alongside the reviewed commit in the
+Harnesses proof. Live availability is staging; shared source landing remains
+required for durable startup configuration.
+
+Three initial Luna max pilots own distinct slices:
+
+- `vlf1t` / `irfb7`: Harnesses provider-argv review, rework and landing. It
+  preserved Sol writer `16yfb`, observed 45-second timeouts with 55-second outer
+  bounds, checked concrete diff/commit progress, and waited for settlement
+  rather than accepting an active writer's clean pushed commit prematurely.
+- `pg0pc` / `sl9o5`: land the accepted alias source. It respected the separate
+  parent rollout task and started shared land without the optional feature card,
+  leaving parent acceptance open. Its PR is Codethread #15.
+- `8ccxd` / `7qxp9`: finish and verify the eight-repository Mill ownership rule.
+  Six repo changes had landed before the predecessor `iabiu` was gracefully
+  stopped at a read-only wait boundary. The fresh handoff included every source
+  task/card/run/merge pointer, two remaining checks, and preservation evidence
+  for the dirty Agents and Notes instruction files. Source workers stayed live.
+
+These observations support the initial ownership/waiting gate, not a blanket
+model-quality verdict. Continue observing review/rework and actual failure
+recovery. Switch to Terra high only for repeated concrete coordination failures
+after correction, through a fresh settled handoff with the same runbook.
