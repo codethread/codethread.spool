@@ -12,7 +12,7 @@ Tracking: Codethread epic `w3oqr`, coordinator feature `x4y0z`, notes task
 `kejtr`. The user requested delegation through `strand agent`; delegated
 execution uses Pi. Built-in Codex/ChatGPT delegates were stopped.
 
-## Handoff snapshot (23:02 UTC)
+## Handoff snapshot (23:50 UTC)
 
 Read the latest note on `x4y0z` and the local coordinator tasks before acting.
 Their current run and workflow state takes precedence over this dated snapshot.
@@ -30,12 +30,13 @@ Skein is locally coordinated by Sol/high `x6qtq` on `0yu6i`. Terra attempts
 `nq6br` and `idjf4` delivered useful work but both exited while owned children
 still required coordination. The second exited after a 45-second timeout despite
 an explicit continuation instruction. The Sol seat owns acceptance and the
-remaining eligible P2s. Policy source reached `dd51e2de` with quality passing;
-sole Sol `giptn` now repairs the remaining review findings and the generated
-review-command timeout. Markdown source `991e3995` is accepted at task level and
-awaits shared land. Repeated optional full-review setup failures remain honest;
-the coordinator is aligning delivery with the declared shared land/basic-review
-requirements instead of repeating the same failed setup.
+remaining eligible P2s. PR479 landed as `a0e88d09` with required quality, basic
+review and FIFO cleanup. Markdown PR480 is in shared land. Sole Sol `onj6j`
+implements prime advice; independent Sol `pc1vy` completes scheduled-review
+selection provenance and the explicit always-run policy disposition. Final audit
+`tirbl` also identified that installed review policy still needs source pickup
+after landing. Repeated optional full-review setup failures remain honest; they
+did not become invented prerequisites for the declared shared landing path.
 The timestamp repair is accepted and landed as PR478 / `ddc63972`. Oracle
 `eq993` accepted closure of obsolete maintained-dependency wrappers and bounded
 the remaining local review-policy work.
@@ -53,10 +54,12 @@ Weaver successfully passed actual unmanaged Pi startup checks, but older managed
 runs failed completion under the newly loaded backend because they lacked the
 new reservation metadata. P1 `b9jg1` is now explicitly owned by local `vm5zk`
 through rework, review, normal land, and compatible Weaver-only deployment.
-Candidate `0029f553` repaired the native-resume and invocation-fencing findings.
-Fresh direct Oracle `t2eme` found one remaining P2: invalid legacy identity still
-blocks honest negative custody settlement. Sole Sol `duz60`, continuing `tqaho`
-on reopened task `vh9jx`, is repairing it. Audit `ywp6w` separately maps remaining
+Candidate `2e1d5f1` repaired earlier native-resume, invocation and negative-custody
+findings. Direct Oracle `q1hmp` found further positive-evidence validation,
+stale-callback and current-predecessor preflight gaps. Sole Sol `6xsnn`, continuing
+`tqaho` on reopened task `vh9jx`, is repairing those concrete contracts. Inherited
+module-size and alias-docstring debt is outside this compatibility repair unless
+an existing required gate fails. Audit `ywp6w` separately maps remaining
 native-guidance transport work in `g23us`; startup identity is already shipped.
 Preserve the recovered standalone source
 checkout and backup; confirm the landing branch/main layout after writers and
@@ -72,6 +75,18 @@ final integration. Source task `6wndt` records only implementation; old review
 task `f265p` is superseded, and validation `q8zbg` now depends on integration. The
 four user examples remain untouched. Hourly scheduling is a cadence, not
 evidence that an agent is dead.
+
+Additive Sol alias feature `58cgg` has exact candidate `65f53c3`, passing required
+quality and direct Oracle acceptance `fbb2n`. PR18 is in normal shared land.
+It preserves the original Luna/max default and Terra/high trial option. Parent
+owns staged registration and a first appropriate local seat; no new alias has
+been registered in a live Weaver yet. Current productive coordinators stay put.
+
+Millhouse now owns the inherited sibling questions on epic `iktli`, coordinator
+feature `qn4qp`, and direct Oracle task `eawh6`. Oracle `exvpk` is bounding Skein
+`5enye` and `seg5v` against current Millhouse `0669388`: queue ownership protection
+and context/return semantics. This precedes implementation and preserves accepted
+defer isolation. Historical stale-lock card `h50b1` remains P3 context only.
 
 ## Recent corrections to the coordination loop
 

@@ -70,6 +70,12 @@ range. Use the required ordinary review and quality gates; do not add repeated
 reviews or unchanged suites without a new concern. Reject helper-based evidence
 when the task requires a direct review.
 
+Keep the acceptance scope explicit through rework. Retain concrete regression
+cases and previously accepted contracts; distinguish a newly demonstrated defect
+from inherited style debt or an optional design proposal. A fresh review does not
+automatically expand a focused repair into unrelated refactoring. Record the
+disposition and ask Oracle a bounded question when the contract itself is unclear.
+
 Check the actual declared acceptance path. An optional review workflow must not
 become an invented prerequisite for the required shared land/basic-review path.
 Keep failed workflow history honest and resolve material findings either way.
