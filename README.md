@@ -120,12 +120,18 @@ Install `clj-kondo` v2026.08.04, then run the complete gate:
 make quality
 ```
 
-`make lint` refreshes each project's dependency-provided clj-kondo imports and
-lints that project with its own classpath. The imports and tool caches are
-generated and ignored. Run only the refresh step with:
+`make kondo` refreshes each project's dependency-provided clj-kondo imports,
+then lints that project with its own classpath. `make kondo-lint` uses existing
+imports only; `make kondo-import` runs only the refresh step. The imports and
+tool caches are generated and ignored.
+
+Each package root owns the same targets, so focused checks do not accidentally
+merge classpaths:
 
 ```text
-make kondo-configs
+make -C .millstrand kondo
+make -C spools/config kondo
+make -C spools/ralph kondo
 ```
 
 Focused Clojure checks:

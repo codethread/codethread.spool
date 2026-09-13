@@ -1,52 +1,39 @@
 CLJ_KONDO := clj-kondo
 CLJ_KONDO_VERSION := 2026.08.04
+PROJECT_ROOTS := .millstrand spools/config spools/ralph
 
-.PHONY: quality lint lint-millstrand lint-config lint-ralph \
-	kondo-configs kondo-configs-millstrand kondo-configs-config \
-	kondo-configs-ralph check-clj-kondo clean-kondo
+.PHONY: quality lint kondo kondo-import kondo-lint kondo-configs \
+	lint-millstrand lint-config lint-ralph check-clj-kondo clean-kondo
 
-quality: lint
+quality: kondo
 	./scripts/quality.sh
 
-lint: lint-millstrand lint-config lint-ralph
+lint: kondo
 
-lint-millstrand: kondo-configs-millstrand
-	@echo "==> .millstrand clj-kondo"
-	@cd .millstrand && $(CLJ_KONDO) --repro --parallel --lint init.clj me
+kondo:
+	$(MAKE) kondo-import
+	$(MAKE) kondo-lint
 
-lint-config: kondo-configs-config
-	@echo "==> spools/config clj-kondo"
-	@cd spools/config && $(CLJ_KONDO) --repro --parallel --lint src test
+kondo-import: check-clj-kondo
+	@for root in $(PROJECT_ROOTS); do \
+		$(MAKE) -C "$$root" kondo-import; \
+	done
 
-lint-ralph: kondo-configs-ralph
-	@echo "==> spools/ralph clj-kondo"
-	@cd spools/ralph && $(CLJ_KONDO) --repro --parallel --lint src test
+kondo-lint: check-clj-kondo
+	@for root in $(PROJECT_ROOTS); do \
+		$(MAKE) -C "$$root" kondo-lint; \
+	done
 
-kondo-configs: kondo-configs-millstrand kondo-configs-config kondo-configs-ralph
+kondo-configs: kondo-import
 
-kondo-configs-millstrand: check-clj-kondo
-	@echo "==> .millstrand clj-kondo imports"
-	@cd .millstrand && \
-		rm -rf .clj-kondo/imports && \
-		mkdir -p .clj-kondo && \
-		classpath="$$(clojure -Spath)" && \
-		$(CLJ_KONDO) --repro --lint "$$classpath" --copy-configs --skip-lint
+lint-millstrand:
+	$(MAKE) -C .millstrand kondo
 
-kondo-configs-config: check-clj-kondo
-	@echo "==> spools/config clj-kondo imports"
-	@cd spools/config && \
-		rm -rf .clj-kondo/imports && \
-		mkdir -p .clj-kondo && \
-		classpath="$$(clojure -Spath -M:test)" && \
-		$(CLJ_KONDO) --repro --lint "$$classpath" --copy-configs --skip-lint
+lint-config:
+	$(MAKE) -C spools/config kondo
 
-kondo-configs-ralph: check-clj-kondo
-	@echo "==> spools/ralph clj-kondo imports"
-	@cd spools/ralph && \
-		rm -rf .clj-kondo/imports && \
-		mkdir -p .clj-kondo && \
-		classpath="$$(clojure -Spath -M:test)" && \
-		$(CLJ_KONDO) --repro --lint "$$classpath" --copy-configs --skip-lint
+lint-ralph:
+	$(MAKE) -C spools/ralph kondo
 
 check-clj-kondo:
 	@command -v $(CLJ_KONDO) >/dev/null 2>&1 || { \
@@ -61,7 +48,6 @@ check-clj-kondo:
 	fi
 
 clean-kondo:
-	rm -rf \
-		.millstrand/.clj-kondo/imports .millstrand/.clj-kondo/.cache \
-		spools/config/.clj-kondo/imports spools/config/.clj-kondo/.cache \
-		spools/ralph/.clj-kondo/imports spools/ralph/.clj-kondo/.cache
+	@for root in $(PROJECT_ROOTS); do \
+		$(MAKE) -C "$$root" clean-kondo; \
+	done
