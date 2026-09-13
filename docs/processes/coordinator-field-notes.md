@@ -598,3 +598,41 @@ tracked child reviews and all shared services remained running. Long sleeps
 prevented timely intake of task notes; use bounded named awaits and read the
 coordination task after each wait. Prioritize a reported broken user entry point
 over completing unrelated downstream migration scope.
+
+The incident Oracle found that a supported immutable dependency upgrade requires
+Weaver replacement; no atomic live loader/registration change was established.
+Agents and Notes share the `dev` JVM and must align their direct identity pins
+before replacing that pool. The parent chose the complete backend pin route
+instead of introducing a temporary root-only legacy hook adapter. That decision
+raced the coordinator's reading of the Oracle choices; an empty fallback
+assignment was settled and cleaned before pin writers were dispatched. Put the
+selected option in the actual continuation prompt when a note may arrive after
+the coordinator has already made its plan.
+
+The user then explicitly authorized Weaver restarts as needed and reiterated:
+**never restart the Mill**. This supersedes the earlier Weaver sign-off limit
+for this recovery. Agents are owned by the Mill, not the Weaver. Preserve Mill
+PID/start time and process custody while replacing the exact Weaver or known
+pool, then verify new generations, resolved code, registered commands and actual
+Pi behavior. Do not keep asking for permission already granted, or serialize
+unrelated repository work behind the planned Weaver replacement.
+
+The current Harnesses coordinator is `vm5zk`, in the same native Sol session.
+It owns the urgent separate Agents and Notes pin workers `ml3tv` and `5r9j9`;
+parent owns the pool replacement and live acceptance. Independent source
+feature `cb0vb`, Sol `ry2uo`, updates the shared config identity pin for the other
+worlds. All three pin targets use reviewed Identity `b1955a96`. Source fixture
+validation remains disposable; verification of the user's real Pi entry path
+is the operational acceptance after activation.
+
+Pin scheduling supplied another bounded Terra trial. Luna `8djua` continued to
+describe failed `vs8hh` and old notes about passed `qp1gc` as active capacity,
+despite corrections. It also described withholding awaits as holding an
+automatic gate. Parent settled only that coordinator and published fresh
+`pcjya` on distinct task `veoee`, verified frozen Terra/high settings, and restored
+the prior runtime flags immediately. Source workers and FIFO reservations were
+preserved. Terra inspected the actual records: `qp1gc` was already passed,
+`vs8hh` had no running custody, and Harnesses gate `bnfk8` was already closed.
+It advanced the real reviewer/sign-off frontier and observed the actual final
+quality process. Record this concrete scheduling improvement; full consumer
+delivery still needs its own final acceptance.
