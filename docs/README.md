@@ -21,3 +21,4 @@ specific decisions and results; they are not the source of current procedures.
 
 - [Kondo resource investigation](reports/kondo-investigation/recommendation.md)
 - [Headless editor verification and discovered pitfalls](reports/kondo-rollout/editor-verification.md)
+- [Active-repository Kondo rollout results](reports/kondo-rollout/results.md)

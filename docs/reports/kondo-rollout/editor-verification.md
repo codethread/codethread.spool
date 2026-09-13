@@ -129,22 +129,21 @@ Owner roots expose only their own macro mappings under
 imported copies under `.clj-kondo/imports`; they do not copy producer mappings
 into local configuration.
 
-## Ten-repository early inventory
+## Active rollout inventory
+
+The user narrowed this rollout to these five active repositories. Earlier
+investigation of archived or experimental repositories does not extend the
+implementation scope.
 
 | Repository | LSP/package roots requiring deliberate handling | Macro-export or legacy concern |
 | --- | --- | --- |
 | `skein-src` | root, `.millstrand`, `spools/batteries`, `spools/unsafe-text-search` | Root exports Millstrand macros; workspace is a separate deps root. |
 | `millhouse.spool` | root, `.millstrand`, Chime, Cron, Identity, Kanban, Workflow | Only Chime, Cron, and Workflow own exports; the three resource paths must stay package-local. |
 | `codethread.spool` | `.millstrand`, `spools/config`, `spools/ralph` | No root `deps.edn`; config is a consumer and must not own Workflow mappings. |
-| `agent-harness.spool` | root, `.millstrand`, ten component package roots | Root has empty `:paths`; source is distributed. Agent-run owns its export. |
 | `harnesses.spool` | root, `.millstrand` | Root owns Harnesses export. |
 | `devflow.spool` | root, `.millstrand`, `kanban-adapter` | Consumer imports exist; no owner export currently. |
-| `dresser.spool` | root | `:test` uses sibling local roots, while `:equivalence-published` uses immutable Git pins; editor/import checks must name which classpath they prove. |
-| `notebook.spool` | `notebook`, `notebook2`, `review` | No top-level `deps.edn`; each package root is independent. |
-| `standup.spool` | root | Test alias consumes Notebook's nested `notebook` root at tag `v6`. |
-| `tidy.spool` | root | Test alias consumes Notebook's nested `review` root by SHA. |
 
-All ten are Clojure-bearing. Neither the lack of a current export nor an empty
+Neither the lack of a current export nor an empty
 root `:paths` makes a root exempt: it still needs an explicit lint scope and
 resolved classpath if it consumes macro-owning dependencies.
 
