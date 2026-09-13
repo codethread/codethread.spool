@@ -83,11 +83,28 @@ directory. Do not add source paths by hand when `deps.edn` already expresses
 them; use `:source-aliases` only for a declared alias whose extra source paths
 are required by the editor.
 
-For a human editor, no special configuration is required when the editor starts
-clojure-lsp at the package root and its environment can run `clojure`. If a
-repository needs durable special classpath behavior, place the equivalent
-project-specific `:project-specs` and `:source-aliases` in that package root's
-`.lsp/config.edn`; do not put one broad setting at a multi-root repository root.
+For a human editor, start clojure-lsp at the package root with `clojure` on its
+PATH. Put any required project settings in that package's `.lsp/config.edn`.
+
+### Workspace source discovery: independently verified correction
+
+`--filenames` does not force analysis of files outside the discovered source
+paths. A workspace containing `init.clj` and a deps-only `deps.edn` can return
+“No diagnostics found” without analyzing its bootstrap code. Absolute filenames
+alone do not fix this.
+
+The coordinator reproduced this in a disposable Harnesses checkout: an
+unresolved symbol appended to `.millstrand/init.clj` was missed until the
+workspace source scope was explicitly configured. Then the same file produced
+an unresolved-symbol error and exit status 3. Such workspaces need a local
+`.millstrand/.lsp/config.edn` containing `{:source-paths ["."]}`, or an equally
+precise scope. Millstrand's own workspace already declares `:paths ["."]`.
+
+Use absolute filenames, distinct per-project caches, and a negative check in a
+disposable copy of the actual workspace file. A valid fixture under `src` proves
+macro imports, but does not prove that a separate workspace bootstrap is in
+scope. This follows the documented fallback for source files outside declared
+project profiles ([source discovery](https://clojure-lsp.io/settings/#source-paths-discovery)).
 
 ## Common Make contract
 

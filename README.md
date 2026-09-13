@@ -4,6 +4,14 @@ This repository publishes two independently activatable Millstrand roots. The
 `codethread/*` coordinates identify roots; their producer namespaces follow the
 shared-spool `ct.spools.*` convention.
 
+## Shared processes
+
+This repository also maintains [shared ecosystem documentation](docs/README.md).
+Sibling repositories should implement and link to these procedures according to
+their own layout:
+
+- [Clojure lint and editor configuration](docs/processes/kondo-and-lsp.md)
+
 ## Roots
 
 | Root | Namespace | Purpose |

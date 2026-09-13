@@ -7,7 +7,8 @@
     "review": "img2u",
     "landing": "t6guj",
     "restarts": "lr2mx",
-    "report": "av1ws"
+    "report": "av1ws",
+    "shared_process": "igem6"
   },
   "initial_runs": {
     "millstrand": "ask2p",
@@ -57,7 +58,8 @@
         "assertions": 2982,
         "focused_tests": 3,
         "focused_assertions": 34,
-        "other": "make quality and make -j8 kondo passed; actual seven-root LSP diagnostics passed"
+        "other": "make quality and make -j8 kondo passed; actual seven-root LSP diagnostics passed",
+        "workspace_lsp_recheck": "Required under ytciv: initial bootstrap source scope was not proved"
       }
     },
     {
@@ -78,7 +80,8 @@
         "lsp_warnings": 0,
         "tests": 6,
         "assertions": 52,
-        "other": "Go format/vet/tests/build, parallel Kondo, controlled resolver and recursive failure checks passed; coordinator reran Kondo on main"
+        "other": "Go format/vet/tests/build, parallel Kondo, controlled resolver and recursive failure checks passed; coordinator reran Kondo on main",
+        "workspace_lsp_recheck": "Required under ytciv: initial bootstrap source scope was not proved"
       }
     },
     {
@@ -86,10 +89,20 @@
       "card": "i01vo",
       "worktree": "/Users/ct/dev/projects/harnesses.spool__kondo-rollout",
       "branch": "rollout/kondo",
-      "state": "implementation",
+      "state": "landed",
       "runs": [
         "yfrjy"
-      ]
+      ],
+      "main_commit": "e8a26477852216bca2579b050a2356c86af132b7",
+      "restart": "pending",
+      "validation": {
+        "kondo_roots": 2,
+        "tests": 77,
+        "assertions": 472,
+        "lsp_errors": 0,
+        "lsp_warnings": 0,
+        "other": "make check and parallel Kondo passed; root corrected LSP source discovery and independently proved actual Make target positive and workspace sentinel-negative cases; main Kondo passed"
+      }
     },
     {
       "repo": "agent-harness.spool",
@@ -106,17 +119,24 @@
       "card": "mzs31",
       "worktree": "/Users/ct/dev/projects/devflow.spool__kondo-rollout",
       "branch": "rollout/kondo",
-      "state": "queued"
+      "state": "review_correction",
+      "runs": [
+        "wv53e",
+        "9v6y9"
+      ],
+      "unaccepted_commit": "f5862b1"
     },
     {
       "repo": "dresser.spool",
       "card": "xgh7s",
       "worktree": "/Users/ct/dev/projects/dresser.spool__kondo-rollout",
       "branch": "rollout/kondo",
-      "state": "implementation",
+      "state": "review_correction",
       "runs": [
-        "phv4g"
-      ]
+        "phv4g",
+        "rvmi5"
+      ],
+      "unaccepted_commit": "7c8f58b"
     },
     {
       "repo": "notebook.spool",
@@ -141,11 +161,14 @@
     }
   ],
   "common_instructions": "This is implementation under ecosystem epic qnmh1, coordinated by feature alri9. Track via strand --workspace /Users/ct/dev/projects/codethread.spool/.millstrand. Read repository AGENTS.md and applicable Clojure/review/test/robustness skills. Claim your assigned feature (your generated identity), create task slices before execution and keep detailed task notes plus lean feature handover. Work ONLY in your supplied worktree and do not edit sibling repositories. No new agents unless coordinator explicitly asks; do your bounded repo work yourself. User authorizes source fixes, commits, dependency updates, all-main landing and restarts, but coordinator sequences main landing and shared restarts: commit on your branch, do not merge/push main or restart any shared worker. Never tag Millstrand V1. Workspace tests must use disposable mktemp dirs with explicit --workspace, never shared .millstrand. Kill only exact owned PIDs. Preserve unrelated changes. Finish by leaving feature in review, return commit(s), concise source changes, exact validation results/limits and required downstream pins; do not close feature until coordinator accepts.\nCommon contract: root Make targets kondo-import (resolved-classpath --copy-configs), kondo-lint (lint relevant source/test/workspace using imports), kondo (ordered import then lint). Only macro-owning package roots need resources/clj-kondo.exports containing their own mappings; pure consumers must not add empty exports or duplicate producer mappings. Cover nested package roots and relevant aliases/workspace bases deliberately; avoid importing from unrelated classpaths or stale user caches. Do not blindly suppress new lint failures. Keep existing quality meaningful and include Kondo where appropriate. Use actual producer APIs in clean consumer proof, including generated handler names. Prior investigation /Users/ct/dev/projects/codethread.spool__kondo-investigation/docs/reports/kondo-investigation/recommendation.md proves packaging already works; erroneous initial hook defect was withdrawn (Chime <name>-rule and executor <name>-stalled?). Research task qflyz will provide headless LSP guidance; read its latest notes later. Prefer clear small scripts and existing tooling over new frameworks. All aggregate loops must stop on any failed root. Classpath assignments must succeed before Kondo runs. Use -Srepro -Spath before the selected -M alias. make -j kondo must complete all imports before lint; kondo-lint is source-only. See editor-verification.md for isolated per-package LSP checks.",
-  "updated_at": "2026-09-13T09:55:00Z",
+  "updated_at": "2026-09-13T10:08:00Z",
   "continuations": {
     "millstrand_review": "t8hvl",
-    "codethread_review": "zjg78"
+    "codethread_review": "zjg78",
+    "dresser_review": "rvmi5",
+    "devflow_cleanup": "9v6y9"
   },
   "pin_feature": "ytciv",
-  "pin_plan": "Publish Harnesses assignment macro export; update/publish Codethread config, then current runtime workspace Harnesses/config pins. Preserve historical library pins and unrelated Agents/Notes dirty files using clean worktrees."
+  "pin_plan": "Publish Harnesses assignment macro export; update/publish Codethread config, then current runtime workspace Harnesses/config pins. Preserve historical library pins and unrelated Agents/Notes dirty files using clean worktrees.",
+  "shared_process": "docs/processes/kondo-and-lsp.md"
 }
