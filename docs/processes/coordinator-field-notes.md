@@ -1,13 +1,61 @@
 # Millstrand coordinator field notes
 
 Working observations from the sibling recovery and open-card execution on
-2026-09-13. These notes supply the sub-coordinator harness alias and runbook now
-being built under feature `jxvxu`. Keep adding concrete outcomes and
-counterexamples while the work runs and the alias is piloted.
+2026-09-13. The sub-coordinator alias from feature `jxvxu` has landed. These notes
+record its live trials and the operational evidence needed to refine its
+runbook. Keep adding concrete outcomes and counterexamples while work runs.
 
 Tracking: Codethread epic `w3oqr`, coordinator feature `x4y0z`, notes task
 `kejtr`. The user requested delegation through `strand agent`; delegated
 execution uses Pi. Built-in Codex/ChatGPT delegates were stopped.
+
+## Current handoff (21:34 UTC)
+
+The user-reported Pi startup incident is accepted. Actual Pi from canonical
+Agents minted and recovered its native identity after a supported replacement
+of the Agents/Notes Weaver pool. The original Mill PID `64448` and start time
+remain unchanged. Devflow, Millhouse, and UI also completed their local source,
+Weaver activation, and actual Pi acceptance; their empty coordination worktrees
+were removed only after the owning runs settled. Do not resume those runs into
+deleted directories.
+
+Skein is now owned by Terra/high `nq6br` on task `4jtjf`, in its durable local
+coordination worktree. It has separate Sol writers for strict date repair
+(`01hbt`, candidate `9dae953e`) and the final startup pin (`38wnq`). Harnesses
+remains with local Sol coordinator `vm5zk`: startup pin PR12 has direct Oracle
+acceptance and is entering shared land; native guidance and rollout follow.
+The separate orphan reconciliation feature `0xq77` remains with Sol `0mvqk` in
+its own worktree. These are independent local owners, not one central queue.
+
+The first orphan candidate was rejected by Oracle: live completion owners were
+not independently protected; disable/removal could race with an in-flight
+sweep; ordinary runtime shutdown erased its durable deadline; and unchanged
+first-page records could starve later candidates. Rework must prove those
+boundaries, integrate current main, and obtain fresh exact-candidate acceptance.
+The four user examples remain untouched. Hourly scheduling is a cadence, not
+evidence that an agent is dead.
+
+## Recent corrections to the coordination loop
+
+Skein's Luna repeatedly waited for published jobs whose frozen targets were
+already closed. They had never acquired process custody. The parent stopped
+those exact requests, handed local coordination to a fresh Terra/high run, and
+used new open tasks. Terra promptly launched real source workers and completed
+the missing final hello-world review. This is concrete evidence for changing
+that seat; it does not establish a universal model ranking.
+
+A gate's static instruction may mention failed checks while its actual error is
+null and a healthy process owns the work. Read the error and custody before
+reporting failure. Likewise, a failed finish request can mean another owner
+already closed the card: read current state before retrying. Both occurred in
+this recovery, and neither warranted restarting a service.
+
+Process provenance must come from the owning task, not only a JVM's source
+checkout. Disposable PID `71714` used Skein code but belonged to the completed
+Agents alias proof. Its task notes, exact workspace/generation, settled owner,
+and empty active-run/queue readback established safe cleanup. The supported
+workspace stop removed only that disposable Weaver; its evidence was retained.
+Unknown temporary processes remain outside that cleanup authority.
 
 ## Give the next coordinator a complete starting point
 
