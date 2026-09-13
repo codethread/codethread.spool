@@ -134,6 +134,11 @@ if $frozen_before != $frozen_after {
 ^strand --workspace $coord_ws agent list --full
 ```
 
+The top-level `strand show RUN_ID` calls are intentional. Batteries `show`
+returns the full raw strand with the `attributes` map consumed by the frozen
+settings proof. `strand agent show RUN_ID` returns a lifecycle summary and omits
+that map; substituting it would break the proof.
+
 The registry comparison expects `sub-coordinator` to be absent before the first
 live registration. If it is already present, stop and compare its descriptor to
 the reviewed candidate rather than replacing it casually. Lifecycle fields can

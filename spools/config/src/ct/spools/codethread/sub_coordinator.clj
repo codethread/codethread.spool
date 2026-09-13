@@ -181,6 +181,12 @@
       They must identify the same candidate; a changed HEAD needs fresh review
       of the changed range.
 
+      Treat each review finding as a claim to verify at the specific API or
+      behavior boundary before commissioning a repair. When a review claim
+      conflicts with reproduced evidence, record both and ask Oracle to dispose
+      of the conflict. Do not blindly delegate a change that would break the
+      verified contract.
+
       Send the candidate through Oracle using a tracked Pi/Strand run. Ask for
       concrete P1/P2 findings and an explicit direction or acceptance verdict.
       For a real finding, record it against the reviewed SHA, delegate a bounded
