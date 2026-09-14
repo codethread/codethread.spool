@@ -12,6 +12,51 @@ Tracking: Codethread epic `w3oqr`, coordinator feature `x4y0z`, notes task
 `kejtr`. The user requested delegation through `strand agent`; delegated
 execution uses Pi. Built-in Codex/ChatGPT delegates were stopped.
 
+## Interactive Goal trials (05:28 UTC, 14 September)
+
+These are dated observations, not replacements for the current procedure in the
+runbook.
+
+The headed Sol readiness pilot used the spool-shipped interactive wrapper, which
+created tracked run `i1ecw`, native session
+`6933e8b8-4486-4b43-a68d-ef5db162ddad`, and named terminal
+`agent-codethread-subcoord`. It proved the TUI was visible and accepted input only
+after the user explicitly confirmed it. It had no source assignment and did not
+prove goal persistence or a complete coordination cycle.
+
+The first Terra trial initially had Strand metadata that was mistaken for a
+goal. The correction used the supported `/goal` command in the live TUI and
+verified actual Pi goal `7c89a630-e411-4c4c-bc49-5fd73c4a8b38` in both TUI and
+native session goal-state. Its automatic guard remained at the default `0/25`.
+Because activation was added to a busy TUI, kickoff consumption was a separate
+observation. The user's preferred launch contract is therefore an initial prompt
+that starts exactly `/goal <rest of prompt>`, followed by verification of real
+Pi goal state rather than a fabricated Strand goal row.
+
+Terra run `ls18x` resolved through Pi to Terra/high, native session
+`beb4c359-95db-4da8-8853-0d2a21a639fd`, terminal
+`agent-millhouse-subcoord-terra`, and Millhouse coordinator task `3eogv`. It
+owned cards `7vglh` and `bnr5p`, resumed the retained sole Land writer, and
+started one independent pin writer. This proves launch and first dispatch, not
+yet sustained review, Land, cleanup, or goal completion.
+
+The parallel Luna trial started with `/goal` in its initial prompt. Tracked run
+`5pufa` resolved through Pi to Luna/max, native session
+`023d9eff-2c78-4799-9752-cc039840e717`, named terminal
+`agent-codethread-subcoord-luna`, and real Pi goal
+`b6eda325-0b04-41ba-9af4-bf57158d3472`, active with the unchanged default
+`0/25` guard. Feature `kchhr` has one local owner and task `wcv6g`; sole Sol
+writer `7yil6` owns task `hdshy` and only the dedicated feature worktree at
+starting candidate `cb866ef`. The canonical coordination records remain
+separate from that execution worktree. Root retains historical PR16 and mentors
+without editing this source.
+
+These trials also sharpened two live-CLI corrections. Current discovery is
+`strand help agent`, not stale `strand prime agent`. An uncertain publication is
+looked up by its stable idempotency key with `strand agent show --request
+<request-id>` before retrying. A ready run still needs an active,
+dependency-eligible target and real attempt/custody evidence.
+
 ## Handoff snapshot (04:25 UTC, 14 September)
 
 Read the latest note on `x4y0z` and the local coordinator tasks before acting.
