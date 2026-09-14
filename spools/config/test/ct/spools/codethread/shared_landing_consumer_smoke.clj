@@ -64,7 +64,7 @@
            (map (fn [file]
                   [(str (.relativize (.toPath workspace) (.toPath file)))
                    (slurp file)])))
-          ["config" "me"])))
+          ["config" "me" "workflows"])))
 
 (defn- contains-name? [form expected]
   (let [nodes (set (tree-seq coll? seq form))]

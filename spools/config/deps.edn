@@ -15,12 +15,12 @@
                                :git/sha "89e5e32f8a948547c233d5dd183bb73f9c5abe4a"
                                :deps/root "spools/land"}
         ct.spools/harnesses {:git/url "https://github.com/codethread/harnesses.spool.git"
-                             :git/sha "e8a26477852216bca2579b050a2356c86af132b7"}
+                             :git/sha "6410da676b3b41be55a58f4abc5fe773cfc75cb9"}
         codethread/devflow {:git/url "https://github.com/codethread/devflow.spool.git"
-                            :git/sha "99313b48f14ab0892cb90264d100dce4ff2a25e0"
+                            :git/sha "3d880109f68e84e9c0d019e34d6ec434daf7c8d8"
                             :deps/root "."}
         codethread/devflow-kanban-adapter {:git/url "https://github.com/codethread/devflow.spool.git"
-                                           :git/sha "99313b48f14ab0892cb90264d100dce4ff2a25e0"
+                                           :git/sha "3d880109f68e84e9c0d019e34d6ec434daf7c8d8"
                                            :deps/root "kanban-adapter"}}
  :aliases {:test {:extra-paths ["test"]
                   :extra-deps {io.millstrand/millstrand

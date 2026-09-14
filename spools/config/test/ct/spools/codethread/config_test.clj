@@ -49,13 +49,13 @@
                            ['millhouse.spools/land
                             "89e5e32f8a948547c233d5dd183bb73f9c5abe4a"]]]
       (is (= sha (get-in config-deps [library :git/sha]))))
-    (is (= "e8a26477852216bca2579b050a2356c86af132b7"
+    (is (= "6410da676b3b41be55a58f4abc5fe773cfc75cb9"
            (get-in config-deps ['ct.spools/harnesses :git/sha])))
     (is (not-any? #{'ct.spools/agent-run 'ct.spools/delegation}
                   (keys config-deps)))
-    (is (= "99313b48f14ab0892cb90264d100dce4ff2a25e0"
+    (is (= "3d880109f68e84e9c0d019e34d6ec434daf7c8d8"
            (get-in config-deps ['codethread/devflow :git/sha])))
-    (is (= "99313b48f14ab0892cb90264d100dce4ff2a25e0"
+    (is (= "3d880109f68e84e9c0d019e34d6ec434daf7c8d8"
            (get-in config-deps
                    ['codethread/devflow-kanban-adapter :git/sha])))))
 
