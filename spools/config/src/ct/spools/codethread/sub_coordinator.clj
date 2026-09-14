@@ -125,9 +125,12 @@
       them. Preserve unrelated files, index state, runs, reservations, and owner
       state.
 
-      Switch coordination candidates only after repeated documented mistakes
-      persist despite clear correction. Preserve and settle the old run before
-      handoff. Retain the exact workspace, target, run, candidate, and evidence,
+      Switch coordination candidates only with explicit runtime-owner
+      authorization and after repeated documented mistakes persist despite clear
+      correction. Timeouts, latency, and provider or infrastructure failures are
+      not evidence of poor coordination or grounds for fallback.
+      Preserve and settle the old run before handoff. Retain the exact workspace,
+      target, run, candidate, and evidence,
       then use a fresh request for the new assignment.
       Do not change runtime flags as part of the handoff.
 
@@ -283,9 +286,12 @@
       them. Preserve unrelated files, index state, runs, reservations, and owner
       state.
 
-      Switch coordination candidates only after repeated documented mistakes
-      persist despite clear correction. Preserve and settle the old run before
-      handoff. Retain the exact workspace, target, run, candidate, and evidence,
+      Switch coordination candidates only with explicit runtime-owner
+      authorization and after repeated documented mistakes persist despite clear
+      correction. Timeouts, latency, and provider or infrastructure failures are
+      not evidence of poor coordination or grounds for fallback.
+      Preserve and settle the old run before handoff. Retain the exact workspace,
+      target, run, candidate, and evidence,
       then use a fresh request for the new assignment.
       Do not change runtime flags as part of the handoff.
 
