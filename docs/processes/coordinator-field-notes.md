@@ -12,7 +12,7 @@ Tracking: Codethread epic `w3oqr`, coordinator feature `x4y0z`, notes task
 `kejtr`. The user requested delegation through `strand agent`; delegated
 execution uses Pi. Built-in Codex/ChatGPT delegates were stopped.
 
-## Handoff snapshot (01:51 UTC, 14 September)
+## Handoff snapshot (02:10 UTC, 14 September)
 
 Read the latest note on `x4y0z` and the local coordinator tasks before acting.
 Their current run and workflow state takes precedence over this dated snapshot.
@@ -94,9 +94,13 @@ Sole Sol continuation `2ks0y` fixed those three findings in clean published
 `d2958b1`, with 105 tests and 803 assertions passing. Follow-up Oracle `envk9`
 found one remaining P2: a delayed completion can cross an accepted retry's ready
 interval and settle it after the current invocation has been cleared. Same
-Sol lineage `u28ht` / `golden-quiet-heron` now owns that exact race on `7i8o9`.
+Sol lineage `u28ht` / `golden-quiet-heron` repaired that exact race on `7i8o9`.
 It was queued against the still-closed source task; root reopened the legitimate
 rework milestone, and the existing run acquired attempt 1 at 01:50:08.
+It published clean `cdf8d038`, passing 107 tests and 813 assertions. Direct
+Oracle `i5vqi` accepted it with no remaining P1/P2: 44 tests / 476 assertions
+and three additional probes / 82 assertions, including six controlled callback
+interleavings. Local `vm5zk` now owns its normal landing path.
 
 Local `vm5zk` owns source acceptance, fresh direct review, normal land and cleanup.
 Root owns live activation and historical-run handling after the explicit `v30bg`
@@ -116,22 +120,35 @@ It sustained the first Sol implementation through full quality, then direct
 Oracle review. It completed a first repair as `3xbhq` / `24b12ee`, then consumed
 the follow-up scanner-race P2 and resumed the same writer as `i7wdl`. The local
 coordinator correctly reopened its source milestone before both continuations,
-preserving exact topology, lock order and regression scope. Final acceptance
-and land remain pending.
+preserving exact topology, lock order and regression scope. Direct Oracle
+`5n9g9` accepted `9c05bc43`; normal workflow `land-7vglh-9c05bc4` has reached
+basic review gate `4gmi1`. Its Land and Workflow changes form a compatible pair
+for subsequent consumer adoption. Landing remains pending.
 Parent task `p3bvq` observes its continuing delivery; durable pins remain with
 Harnesses `ta2ip`. Current productive coordinators in other repos stay put.
 
-Root-owned follow-up `mbygj` refines only the Sol guidance string. Writer
-`l4a0k` published `7f509d3` with full quality; continuation `y80ar` clarifies the
-same-source-milestone reopening rule before ordinary review and landing. Existing
+Root-owned follow-up `mbygj` refines only the Sol guidance string, now PR19.
+Writer lineage `l4a0k` / `y80ar` / `b4ef6` published `8d17aa9a` with full
+quality. Direct basic reviewer `lkf05` found one request-key example defect in
+`476a4c4`; the successor distinguishes retained `SOURCE_REQUEST` from a fresh
+stable `RESUME_REQUEST`. The same direct review lineage will verify that narrow
+repair after the exact successor quality marker is produced. Generated reviewer
+`7hny7` was stopped for native helper use and its evidence is excluded. Existing
 aliases, settings and frozen running prompts remain unchanged.
 
 Native-guidance design Oracle `lfk7y` accepted the bounded contract on `b5bph`:
 explicit legacy/native selection, approved host capability evidence, frozen
 bundle delivery, attempt-scoped adapter acknowledgement and bootstrap failure.
 This is design acceptance only. It unblocks disabled Agents adapter preparation;
-overlapping Harnesses integration waits for orphan landing. The local Harnesses
-coordinator retains that source/pin ownership, with root operating live pickup.
+overlapping Harnesses integration waits for orphan landing. Local task `n9m9g`
+now has Sol worker `rtu0v`, working in
+`/Users/ct/dev/projects/agents__feat--native-guidance-adapters-20260914`.
+It launches from retained driver `/tmp/agents-native-guidance-driver.rvOS63`
+because optional project Pi model-policy validation prevented the earlier
+attempts from starting. Neither those attempts nor the failed `--no-approve`
+workaround changed source. Current-main integration remains part of final
+acceptance; canonical user changes are preserved. The local Harnesses
+coordinator retains source/pin ownership, with root operating live pickup.
 
 Millhouse now owns the inherited sibling questions on epic `iktli`, coordinator
 feature `qn4qp`, and accepted Oracle task `eawh6`. Oracle `exvpk` confirmed one
@@ -1065,3 +1082,37 @@ as the other tested models. A genuinely completed coordinator or review target
 still needs a fresh task; a new finding on the same source milestone can
 legitimately reopen it for its retained writer. Alias follow-up `mbygj` captures
 both cases and the coordinator-plus-child mailbox check after every await.
+
+## Freeze review constraints before dispatch
+
+PR19's generated review started before root added direct-only instructions to
+its gate. The running invocation retained only its original frozen prompt and
+used an untracked native helper. Updating gate attributes afterward did not
+change that invocation. Root stopped the exact reviewer, preserved the already
+completed helper's history but excluded its evidence, and dispatched one fresh
+direct basic review with the constraints in both its prompt and appended system
+instructions. That review found a real request-key example error; the original
+source writer corrected it. Preserve the valid source and quality evidence
+while replacing only the invalid review.
+
+Check actual public tool actions before accepting a direct-only review. When
+inspecting a tool result, select only the needed public fields: helper results
+can embed entire transcripts, including private reasoning, in their details.
+Never dump those nested messages into the coordinator's evidence.
+
+## Make identifiers and launch context unambiguous
+
+Use exact IDs as separate tokens in prompts. Root's cramped phrases such as
+`task480r1` and `featurembygj` caused a reviewer to query those nonexistent IDs
+before finding `480r1` and `mbygj`. Write “task `480r1`” and “feature `mbygj`”.
+Use distinct placeholders for a predecessor request and the new continuation's
+stable idempotency key; equivalent retries reuse a key, different requests do not.
+
+Agents' adapter writer could not start because an optional project Pi agent
+referenced a model absent from that runtime's catalogue. `--no-approve` did not
+suppress this policy validation. The local coordinator launched a fresh tracked
+worker from a clean retained driver, with all source operations explicitly
+targeting the feature worktree. Record driver cwd and source cwd separately,
+read source instructions explicitly, and retain the driver for native
+continuations. This is a bounded launch workaround, not a claim that ordinary
+Pi startup in that project has been repaired.
