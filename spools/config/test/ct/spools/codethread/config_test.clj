@@ -90,50 +90,50 @@
                             :mode :interactive
                             :cwd "/tmp"
                             :title "Frozen Luna sub-coordinator run"})]
-          (is (= "pi" (:harness luna)))
-          (is (= "openai-codex/gpt-5.6-luna"
+          (is (= "codex" (:harness luna)))
+          (is (= "gpt-5.6-luna"
                  (get-in luna [:generated :harness/model])))
           (is (= "max" (get-in luna [:generated :harness/effort])))
           (is (= 1 (count luna-guidance)))
           (doseq [contract-fragment
                   ["# Bounded sub-coordinator runbook"
                    "canonical coordination workspace"
-                   "agent assign sol"
-                   "agent run sol"
-                   "agent show --request"
-                   "open --raw task-body.md"
-                   "Never stop or restart the global Mill"
-                   "untracked native Pi subagent"
-                   "deprecated `agent-harness.spool`"
+                   "Set a real goal for every assigned card"
+                   "only through tracked Strand runs"
+                   "bounded `strand await`"
                    "agent-run-terminal"
                    "agent-run-settled"
                    "agent-run-active"
                    "agent-work-complete"
                    "agent-work-complete-or-intervention"
-                   "never `goal_wait`"
-                   "defaults to `--timeout-secs 1800`"
-                   "agent runs --active"
-                   "stop-on-complete"
-                   "agent resume --run-id"
-                   "explicit direction or acceptance verdict"
-                   "every gate when repairing a failure"
-                   "seat/sub-coordinator-terra"]]
+                   "A timeout means only"
+                   "exact implementation SHA"
+                   "required quality marker"
+                   "shared Land workflow"
+                   "strict FIFO"
+                   "worktree cleanup"
+                   "evidenced handoff"]]
             (is (str/includes? (first luna-guidance)
                                contract-fragment)))
-          (is (= "openai-codex/gpt-5.6-luna"
+          (doseq [provider-specific-fragment
+                  ["Pi" "Codex" "/goal" "goal_wait" "goal_complete"
+                   "goal_blocked" "native resume" "model" "trial"]]
+            (is (not (str/includes? (first luna-guidance)
+                                    provider-specific-fragment))))
+          (is (= "gpt-5.6-luna"
                  (attr-get luna-run :harness/model)))
           (is (= luna-guidance
                  (attr-get luna-run :harness/appended-system-prompts)))
           (harnesses/set-flag! rt :seat/sub-coordinator-terra true)
           (let [terra (harnesses/resolve-harness rt :sub-coordinator)]
-            (is (= "pi" (:harness terra)))
-            (is (= "openai-codex/gpt-5.6-terra"
+            (is (= "codex" (:harness terra)))
+            (is (= "gpt-5.6-terra"
                    (get-in terra [:generated :harness/model])))
             (is (= "high" (get-in terra [:generated :harness/effort])))
             (is (= luna-guidance
                    (get-in terra
                            [:generated :harness/appended-system-prompts])))
-            (is (= "openai-codex/gpt-5.6-luna"
+            (is (= "gpt-5.6-luna"
                    (attr-get (harnesses/run rt (:id luna-run))
                              :harness/model))))
           (is (= coordinator-before
@@ -150,37 +150,36 @@
                                  :mode :interactive
                                  :cwd "/tmp"
                                  :title "Frozen Sol sub-coordinator run"})]
-          (is (= "pi" (:harness sustained)))
-          (is (= "openai-codex/gpt-5.6-sol"
+          (is (= "codex" (:harness sustained)))
+          (is (= "gpt-5.6-sol"
                  (get-in sustained [:generated :harness/model])))
           (is (= "high" (get-in sustained [:generated :harness/effort])))
           (is (= 1 (count guidance)))
           (doseq [contract-fragment
-                  ["# Sustained Sol sub-coordinator runbook"
-                   "canonical coordination repository"
-                   "one source writer per feature worktree"
-                   "--timeout 10m"
-                   "agent show --request REQUEST"
-                   "request ID and actual child runs"
+                  ["# Sustained sub-coordinator runbook"
+                   "canonical coordination workspace"
+                   "Set a real goal for every assigned card"
+                   "only through tracked Strand runs"
+                   "bounded `strand await`"
                    "agent-run-terminal"
                    "agent-run-settled"
                    "agent-run-active"
                    "agent-work-complete"
                    "agent-work-complete-or-intervention"
-                   "never `goal_wait`"
-                   "defaults to `--timeout-secs 1800`"
-                   "agent runs --active"
-                   "notes before every dispatch"
-                   "P1/P2 findings"
-                   "ordinary basic-review"
-                   "FIFO land"
-                   "repeated optional full-review loops"
-                   "acknowledged next owner"
-                   "failed closed-target"
-                   "owned work pending"
-                   "not a universal"]]
+                   "A timeout means only"
+                   "P1/P2"
+                   "required quality marker"
+                   "shared Land workflow"
+                   "strict FIFO"
+                   "worktree cleanup"
+                   "acknowledged next owner"]]
             (is (str/includes? (first guidance) contract-fragment)))
-          (is (= "openai-codex/gpt-5.6-sol"
+          (doseq [provider-specific-fragment
+                  ["Pi" "Codex" "/goal" "goal_wait" "goal_complete"
+                   "goal_blocked" "native resume" "model" "trial"]]
+            (is (not (str/includes? (first guidance)
+                                    provider-specific-fragment))))
+          (is (= "gpt-5.6-sol"
                  (attr-get sustained-run :harness/model)))
           (is (= "high" (attr-get sustained-run :harness/effort)))
           (is (= guidance
@@ -286,10 +285,10 @@
         (is (= runs-before runs-after))
         (is (= "openai-codex/gpt-5.6-sol"
                (attr-get (first runs-after) :harness/model)))
-        (is (= "openai-codex/gpt-5.6-luna"
+        (is (= "gpt-5.6-luna"
                (attr-get (second runs-after) :harness/model)))
-        (is (= "pi" (:harness resolved)))
-        (is (= "openai-codex/gpt-5.6-sol"
+        (is (= "codex" (:harness resolved)))
+        (is (= "gpt-5.6-sol"
                (get-in resolved [:generated :harness/model])))
         (is (= "high" (get-in resolved [:generated :harness/effort])))
         (is (= "alias" (:kind added)))
