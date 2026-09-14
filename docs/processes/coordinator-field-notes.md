@@ -12,7 +12,7 @@ Tracking: Codethread epic `w3oqr`, coordinator feature `x4y0z`, notes task
 `kejtr`. The user requested delegation through `strand agent`; delegated
 execution uses Pi. Built-in Codex/ChatGPT delegates were stopped.
 
-## Handoff snapshot (02:10 UTC, 14 September)
+## Handoff snapshot (02:17 UTC, 14 September)
 
 Read the latest note on `x4y0z` and the local coordinator tasks before acting.
 Their current run and workflow state takes precedence over this dated snapshot.
@@ -121,20 +121,28 @@ Oracle review. It completed a first repair as `3xbhq` / `24b12ee`, then consumed
 the follow-up scanner-race P2 and resumed the same writer as `i7wdl`. The local
 coordinator correctly reopened its source milestone before both continuations,
 preserving exact topology, lock order and regression scope. Direct Oracle
-`5n9g9` accepted `9c05bc43`; normal workflow `land-7vglh-9c05bc4` has reached
-basic review gate `4gmi1`. Its Land and Workflow changes form a compatible pair
-for subsequent consumer adoption. Landing remains pending.
+`5n9g9` accepted `9c05bc43`; normal workflow `land-7vglh-9c05bc4` then reached
+basic review gate `4gmi1`. Reviewer `8eawy` found one further P2 concerning delayed
+reconciliation of cancelled in-flight preparation. Same source writer `t5qau`
+owns the bounded repair. Root requested one focused direct Oracle follow-up to
+cover both technical acceptance and the basic-review correction, avoiding two
+reviews of the same unchanged successor. Land and Workflow remain a compatible
+pair for subsequent consumer adoption. Landing remains pending.
 Parent task `p3bvq` observes its continuing delivery; durable pins remain with
 Harnesses `ta2ip`. Current productive coordinators in other repos stay put.
 
-Root-owned follow-up `mbygj` refines only the Sol guidance string, now PR19.
+Root-owned follow-up `mbygj` is complete: PR19 merged at 02:14:36 as `0edfb491`.
 Writer lineage `l4a0k` / `y80ar` / `b4ef6` published `8d17aa9a` with full
 quality. Direct basic reviewer `lkf05` found one request-key example defect in
 `476a4c4`; the successor distinguishes retained `SOURCE_REQUEST` from a fresh
-stable `RESUME_REQUEST`. The same direct review lineage will verify that narrow
-repair after the exact successor quality marker is produced. Generated reviewer
-`7hny7` was stopped for native helper use and its evidence is excluded. Existing
-aliases, settings and frozen running prompts remain unchanged.
+stable `RESUME_REQUEST`. Focused continuation `39x6q` accepted the correction
+and exact successor quality marker. The shared workflow is done, canonical main
+is clean and exact, and the feature branch/worktree have been removed. Never
+resume those source runs into their removed cwd. Generated reviewer `7hny7` was
+stopped for native helper use and its evidence is excluded. Evidence is retained
+at `/Users/ct/dev/evidence/sub-coordinator-progress-20260914T021436Z`. The accepted
+config successor is recorded on consumer feature `ta2ip`; no live alias update
+from this refinement has occurred yet. Existing running prompts remain frozen.
 
 Native-guidance design Oracle `lfk7y` accepted the bounded contract on `b5bph`:
 explicit legacy/native selection, approved host capability evidence, frozen
