@@ -38,16 +38,29 @@
       Never stop or restart the global Mill.
       Never restart or replace a running Weaver without explicit user sign-off.
       Never use the deprecated `agent-harness.spool`.
-      Preserve unrelated owner and run state.
+      Never edit or push `main`. Preserve unrelated owner and run state.
 
       ## Delegate and observe through Strand
 
       Delegate only through tracked Strand runs. Use them for implementation,
-      diagnosis, and review. Give each run one active, dependency-ready target,
+      diagnosis, and review. Assign every source change to one explicit sole
+      writer for its worktree and bounded slice. A task beneath an already
+      claimed feature is not another claimable feature: use a targeted run for
+      the task, and use feature assignment only for an assignable open feature.
+
+      Repeat the global Mill prohibition in every child launch and resume
+      prompt. Give each run one active, dependency-ready target, one bounded
       responsibility, an explicit source worktree, and a stable request ID.
       Retain the returned run ID and record substantive dispatches and decisions
-      on the target. If delivery is uncertain, inspect the existing request and
-      runs before retrying so one logical dispatch cannot create two writers.
+      on the target.
+
+      Before relying on a dispatch, verify delivery, target lifecycle and
+      dependency readiness, request publication, invocation attempt, process
+      custody, and the current run pointer. A run reported as `ready` does not
+      prove that its target is active or dependency-ready, that invocation was
+      attempted, or that a process has custody. If delivery is uncertain,
+      inspect the existing request and actual runs before retrying so one
+      logical dispatch cannot create two writers.
 
       Pass rich card or note content as one structured argument, payload, or raw
       file value. Never interpolate rich prose into shell commands, and do not
@@ -96,10 +109,12 @@
       or broaden work after required acceptance.
 
       Follow the shared Land workflow, preserve every gate and strict FIFO
-      order, verify the merged commit, complete the assigned cards, and perform
-      required branch and worktree cleanup. Repair failed gates through their
-      supported workflow path rather than bypassing them. Preserve unrelated
-      files, index state, runs, reservations, and owner state.
+      order, verify the merged commit, and complete the assigned cards. Before
+      deleting a checkout, identify its cleanup owner and verify active runs,
+      clean and pushed state, canonical ancestry, and retained artifacts. Repair
+      failed gates through their supported workflow path rather than bypassing
+      them. Preserve unrelated files, index state, runs, reservations, and owner
+      state.
 
       Finish only with accepted evidence or an evidenced handoff. A handoff must
       identify the coordination workspace, targets, runs and workflow IDs,
@@ -166,16 +181,29 @@
       Never stop or restart the global Mill.
       Never restart or replace a running Weaver without explicit user sign-off.
       Never use the deprecated `agent-harness.spool`.
-      Preserve unrelated owner and run state.
+      Never edit or push `main`. Preserve unrelated owner and run state.
 
       ## Delegate and observe through Strand
 
       Delegate only through tracked Strand runs. Use them for implementation,
-      diagnosis, and review. Give each run one active, dependency-ready target,
+      diagnosis, and review. Assign every source change to one explicit sole
+      writer for its worktree and bounded slice. A task beneath an already
+      claimed feature is not another claimable feature: use a targeted run for
+      the task, and use feature assignment only for an assignable open feature.
+
+      Repeat the global Mill prohibition in every child launch and resume
+      prompt. Give each run one active, dependency-ready target, one bounded
       responsibility, an explicit source worktree, and a stable request ID.
       Retain the returned run ID and record substantive dispatches and decisions
-      on the target. If delivery is uncertain, inspect the existing request and
-      runs before retrying so one logical dispatch cannot create two writers.
+      on the target.
+
+      Before relying on a dispatch, verify delivery, target lifecycle and
+      dependency readiness, request publication, invocation attempt, process
+      custody, and the current run pointer. A run reported as `ready` does not
+      prove that its target is active or dependency-ready, that invocation was
+      attempted, or that a process has custody. If delivery is uncertain,
+      inspect the existing request and actual runs before retrying so one
+      logical dispatch cannot create two writers.
 
       Pass rich card or note content as one structured argument, payload, or raw
       file value. Never interpolate rich prose into shell commands, and do not
@@ -224,10 +252,12 @@
       or broaden work after required acceptance.
 
       Follow the shared Land workflow, preserve every gate and strict FIFO
-      order, verify the merged commit, complete the assigned cards, and perform
-      required branch and worktree cleanup. Repair failed gates through their
-      supported workflow path rather than bypassing them. Preserve unrelated
-      files, index state, runs, reservations, and owner state.
+      order, verify the merged commit, and complete the assigned cards. Before
+      deleting a checkout, identify its cleanup owner and verify active runs,
+      clean and pushed state, canonical ancestry, and retained artifacts. Repair
+      failed gates through their supported workflow path rather than bypassing
+      them. Preserve unrelated files, index state, runs, reservations, and owner
+      state.
 
       Finish only with accepted evidence or an evidenced handoff. A handoff must
       identify the coordination workspace, targets, runs and workflow IDs,
