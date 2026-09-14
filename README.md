@@ -82,8 +82,8 @@ The preferred role aliases are `luna`, `oracle`, `grunt`, `reviewer`,
 `luna-low`, `terra-med`, and `sol-high` remain available. The bounded
 `sub-coordinator` carries its complete runbook as supported alias system
 guidance. See the [rollout procedure](docs/processes/sub-coordinator-rollout.md)
-for its Luna/max trial, authorized Terra/high fallback, and additive live
-registration proof.
+for its Codex handoff, Terra/high fallback, and additive live-registration
+proof without runtime mutation.
 
 Claude and Cursor are registered but disabled by default, matching the
 Harnesses workspace policy. A consumer can explicitly enable them after startup
