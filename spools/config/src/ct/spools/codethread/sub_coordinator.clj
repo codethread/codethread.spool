@@ -298,14 +298,34 @@
 
       ## Dispatch with durable request evidence
 
-      Before dispatch, verify that the target is still open, no other writer
-      owns it, the execution checkout exists, and the selected alias resolves
-      through Pi. Use Sol for implementation and material rework. Use tracked
-      Oracle for required technical direction and acceptance.
+      Before dispatch, verify that the target is still active, dependency-ready,
+      owned by no other writer, and backed by an existing execution checkout.
+      Also verify that the selected alias resolves through Pi. Use Sol for
+      implementation and material rework. Use tracked Oracle for required
+      technical direction and acceptance.
+
+      Active and ready are different facts. `show` reports the target lifecycle;
+      `ready` additionally requires every blocking dependency to be closed.
+      Inspect both facts and the declared graph before dispatch or recovery:
+
+      ```text
+      strand --cwd CANONICAL_REPO --workspace COORD_WS show TARGET
+      strand --cwd CANONICAL_REPO --workspace COORD_WS kanban-export FEATURE
+      strand --cwd CANONICAL_REPO --workspace COORD_WS \\
+        list --query blockers-active --param id=TARGET
+      strand --cwd CANONICAL_REPO --workspace COORD_WS \\
+        ready --query strand-active --param id=TARGET
+      ```
+
+      The target appears in the final result only when it is active and ready.
+      If an active target has an active blocker, inspect and fulfill that
+      legitimate prerequisite. Never remove its `depends-on` edge or close the
+      blocker merely to make the target launchable.
 
       Put canonical global `--cwd` and `--workspace` flags before the operation.
       Give real dispatch and review requests a generous global request deadline,
-      a stable request ID, the open target, source cwd, and explicit identity:
+      a stable request ID, the active-and-ready target, source cwd, and explicit
+      identity:
 
       ```text
       strand --cwd CANONICAL_REPO --workspace COORD_WS --timeout 10m \\
@@ -322,9 +342,11 @@
       writer and must not Kanban-claim that task. Use `agent assign` only for an
       assignable open feature.
 
-      Publication metadata alone does not prove launch or process custody. After
-      every dispatch, retain the returned run ID and verify the request, target,
-      identity, invocation attempt, process or queue evidence, and open target:
+      Publication metadata alone does not prove launch or process custody. A run
+      whose harness status is `ready` is not proof that its target is
+      dependency-ready. After every dispatch, retain the returned run ID and
+      verify the request, target, identity, invocation attempt, process or queue
+      evidence, and active-and-ready target:
 
       ```text
       strand --cwd CANONICAL_REPO --workspace COORD_WS --timeout 30s \\
@@ -335,15 +357,30 @@
 
       If a request times out, query that same request ID and actual child runs
       before retrying. Reuse its idempotency key only for the equivalent request;
-      never create a second writer because delivery was uncertain. A closed
-      frozen target needs a fresh open target, not a native continuation whose
-      prompt merely names different work.
+      never create a second writer because delivery was uncertain. For a
+      published run with no invocation attempt, recheck target readiness and
+      satisfy a real prerequisite before expecting dispatch; do not duplicate or
+      stop the waiting run as a shortcut. Do not fabricate a callback or
+      completion signal. A missing process handle can be normal terminal cleanup,
+      so inspect current run, request, and target evidence before declaring lost
+      custody or relaunching.
+
+      A closed frozen target needs a fresh open target, not a native continuation
+      whose prompt merely names different work. After a resumed or successor
+      dispatch is verified, preserve the predecessor run, request, and result in
+      a feature note, then refresh the ordinary primary run pointer:
+
+      ```text
+      strand --cwd CANONICAL_REPO --workspace COORD_WS \\
+        note FEATURE \"Superseded OLD_RUN with RUN after verified dispatch.\" --by IDENTITY
+      strand --cwd CANONICAL_REPO --workspace COORD_WS \\
+        update FEATURE --attr kanban/run-id=RUN
+      ```
 
       ## Sustain bounded observation
 
       Wait with a bounded query timeout and a slightly longer global request
-      deadline. After every result or timeout, inspect the current run, latest
-      task and feature notes, source or gate progress, and workflow readiness:
+      deadline:
 
       ```text
       strand --cwd CANONICAL_REPO --workspace COORD_WS --timeout 55s await \\
@@ -356,10 +393,25 @@
         workflow await WORKFLOW_RUN --timeout-secs 45
       ```
 
+      After every bounded await result or timeout, read both durable mailboxes;
+      watching child output alone misses instructions addressed to the
+      coordinator. Then inspect the current run, source or gate progress, graph,
+      and workflow readiness:
+
+      ```text
+      strand --cwd CANONICAL_REPO --workspace COORD_WS notes COORDINATOR_TARGET
+      strand --cwd CANONICAL_REPO --workspace COORD_WS notes CHILD_TARGET
+      strand --cwd CANONICAL_REPO --workspace COORD_WS \\
+        agent show RUN --by-identity IDENTITY
+      strand --cwd CANONICAL_REPO --workspace COORD_WS \\
+        ready --query strand-active --param id=CHILD_TARGET
+      ```
+
       A timeout means only that the condition was not observed. Check meaningful
       progress, then await again while healthy owned work continues. Meaningful
-      evidence includes a note, child dispatch, commit, quality result, review
-      verdict, or gate transition; a live PID alone is not completion.
+      evidence includes a coordinator or child note, child dispatch, commit,
+      quality result, review verdict, or gate transition; a live PID alone is
+      not completion.
 
       Keep these states distinct:
 
@@ -378,9 +430,28 @@
       ## Review, land, and finish
 
       Match the implementation SHA, reviewed SHA, required quality evidence, and
-      pushed branch or pull-request head. Ask tracked Oracle a bounded question
-      when material scope or contract judgment is unresolved. Require concrete
-      P1/P2 findings and an explicit direction or acceptance verdict.
+      pushed branch or pull-request head. When an implementation milestone's
+      declared outcome is fully satisfied, verify its exact clean pushed SHA and
+      checks, record that evidence, and close only that implementation task:
+
+      ```text
+      strand --cwd CANONICAL_REPO --workspace COORD_WS \\
+        note IMPLEMENTATION_TASK \"Accepted exact pushed SHA and checks: EVIDENCE\" --by IDENTITY
+      strand --cwd CANONICAL_REPO --workspace COORD_WS \\
+        update IMPLEMENTATION_TASK --state closed
+      strand --cwd CANONICAL_REPO --workspace COORD_WS \\
+        ready --query strand-active --param id=REVIEW_TASK
+      ```
+
+      That closure records source implementation and legitimately releases a
+      dependent review. It does not accept the review, feature, quality gates,
+      landing, or cleanup; leave those open for their authorized owners and
+      workflows. Never close an incomplete prerequisite merely to force launch.
+      Dispatch the dependent review only after the readiness recheck returns it.
+
+      Ask tracked Oracle a bounded question when material scope or contract
+      judgment is unresolved. Require concrete P1/P2 findings and an explicit
+      direction or acceptance verdict.
 
       For a material finding or Oracle direction, give one Sol writer the exact
       issue and retained contract, await settlement, rerun affected quality, and
