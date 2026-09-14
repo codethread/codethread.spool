@@ -12,7 +12,7 @@ Tracking: Codethread epic `w3oqr`, coordinator feature `x4y0z`, notes task
 `kejtr`. The user requested delegation through `strand agent`; delegated
 execution uses Pi. Built-in Codex/ChatGPT delegates were stopped.
 
-## Handoff snapshot (01:23 UTC, 14 September)
+## Handoff snapshot (01:51 UTC, 14 September)
 
 Read the latest note on `x4y0z` and the local coordinator tasks before acting.
 Their current run and workflow state takes precedence over this dated snapshot.
@@ -90,8 +90,13 @@ assertions plus required checks passing. Fresh direct Oracle `okbci` rejected
 that candidate with three concrete findings: probe errors can erase independent
 liveness and terminal protection; retained provider evidence blocks retries;
 and an invocation-less legacy callback can settle a newer fenced attempt.
-These defects belong to the uninstalled orphan candidate. Sole Sol continuation
-`2ks0y` / `golden-quiet-heron` owns the exact rework on task `7i8o9`.
+Sole Sol continuation `2ks0y` fixed those three findings in clean published
+`d2958b1`, with 105 tests and 803 assertions passing. Follow-up Oracle `envk9`
+found one remaining P2: a delayed completion can cross an accepted retry's ready
+interval and settle it after the current invocation has been cleared. Same
+Sol lineage `u28ht` / `golden-quiet-heron` now owns that exact race on `7i8o9`.
+It was queued against the still-closed source task; root reopened the legitimate
+rework milestone, and the existing run acquired attempt 1 at 01:50:08.
 
 Local `vm5zk` owns source acceptance, fresh direct review, normal land and cleanup.
 Root owns live activation and historical-run handling after the explicit `v30bg`
@@ -108,11 +113,25 @@ alias only in Millhouse, with existing aliases, flags, modules, frozen runs and
 Mill/Weaver custody unchanged. Pilot `0pln0` / `crisp-tidy-beaver` is running on
 task `qxlcv`, acknowledged local ownership, and created source feature `7vglh`.
 It sustained the first Sol implementation through full quality, then direct
-Oracle review. After one queue-repair P2, it reopened the implementation task
-and resumed the same writer as `3xbhq`, preserving the exact topology and
-regression scope. Final acceptance and land remain pending.
+Oracle review. It completed a first repair as `3xbhq` / `24b12ee`, then consumed
+the follow-up scanner-race P2 and resumed the same writer as `i7wdl`. The local
+coordinator correctly reopened its source milestone before both continuations,
+preserving exact topology, lock order and regression scope. Final acceptance
+and land remain pending.
 Parent task `p3bvq` observes its continuing delivery; durable pins remain with
 Harnesses `ta2ip`. Current productive coordinators in other repos stay put.
+
+Root-owned follow-up `mbygj` refines only the Sol guidance string. Writer
+`l4a0k` published `7f509d3` with full quality; continuation `y80ar` clarifies the
+same-source-milestone reopening rule before ordinary review and landing. Existing
+aliases, settings and frozen running prompts remain unchanged.
+
+Native-guidance design Oracle `lfk7y` accepted the bounded contract on `b5bph`:
+explicit legacy/native selection, approved host capability evidence, frozen
+bundle delivery, attempt-scoped adapter acknowledgement and bootstrap failure.
+This is design acceptance only. It unblocks disabled Agents adapter preparation;
+overlapping Harnesses integration waits for orphan landing. The local Harnesses
+coordinator retains that source/pin ownership, with root operating live pickup.
 
 Millhouse now owns the inherited sibling questions on epic `iktli`, coordinator
 feature `qn4qp`, and accepted Oracle task `eawh6`. Oracle `exvpk` confirmed one
@@ -1026,3 +1045,23 @@ source task `3snhl`, and resumed the original Sol writer as `3xbhq` with the exa
 regression. It preserved the source worktree, review dependency and queue
 contracts. This proves a sustained await-to-rework handoff; final acceptance and
 durable alias rollout still need their own evidence.
+
+## Distinguish a ready run from an eligible target
+
+Harnesses follow-up Oracle `envk9` was published without an attempt because its
+review target depended on implementation task `7i8o9`, which remained active
+after the writer had finished. Root verified the exact clean pushed candidate
+and checks, closed only that completed implementation milestone, and the same
+Oracle started. No edge removal, duplicate review or fabricated callback was
+needed. Implementation completion is a legitimate prerequisite for review,
+not a claim that the review or feature has been accepted.
+
+The reverse happened after that review found another race. Source continuation
+`u28ht` was published against the now-closed implementation task and waited ten
+minutes without custody. Root reopened the same milestone for the documented
+unfinished repair, updated the ordinary run pointer, and the same published run
+started immediately. Sol coordination needs the same explicit lifecycle checks
+as the other tested models. A genuinely completed coordinator or review target
+still needs a fresh task; a new finding on the same source milestone can
+legitimately reopen it for its retained writer. Alias follow-up `mbygj` captures
+both cases and the coordinator-plus-child mailbox check after every await.

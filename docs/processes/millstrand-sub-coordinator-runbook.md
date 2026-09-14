@@ -29,8 +29,9 @@ evidence is in [coordinator-field-notes.md](coordinator-field-notes.md).
 2. Record the coordinator's owner, current run, task, branch, and durable worktree.
    Preserve predecessor pointers. State which features belong to other owners.
 3. Adopt existing workers and workflows before creating any. Confirm each target
-   is open and each execution checkout exists. Published metadata alone does not
-   prove a process launched.
+   is active, its blocking dependencies are closed, and its checkout exists.
+   Published metadata alone does not prove a process launched. A run marked
+   ready can still have a closed or dependency-blocked target.
 4. Select eligible P1/P2 work with a concrete acceptance condition. Reconcile old
    blockers against maintained current source. Do not promote refinement or
    pursue the P3/P4 tail without a reason tied to the requested outcome.
@@ -56,18 +57,26 @@ A reminder or elapsed time is not an acknowledgement.
 | Observed state | Next action |
 | --- | --- |
 | Running with valid custody and progress | Continue waiting; advance independent eligible work. |
-| Ready/pending | Check publication, identity, invocation, attempt, and process/queue evidence. Do not infer capacity. |
+| Ready/pending | Check the actual target lifecycle and dependency graph, then publication, invocation, attempt and process/queue evidence. Do not infer capacity. |
 | Request timed out | Look up the same request ID and actual child runs before retrying. Reuse the idempotency key where supported. |
 | Process failed or never launched | Classify the concrete error. Preserve source. Repair the cause and use an eligible retry or fresh target. |
 | Worker settled successfully | Inspect its immutable candidate, validation, clean/pushed state, and acceptance gaps. Exit zero is not feature acceptance. |
 | Gate appears failed | Read its actual error, report, and executor custody. Static instructions or warnings are not a failure verdict. |
-| Review requires rework | Give one Sol writer the exact P1/P2 findings, retain accepted contracts, then review the changed candidate. |
+| Review requires rework | Reopen the same unfinished implementation milestone with the finding, resume its sole Sol lineage, then review the changed candidate. |
 | Dependencies block work | Record the owning repo, exact prerequisite, evidence, and event that makes the task ready. |
 
 A timeout is not a completion condition. Do not finalize while a child, review,
 or workflow still needs your next action. Continue until eligible work is
 accepted and cleaned or each remaining item has a concrete blocker. Leaving a
 list of active children is only a handoff after another owner has accepted it.
+
+If an implementation milestone is complete, verify its exact clean pushed
+candidate and checks, record the evidence, and close that milestone before its
+dependent review can start. This does not accept the review or feature. Never
+close incomplete work or remove dependency edges just to force dispatch. If a
+run is already published, satisfy its legitimate prerequisite and observe that
+same run rather than launching a duplicate. Refresh the ordinary run pointer
+after a verified continuation; retain its predecessor in a note.
 
 ## Review, land, and activate
 
@@ -113,6 +122,10 @@ Check branch/main layout after recovery or moving between clones and worktrees.
 Native continuation retains its original target, cwd, and model. Use a fresh
 open task/run when any of those must change. Close predecessor coordinator tasks
 as superseded, not as evidence that their source features are complete.
+Reopening the same source milestone after a material review finding is different:
+its unfinished outcome and original writer remain applicable. Reopen it before
+resuming. Never repurpose a finished coordinator or review target through prompt
+text alone.
 
 Change a coordinator model based on concrete behavior. Luna failed to recover
 closed-target launches in this trial. Terra delivered bounded tasks but twice
