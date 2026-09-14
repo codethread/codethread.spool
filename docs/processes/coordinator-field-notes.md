@@ -12,7 +12,7 @@ Tracking: Codethread epic `w3oqr`, coordinator feature `x4y0z`, notes task
 `kejtr`. The user requested delegation through `strand agent`; delegated
 execution uses Pi. Built-in Codex/ChatGPT delegates were stopped.
 
-## Handoff snapshot (00:27 UTC, 14 September)
+## Handoff snapshot (00:55 UTC, 14 September)
 
 Read the latest note on `x4y0z` and the local coordinator tasks before acting.
 Their current run and workflow state takes precedence over this dated snapshot.
@@ -32,10 +32,12 @@ still required coordination. The second exited after a 45-second timeout despite
 an explicit continuation instruction. The Sol seat owns acceptance and the
 remaining eligible P2s. PR479 landed as `a0e88d09` with required quality, basic
 review and FIFO cleanup. Markdown PR480 also landed, as `598817b3`. Prime advice
-is in shared land as PR481 at `aa25c1e3`; independent Sol `pc1vy` completes
-scheduled-review selection provenance and the explicit always-run policy
-disposition. Final audit
-`tirbl` also identified that installed review policy still needs source pickup
+resolved two concrete concurrency findings; final source `b5291633` passed
+required quality and focused re-review. PR481 merged as `49289332`; local
+coordination owns workflow completion and cleanup.
+Scheduled-review selection provenance `fvwzq` has accepted source `5d0ceb38`
+queued behind it, including the explicit always-run policy disposition. Final
+audit `tirbl` also identified that installed review policy still needs source pickup
 after landing. Repeated optional full-review setup failures remain honest; they
 did not become invented prerequisites for the declared shared landing path.
 The timestamp repair is accepted and landed as PR478 / `ddc63972`. Oracle
@@ -54,14 +56,21 @@ Harnesses local Sol coordinator `vm5zk` owns the identity epic. Its replacement
 Weaver successfully passed actual unmanaged Pi startup checks, but older managed
 runs failed completion under the newly loaded backend because they lacked the
 new reservation metadata. P1 `b9jg1` is now explicitly owned by local `vm5zk`
-through rework, review, normal land, and compatible Weaver-only deployment.
+through rework, review, and normal land. Root owns live activation after the
+explicit operator handoff recorded on `0vq1b`.
 Candidate `7060f46` now includes the positive-evidence validation, stale-callback
 and current-predecessor preflight repairs requested by Oracle `q1hmp`, preserving
 earlier native-resume, invocation and negative-custody fixes. Sole Sol `6xsnn`
 settled with full checks passing (93 tests, 697 assertions). Direct Oracle `g9mu8`
 accepted the bounded contracts with 482 direct probes. PR14 landed as `10279584`;
 normal shared land and actual canonical fast-forward are complete after repair
-of the recovered checkout's layout. Installed activation is still pending. Inherited
+of the recovered checkout's layout. Root replaced only the Harnesses Weaver:
+`35590` became `84892`, generation `d94cf791-05f9-4d91-820f-cba24322a1f1`. The
+loaded compatibility namespace matches the accepted source. Both active Pi
+process trees, all captured run attributes, every sibling Weaver, and the
+original Mill stayed unchanged. Read-only validation of the actual legacy
+coordinator row passes. Its eventual real completion callback remains a separate
+operational check; root has submitted no completion evidence. Inherited
 module-size and alias-docstring debt is outside this compatibility repair unless
 an existing required gate fails. Audit `ywp6w` separately maps remaining
 native-guidance transport work in `g23us`; startup identity is already shipped.
@@ -69,16 +78,21 @@ Preserve the recovered standalone source
 checkout and backup; confirm the landing branch/main layout after writers and
 reviewers settle. The running Mill and historical run outcomes remain intact.
 
-Orphan reconciliation `0xq77` has clean published candidate `fc69a46` and focused
-worker checks. Its original Sol `0mvqk` exited normally but encountered that same
+Orphan reconciliation `0xq77` integrated its retained `fc69a46` candidate onto
+B9 as `08db7cc9`, with 102 tests and 778 assertions plus required checks passing.
+Its original Sol `0mvqk` exited normally but encountered that same
 legacy completion error. Integration task `7i8o9` now has fresh Sol `8rjmv` /
 `golden-quiet-heron`, integrating the retained candidate with accepted `b9jg1`
-in its original feature worktree. Root verified publication and custody. Follow-up
+in its original feature worktree. Its continuation `eb5as` now performs a
+bounded extraction of feature process/sweep internals and tests before final
+direct Oracle review. Root verified publication and custody. Follow-up
 Oracle `8e3c4` used prohibited native helpers; it was stopped, and that evidence
 is excluded. Local `vm5zk` offered to adopt orphan source acceptance and landing;
-root accepted that handoff, preserving `8rjmv` and requiring a fresh direct-only
-Oracle. Root proposed taking B9/orphan live activation and historical-run handling,
-and waits for explicit operator acknowledgement before replacing any Weaver.
+root accepted that handoff, preserving the writer lineage and requiring a fresh
+direct-only Oracle. Local `vm5zk` acknowledged the operator split in `v30bg`:
+root owns B9/orphan live activation and historical-run handling; the local
+coordinator owns source delivery. The B9 replacement is complete. Orphan source
+review, land, and installed acceptance are still pending.
 Source task `6wndt` records only implementation; old review
 task `f265p` is superseded, and validation `q8zbg` now depends on integration. The
 four user examples remain untouched. Hourly scheduling is a cadence, not
@@ -942,3 +956,43 @@ probes or reports. Check the actual path and action; a tool-name allowlist alone
 does not distinguish an allowed temporary fixture from a prohibited source edit
 or helper launch. Millhouse direction `exvpk` wrote only its own disposable probe
 and report files, and its direct evidence remained valid.
+
+## Keep the coordinator mailbox in the wait loop
+
+Harnesses acknowledged root's proposed operator split nineteen minutes after the
+initial note. Its public trace showed useful source monitoring and bounded
+awaits, but it checked the child process and dialogue without consistently
+reading its own coordinator task. Root had promised to wait for the operator
+acknowledgement, so the missed mailbox delayed live activation while independent
+source work continued. This was a communication defect in the loop, not evidence
+that the source worker had stalled or permission from silence.
+
+Read both the coordinator task and active child task after each bounded await.
+An acknowledgement belongs on the coordinator task and must state the accepted
+scope and any operation already in progress. Do not stop a productive worker or
+replace an agent just to deliver a note. Keep acting on independent work until
+the conflicting ownership is resolved. For an urgent handoff, place a concise
+pointer on the child task as well; never treat that pointer as an acknowledgement.
+
+## Prove that a Weaver replacement preserves workers
+
+After the explicit handoff, root activated accepted B9 source `10279584` using
+only the supported Harnesses Weaver replacement. Before the operation,
+`managed-legacy` was absent from the live runtime. Afterward it was loaded from
+canonical Harnesses, with a resource hash matching the accepted Git blob. The
+old and new dependency fingerprints were identical: local source activation
+required the generation and loaded-resource evidence.
+
+The snapshots also establish the process boundary directly. Both Pi launcher
+roots retained their PIDs, start times and parent Mill PID `64448`; their children
+and all captured run attributes stayed unchanged. The new Weaver could read the
+same running Mill-owned handles. Read-only legacy validation of coordinator
+`vm5zk` passed and left its row unchanged. This does not claim a completion
+callback: that requires the real eventual provider outcome. The four historical
+Stopping rows remain unchanged until the supported orphan operation is accepted
+and installed.
+
+Evidence: `/Users/ct/dev/evidence/harnesses-b9-activation-20260914T005138Z`.
+The old Weaver was `35590`; the replacement is `84892`, generation
+`d94cf791-05f9-4d91-820f-cba24322a1f1`. All other observed Weaver generations and
+the original Mill process stayed unchanged.

@@ -46,9 +46,12 @@ Use a bounded await, normally 45 seconds with a longer request deadline. After
 each result, read current run state, the latest task notes, workflow readiness,
 and source or gate progress. Record a concise next action when something changes.
 
-Read both the coordinator task's notes and the active child's notes. The parent
+After every bounded await, explicitly read both `notes COORDINATOR_TASK` and
+`notes CHILD_TASK` in the canonical coordination workspace. The parent
 may leave new scope or handoff guidance on the coordinator task; watching only a
-child's output misses that mailbox. Acknowledge changed ownership explicitly.
+child's output misses that mailbox. Acknowledge changed ownership on the
+coordinator task, including whether a conflicting operation is already underway.
+A reminder or elapsed time is not an acknowledgement.
 
 | Observed state | Next action |
 | --- | --- |
