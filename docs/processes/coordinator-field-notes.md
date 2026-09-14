@@ -12,7 +12,7 @@ Tracking: Codethread epic `w3oqr`, coordinator feature `x4y0z`, notes task
 `kejtr`. The user requested delegation through `strand agent`; delegated
 execution uses Pi. Built-in Codex/ChatGPT delegates were stopped.
 
-## Handoff snapshot (00:55 UTC, 14 September)
+## Handoff snapshot (01:23 UTC, 14 September)
 
 Read the latest note on `x4y0z` and the local coordinator tasks before acting.
 Their current run and workflow state takes precedence over this dated snapshot.
@@ -26,23 +26,27 @@ are accepted; parent feature `evzz8` and its tasks are closed. Its empty
 coordination worktree was removed after the owner settled. Never resume a run
 into a removed directory.
 
-Skein is locally coordinated by Sol/high `x6qtq` on `0yu6i`. Terra attempts
-`nq6br` and `idjf4` delivered useful work but both exited while owned children
-still required coordination. The second exited after a 45-second timeout despite
-an explicit continuation instruction. The Sol seat owns acceptance and the
-remaining eligible P2s. PR479 landed as `a0e88d09` with required quality, basic
-review and FIFO cleanup. Markdown PR480 also landed, as `598817b3`. Prime advice
-resolved two concrete concurrency findings; final source `b5291633` passed
-required quality and focused re-review. PR481 merged as `49289332`; local
-coordination owns workflow completion and cleanup.
-Scheduled-review selection provenance `fvwzq` has accepted source `5d0ceb38`
-queued behind it, including the explicit always-run policy disposition. Final
-audit `tirbl` also identified that installed review policy still needs source pickup
-after landing. Repeated optional full-review setup failures remain honest; they
-did not become invented prerequisites for the declared shared landing path.
-The timestamp repair is accepted and landed as PR478 / `ddc63972`. Oracle
-`eq993` accepted closure of obsolete maintained-dependency wrappers and bounded
-the remaining local review-policy work.
+Skein Sol/high coordinator `x6qtq` on `0yu6i` completed its eligible local
+recovery and published handoff `1vemh`. Terra attempts `nq6br` and `idjf4` had
+exited with children still needing coordination; Sol sustained the remaining
+source, review, repair and landing cycles. PR479 landed as `a0e88d09`, Markdown
+PR480 as `598817b3`, prime advice PR481 as `49289332`, and scheduled-review
+provenance PR482 as `3c5062fc`. Both latest shared workflows are done and source
+worktrees are cleaned. Final audit `cwnbs` accepted the bounded outcome, including
+the installed five-reviewer roster and selection-aware success contract. Weaver
+`53046`, its generation and the original Mill stayed unchanged. Earlier failed
+optional reviews remain honest history and did not become new landing gates.
+The timestamp repair also landed as PR478 / `ddc63972`.
+
+Root accepted the remaining dependency waits: `xahg3` depends on Devflow consumer
+adoption through `666xq`; `5enye` depends on Millhouse `7vglh`. The coordinator
+checkout is retained for a future fresh tracked run; the completed coordinator
+task must not be reused as a closed launch target. Root also closed the
+missed JVM-pooling epic `mmk77` after verifying PR465 / `9785332a` ancestry, all
+52 closed child tasks, the completed registered workflow, and prior final
+quality/activation evidence. `seg5v` and wrapper `8evdt` remain open as P3
+refinement for unchosen product semantics, per direct Oracle `jfp46`; no new
+context behavior is claimed delivered.
 
 Devflow's local coordinator completed discovery source feature `peytg`: PR26 /
 `47cf5f3` corrects two unsupported prime pointers. Its source and empty coordinator
@@ -69,8 +73,10 @@ of the recovered checkout's layout. Root replaced only the Harnesses Weaver:
 loaded compatibility namespace matches the accepted source. Both active Pi
 process trees, all captured run attributes, every sibling Weaver, and the
 original Mill stayed unchanged. Read-only validation of the actual legacy
-coordinator row passes. Its eventual real completion callback remains a separate
-operational check; root has submitted no completion evidence. Inherited
+coordinator row passes. Current managed worker `eb5as` subsequently completed
+normally under the new generation, with its usable native session retained.
+The old coordinator's eventual real completion remains a separate operational
+check; root has submitted no completion evidence. Inherited
 module-size and alias-docstring debt is outside this compatibility repair unless
 an existing required gate fails. Audit `ywp6w` separately maps remaining
 native-guidance transport work in `g23us`; startup identity is already shipped.
@@ -78,24 +84,21 @@ Preserve the recovered standalone source
 checkout and backup; confirm the landing branch/main layout after writers and
 reviewers settle. The running Mill and historical run outcomes remain intact.
 
-Orphan reconciliation `0xq77` integrated its retained `fc69a46` candidate onto
-B9 as `08db7cc9`, with 102 tests and 778 assertions plus required checks passing.
-Its original Sol `0mvqk` exited normally but encountered that same
-legacy completion error. Integration task `7i8o9` now has fresh Sol `8rjmv` /
-`golden-quiet-heron`, integrating the retained candidate with accepted `b9jg1`
-in its original feature worktree. Its continuation `eb5as` now performs a
-bounded extraction of feature process/sweep internals and tests before final
-direct Oracle review. Root verified publication and custody. Follow-up
-Oracle `8e3c4` used prohibited native helpers; it was stopped, and that evidence
-is excluded. Local `vm5zk` offered to adopt orphan source acceptance and landing;
-root accepted that handoff, preserving the writer lineage and requiring a fresh
-direct-only Oracle. Local `vm5zk` acknowledged the operator split in `v30bg`:
-root owns B9/orphan live activation and historical-run handling; the local
-coordinator owns source delivery. The B9 replacement is complete. Orphan source
-review, land, and installed acceptance are still pending.
-Source task `6wndt` records only implementation; old review
-task `f265p` is superseded, and validation `q8zbg` now depends on integration. The
-four user examples remain untouched. Hourly scheduling is a cadence, not
+Orphan reconciliation `0xq77` integrated its retained candidate onto B9 and
+published `0c4e1303` after a bounded module extraction, with 102 tests and 778
+assertions plus required checks passing. Fresh direct Oracle `okbci` rejected
+that candidate with three concrete findings: probe errors can erase independent
+liveness and terminal protection; retained provider evidence blocks retries;
+and an invocation-less legacy callback can settle a newer fenced attempt.
+These defects belong to the uninstalled orphan candidate. Sole Sol continuation
+`2ks0y` / `golden-quiet-heron` owns the exact rework on task `7i8o9`.
+
+Local `vm5zk` owns source acceptance, fresh direct review, normal land and cleanup.
+Root owns live activation and historical-run handling after the explicit `v30bg`
+operator acknowledgement. Old helper-based Oracle evidence remains excluded.
+The four user examples are unchanged; deployment waits for corrected source and
+acceptance. Millhouse also needs its explicit Harnesses dependency advanced
+through the coordinated consumer wave. Hourly scheduling is a cadence, never
 evidence that an agent is dead.
 
 Additive Sol alias feature `58cgg` is complete: PR18 landed as `c47ab534` after
@@ -104,6 +107,10 @@ the original Luna/max default and Terra/high trial option. Parent staged the new
 alias only in Millhouse, with existing aliases, flags, modules, frozen runs and
 Mill/Weaver custody unchanged. Pilot `0pln0` / `crisp-tidy-beaver` is running on
 task `qxlcv`, acknowledged local ownership, and created source feature `7vglh`.
+It sustained the first Sol implementation through full quality, then direct
+Oracle review. After one queue-repair P2, it reopened the implementation task
+and resumed the same writer as `3xbhq`, preserving the exact topology and
+regression scope. Final acceptance and land remain pending.
 Parent task `p3bvq` observes its continuing delivery; durable pins remain with
 Harnesses `ta2ip`. Current productive coordinators in other repos stay put.
 
@@ -996,3 +1003,26 @@ Evidence: `/Users/ct/dev/evidence/harnesses-b9-activation-20260914T005138Z`.
 The old Weaver was `35590`; the replacement is `84892`, generation
 `d94cf791-05f9-4d91-820f-cba24322a1f1`. All other observed Weaver generations and
 the original Mill process stayed unchanged.
+
+## Accept a real dependency handoff
+
+Skein's Sol coordinator completed its source features, ordinary quality and
+review gates, FIFO cleanup and installed readback. Its final audit accepted the
+bounded outcome. The remaining P2 cards depended on parent-owned consumer pins
+and the active Millhouse feature, so root explicitly accepted those dependency
+waits and retained the coordinator checkout. Normal finalization at that boundary
+is appropriate: there is no local child or gate awaiting its next action.
+
+This differs from the earlier Terra exits while reviews or source children still
+needed an owner. Record the exact remaining card, prerequisite, owner and event
+that makes it actionable; then obtain an acknowledged handoff. Do not keep an
+agent polling an unchanged dependency merely to display an active run. Do not
+mark the dependent source feature complete. A later continuation must use an
+open target and an existing checkout.
+
+The first Sol alias pilot also reached a useful rework boundary without parent
+intervention. `0pln0` consumed direct Oracle `rlhh6`'s single finding, reopened
+source task `3snhl`, and resumed the original Sol writer as `3xbhq` with the exact
+regression. It preserved the source worktree, review dependency and queue
+contracts. This proves a sustained await-to-rework handoff; final acceptance and
+durable alias rollout still need their own evidence.
