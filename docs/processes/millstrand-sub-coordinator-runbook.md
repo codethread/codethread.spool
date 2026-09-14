@@ -137,3 +137,11 @@ The latest handoff note must contain: current owner/run/task/cwd; each live chil
 and its feature; exact accepted or rejected candidate; pending gate and next
 action; concrete blockers; preserved artifacts; and any user-authorized runtime
 scope. Keep it short enough for a cold start without rereading the entire log.
+
+
+For provider quota failures, preserve partial work and resumable lineage. A
+reported zero process exit does not override an explicit provider error. Check
+current availability before one bounded continuation; do not churn new runs.
+Do not release a predecessor merely because a successor was published: require
+its readiness acknowledgement, confirm the old owner has relinquished or
+settled, then record the new owner's release to act.
