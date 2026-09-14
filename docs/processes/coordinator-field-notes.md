@@ -12,6 +12,48 @@ Tracking: Codethread epic `w3oqr`, coordinator feature `x4y0z`, notes task
 `kejtr`. The user requested delegation through `strand agent`; delegated
 execution uses Pi. Built-in Codex/ChatGPT delegates were stopped.
 
+## Protocol refinement evidence (14 September, after 08:38 UTC)
+
+Feature `wzepr` promotes the agreed protocol, not a new model trial. Current
+procedure is the linked runbook and working handoff briefs. Historical Pi aliases,
+45/55-second examples and disposable coordination checkouts below are not current
+defaults. Kanban-only completion, canonical coordinator roots and harness-specific
+180-second event-aware waits supersede those recommendations, including the
+original audit's separate-ledger proposal.
+
+The audit `ylkr8` at `/Users/ct/dev/evidence/luna-coordinator-audit-20260914/report.md`
+found that Pi `5pufa` completed source Land but missed required superseded PR
+closure and lost its feature-worktree CWD during cleanup. Its Codex observation
+was provisional at 06:17 UTC. Later `hohca` task notes establish same-writer repair
+`4103r`, accepted candidate `fcfc383848541c517e1ed455a8226d89a3a24c86`, Land
+`land-hohca-fcfc383-20260914`, PR #21 / merge
+`7e8ef94cec100db5cbf4d1d9977d73692ffbba45`, required basic review `mjo1z` and
+source cleanup. Land prematurely cascaded activation children as unactioned;
+the coordinator reopened them and recorded runtime-owner handoff `rprnm/0rwrh`
+before final closure. That is recovered completion, not flawless bookkeeping or
+proof the live aliases had loaded. Evaluation task `e7otl` remains pending.
+
+Harnesses planner `qhpg2` prepared existing work, then successor
+`steady-lucid-swan` acknowledged task `60gpx` in note `1r5cz`: tracked `psu8g`,
+managed session `9eef536e-9083-4c7d-87ea-310b8c0ee071`, actual Codex thread/goal
+`01a09ec3-55d2-7f40-a1ef-8673dee79c6b`, terminal
+`agent-harnesses-codex-luna`, canonical Harnesses CWD. Only afterward did the
+planner close predecessor `q6ai2`, preserving settled `uea97` and source lineages.
+Evidence is in `/Users/ct/dev/evidence/harnesses-coordinator-recovery-20260914-citiq7k5/`.
+The 08:38 parent handoff records Devflow PR #27 / `3d880109` and Codethread PR #22 /
+`42c1ce14` accepted through ordinary Land/cleanup. Retained Harnesses `qfw9o/kyp3h`
+was only partial settled history; Agents `n9m9g` was source-only `a9fa4840`.
+Neither was represented as reviewed, landed or activated native guidance.
+
+Those headed recovery launches used detailed **one-off direct Codex prompts**,
+not the newly shipped shared alias plus launch files. They support the protocol
+choices but do not prove effective shared defaults or a new cohort. Canonical
+Codethread still exposed old Pi coordinator aliases at source refinement intake;
+consumer pickup remains parent-owned. The observed `mill prime millstrand`
+binary 0.5.2/source 0.5.3 mismatch does not authorize stopping Mill or global
+installation changes. Source verification and actual runtime activation remain
+separate evidence.
+
 ## Interactive Goal trials (05:28 UTC, 14 September)
 
 These are dated observations, not replacements for the current procedure in the
