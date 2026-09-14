@@ -40,7 +40,9 @@
       Never use the deprecated `agent-harness.spool`.
       Terminate processes only by an identified run or PID.
       Never use a broad process-name kill.
-      Never edit or push `main`. Preserve unrelated owner and run state.
+      Never edit or push `main`. Preserve unrelated owner and run state. Use
+      disposable explicit workspaces for workspace-backed tests.
+      Never use the shared Millstrand world for those tests.
 
       ## Delegate and observe through Strand
 
@@ -54,7 +56,8 @@
       prompt. Give each run one active, dependency-ready target, one bounded
       responsibility, an explicit source worktree, and a stable request ID.
       Retain the returned run ID and record substantive dispatches and decisions
-      on the target.
+      on the target. Preserve stable request IDs and request lineage.
+      Include them in dispatch, retry, and handoff evidence.
 
       Before relying on a dispatch, verify delivery, target lifecycle and
       dependency readiness, request publication, invocation attempt, process
@@ -105,10 +108,11 @@
       review and affected quality checks against the changed candidate.
 
       Require the exact review and quality specified by the repository and
-      workflow. Verify material findings at their concrete contract boundary,
-      assign one bounded repair to the source writer, then repeat affected
-      quality and review. Do not substitute optional review for required review
-      or broaden work after required acceptance.
+      workflow. Verify material findings at their concrete contract boundary.
+      Continue material rework on the same unfinished milestone with its sole
+      writer, retain the predecessor request and run lineage, then repeat
+      affected quality and review. Do not substitute optional review for
+      required review or broaden work after required acceptance.
 
       Follow the shared Land workflow, preserve every gate and strict FIFO
       order, verify the merged commit, and complete the assigned cards. Before
@@ -185,7 +189,9 @@
       Never use the deprecated `agent-harness.spool`.
       Terminate processes only by an identified run or PID.
       Never use a broad process-name kill.
-      Never edit or push `main`. Preserve unrelated owner and run state.
+      Never edit or push `main`. Preserve unrelated owner and run state. Use
+      disposable explicit workspaces for workspace-backed tests.
+      Never use the shared Millstrand world for those tests.
 
       ## Delegate and observe through Strand
 
@@ -199,7 +205,8 @@
       prompt. Give each run one active, dependency-ready target, one bounded
       responsibility, an explicit source worktree, and a stable request ID.
       Retain the returned run ID and record substantive dispatches and decisions
-      on the target.
+      on the target. Preserve stable request IDs and request lineage.
+      Include them in dispatch, retry, and handoff evidence.
 
       Before relying on a dispatch, verify delivery, target lifecycle and
       dependency readiness, request publication, invocation attempt, process
@@ -250,10 +257,11 @@
       review and affected quality checks against the changed candidate.
 
       Require the exact review and quality specified by the repository and
-      workflow. Verify material findings at their concrete contract boundary,
-      assign one bounded repair to the source writer, then repeat affected
-      quality and review. Do not substitute optional review for required review
-      or broaden work after required acceptance.
+      workflow. Verify material findings at their concrete contract boundary.
+      Continue material rework on the same unfinished milestone with its sole
+      writer, retain the predecessor request and run lineage, then repeat
+      affected quality and review. Do not substitute optional review for
+      required review or broaden work after required acceptance.
 
       Follow the shared Land workflow, preserve every gate and strict FIFO
       order, verify the merged commit, and complete the assigned cards. Before

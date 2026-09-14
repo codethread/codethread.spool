@@ -24,8 +24,9 @@ Never stop or restart the global Mill. Never restart or replace a running Weaver
 without explicit user sign-off. Never use the deprecated
 `agent-harness.spool`; maintained harness work belongs in `harnesses.spool`.
 Terminate processes only by an identified run or PID; never use a broad
-process-name kill. Never edit or push `main`, and use disposable explicit
-workspaces for workspace-backed tests.
+process-name kill. Never edit or push `main`. Use disposable explicit
+workspaces for workspace-backed tests. Never use the shared Millstrand world
+for those tests.
 
 ## Dispatch tracked work safely
 
@@ -33,6 +34,8 @@ Delegate implementation, diagnosis, and review only through tracked Strand
 runs. Give each run one active, dependency-ready target, one bounded
 responsibility, an explicit source worktree, and a stable request ID. Retain the
 returned run ID and record substantive dispatches and decisions on the target.
+Preserve stable request IDs and request lineage. Include them in dispatch,
+retry, and handoff evidence.
 
 A task beneath an already claimed feature is not another claimable feature. Use
 a targeted run for that task and state that its assigned worker is the sole
@@ -85,7 +88,7 @@ live PID or elapsed time.
 | Request timed out | Read the same request and runs before an idempotent retry. |
 | Terminal | Inspect the semantic result and target; do not infer settlement or success. |
 | Settled | Confirm the result and custody before continuation or transfer. |
-| Review requires rework | Continue the same unfinished milestone with its sole writer. |
+| Review requires rework | Continue the same unfinished milestone with its sole writer and retain predecessor request and run lineage. |
 | Dependency blocks work | Record the prerequisite, owner, evidence, and readiness event. |
 
 ## Review, land, and clean up
@@ -97,8 +100,9 @@ must identify the same candidate; changed source requires affected quality and
 review against the changed candidate.
 
 Require the repository's exact review and quality. Verify material findings at
-the concrete contract boundary, assign one bounded repair to the source writer,
-and repeat affected checks and review. Do not substitute optional review for a
+the concrete contract boundary. Continue material rework on the same unfinished
+milestone with its sole writer, retain predecessor request and run lineage, and
+repeat affected checks and review. Do not substitute optional review for a
 required verdict or broaden accepted work.
 
 Follow the installed shared Land workflow. Preserve every gate and strict FIFO
