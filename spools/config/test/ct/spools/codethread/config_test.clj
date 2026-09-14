@@ -155,12 +155,26 @@
                    "target, run, candidate, and evidence"
                    "fresh request for the new assignment"
                    "Do not change runtime flags"
-                   "evidenced handoff"]]
+                   "evidenced handoff"
+                   "sole completion record"
+                   "canonical root, never a"
+                   "Publication alone is not acknowledgement"
+                   "kanban-identity-work"
+                   "Empty ready is not completion"
+                   "safety cap, not pagination"
+                   "without parent preapproval"
+                   "Do not require"
+                   "positive settlement"
+                   "prose cannot retarget a frozen run"
+                   "Omit Land's optional card parameter"
+                   "loaded runtime activation are separate facts"
+                   "On cold start verify"]]
             (is (str/includes? (first luna-guidance)
                                contract-fragment)))
           (doseq [provider-specific-fragment
                   ["Pi" "Codex" "/goal" "goal_wait" "goal_complete"
-                   "goal_blocked" "native resume" "model" "trial"]]
+                   "goal_blocked" "native resume" "model" "trial"
+                   "180" "210s" "three-minute"]]
             (is (not (str/includes? (first luna-guidance)
                                     provider-specific-fragment))))
           (is (= "gpt-5.6-luna"
@@ -198,73 +212,14 @@
                  (get-in sustained [:generated :harness/model])))
           (is (= "high" (get-in sustained [:generated :harness/effort])))
           (is (= 1 (count guidance)))
-          (doseq [contract-fragment
-                  ["# Sustained sub-coordinator runbook"
-                   "canonical coordination workspace"
-                   "Set a real goal for every assigned card"
-                   "Never stop or restart the global Mill"
-                   "Never restart or replace a running Weaver"
-                   "explicit user sign-off"
-                   "Never use the deprecated `agent-harness.spool`"
-                   "only by an identified run or PID"
-                   "Never use a broad process-name kill"
-                   "Never edit or push `main`"
-                   "Preserve unrelated owner and run state"
-                   "disposable explicit workspaces"
-                   "Never use the shared Millstrand world"
-                   "only through tracked Strand runs"
-                   "Assign every source change"
-                   "implement directly without recursively delegating"
-                   "only with explicit parent authorization"
-                   "not another claimable feature"
-                   "feature assignment only"
-                   "every child launch and resume"
-                   "verify delivery, target lifecycle"
-                   "dependency readiness"
-                   "request publication"
-                   "invocation attempt"
-                   "custody, and the current run pointer"
-                   "reported as `ready` does not"
-                   "stable request IDs and request lineage"
-                   "Include them in dispatch, retry, and handoff evidence"
-                   "one structured argument, payload, or raw"
-                   "Never interpolate rich prose into shell commands"
-                   "confuse JSON encoding with shell escaping"
-                   "bounded `strand await`"
-                   "agent-run-terminal"
-                   "agent-run-settled"
-                   "agent-run-active"
-                   "agent-work-complete"
-                   "agent-work-complete-or-intervention"
-                   "A timeout means only"
-                   "P1/P2"
-                   "required quality marker"
-                   "same unfinished milestone with its sole"
-                   "retain the predecessor request and run lineage"
-                   "shared Land workflow"
-                   "strict FIFO"
-                   "identify its cleanup owner"
-                   "verify active runs"
-                   "clean and pushed state"
-                   "canonical ancestry"
-                   "retained artifacts"
-                   "only with explicit runtime-owner"
-                   "repeated documented mistakes"
-                   "persist despite clear"
-                   "Timeouts, latency, and provider or infrastructure failures"
-                   "not evidence of poor coordination or grounds for fallback"
-                   "Preserve and settle the old run"
-                   "Retain the exact workspace"
-                   "target, run, candidate, and evidence"
-                   "fresh request for the new assignment"
-                   "Do not change runtime flags"
-                   "acknowledged next owner"]]
-            (is (str/includes? (first guidance) contract-fragment)))
-          (doseq [provider-specific-fragment
-                  ["Pi" "Codex" "/goal" "goal_wait" "goal_complete"
-                   "goal_blocked" "native resume" "model" "trial"]]
-            (is (not (str/includes? (first guidance)
-                                    provider-specific-fragment))))
+          (is (str/includes? (first guidance)
+                             "# Sustained sub-coordinator runbook"))
+          (is (str/includes? (first guidance)
+                             "until it is accepted and cleaned"))
+          (is (str/includes?
+               (first guidance)
+               (first (get-in bounded-before
+                              [:generated :harness/appended-system-prompts]))))
           (is (= "gpt-5.6-sol"
                  (attr-get sustained-run :harness/model)))
           (is (= "high" (attr-get sustained-run :harness/effort)))

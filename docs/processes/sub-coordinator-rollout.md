@@ -10,11 +10,17 @@ A process-local `seat/sub-coordinator-terra` flag selects the authorized
 fallback: Codex with the unqualified native model ID `gpt-5.6-terra` at explicit
 `high` effort and the same runbook. The additive `sub-coordinator-sol` seat
 resolves through Codex to the unqualified native model ID `gpt-5.6-sol` at
-explicit `high` effort. It has self-contained sustained-coordination guidance
-and does not change the Luna default, Terra switch, ordinary `coordinator`, or
-`sol` aliases.
+explicit `high` effort. It shares the common coordination contract with
+sustained-role framing and does not change the Luna default, Terra switch,
+ordinary `coordinator`, or `sol` aliases.
 
-Both prompt values are provider-neutral Strand coordination guidance. They make
+Both alias prompt values are provider-neutral Strand coordination guidance.
+Use the [planner/coordinator briefs](coordinator-handoff.md) for prepared intake,
+acknowledged ownership and canonical-root headed launches. Append the separate
+[Codex](coordinator-launch-codex.md) or explicitly selected
+[Pi](coordinator-launch-pi.md) launch policy; harness timing is not embedded in
+the common system prompt. The supported launch examples apply these policies
+explicitly, rather than claiming old sessions inherit new defaults. They make
 the global Mill user-controlled, prohibit replacing a running Weaver without
 explicit user sign-off, require payload-safe dispatch, and preserve unrelated
 owner and run state. Deprecated `agent-harness.spool` workspaces, source, and
@@ -42,11 +48,11 @@ quality and review. The parent owns any staged runtime adoption; source workers
 must not perform registration, refresh a runtime, restart a process, change a
 flag, update a source pin, or start a pilot.
 
-Parent coordinator `x4y0z`, through pilot task `irfb7`, owns authorization and
-execution of this recipe. Run it only at a selected handoff boundary; the
-implementation worker must not mutate shared running worlds. The separate
-one-line repository-instruction rollout is owned by feature `7qxp9` and must not
-be duplicated here.
+The original pilot used parent `x4y0z` / task `irfb7`; that historical approval
+is not standing permission for new adoption. A currently authorized runtime
+owner must select the handoff boundary. Source workers must not mutate shared
+running worlds. Existing alias replacement or Weaver pickup requires its own
+explicit scoped authorization; the create-only recipe below is not that path.
 
 ```nu
 let coord_ws = "/absolute/path/to/canonical/.millstrand"
@@ -187,9 +193,12 @@ additive registration.
 ## Activation handoff and fallback
 
 After review and disposable-world proof, the runtime owner may assign one
-bounded coordination slice at an ownership boundary. Record the canonical
-workspace, execution worktree, target, stable request ID, run ID, initial
-registry, and frozen settings for existing runs. Verify ownership,
+bounded coordination slice at an ownership boundary. Launch from the assigned
+repository's canonical root, not a feature worktree or disposable coordinator
+checkout. Record the canonical CWD/workspace separately from source worktree and
+cleanup custody; retain target, stable request ID, run ID, native session, real
+goal and discoverable terminal, initial registry, and frozen settings for existing
+runs. Require successor acknowledgement before planner release. Verify ownership,
 task-versus-feature dispatch, payload-safe prompts, bounded waits, progress
 checks, rework, required review, and accepted handoff.
 

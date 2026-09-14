@@ -1,128 +1,193 @@
-# Millstrand sub-coordinator runbook
+# Sol preparation → Luna coordination
 
-Use this provider-neutral procedure for one repository's eligible work. Keep the
-live ownership map on its Kanban feature and the next action on the current
-coordinator task. The parent coordinator owns cross-repository dependencies.
-Dated observations and historical trial details belong in
-[coordinator-field-notes.md](coordinator-field-notes.md), not here.
+The parent owns the conversation, shared decisions and mentoring. Sol prepares
+bounded work; one headed Luna coordinator executes the prepared Kanban DAG.
+The [launch briefs](coordinator-handoff.md) apply this provider-neutral contract.
+[Field notes](coordinator-field-notes.md) are dated evidence, not shared defaults.
 
-## Establish ownership and goals
+## Prepare before handing off
 
-1. Read applicable repository instructions and live `strand help` and
-   `strand prime` output.
-2. Read the feature, task graph, dependencies, latest notes, active runs,
-   workflows, recorded branch and worktree, and actual source custody.
-3. Distinguish the canonical coordination workspace, which owns cards, notes,
-   runs, and workflows, from execution worktrees, which own source changes.
-4. Establish one coordinator and at most one source writer per worktree. Adopt
-   healthy existing runs before creating work and preserve unrelated owner,
-   run, file, index, workflow, and queue state.
-5. Set a real goal for each assigned card and keep it current until the declared
-   outcome is accepted or handed off with an evidenced blocker.
+Sol turns each direct request into a feature with acceptance outcomes and tasks.
+Use an epic only to group genuinely related features, including cross-repository
+work; do not create an epic merely because a launch uses another harness. Keep
+source features in their owning repositories and record workspace-qualified
+supplier/receiver milestones. Do not invent cross-world dependency edges or make
+independent supplier publication depend on the entire receiving epic.
 
-Never stop or restart the global Mill. Never restart or replace a running Weaver
-without explicit user sign-off. Never use the deprecated
-`agent-harness.spool`; maintained harness work belongs in `harnesses.spool`.
-Terminate processes only by an identified run or PID; never use a broad
-process-name kill. Never edit or push `main`. Use disposable explicit
-workspaces for workspace-backed tests. Never use the shared Millstrand world
-for those tests.
+Reconcile stale cards against actual source, reviews, Land and ownership before
+execution. Reuse existing tasks and sole writers. Put dependencies before the
+specific source or acceptance slice they protect, not every independent task.
+Record ambiguous diagnosis/design or substantial cleanup as a bounded Sol/Oracle
+preparation task. A blocked preparation slice does not block independent prepared
+work. Luna selects ready work, delegates, awaits, inspects evidence, routes
+understood repair and executes acceptance/landing; it is not the default source
+writer or backlog investigator. New ambiguity returns to tracked preparation or
+Oracle direction without silently expanding the coordinator role.
 
-## Dispatch tracked work safely
+## Establish custody and acknowledge the handoff
 
-Delegate implementation, diagnosis, and review only through tracked Strand
-runs. Give each run one active, dependency-ready target, one bounded
-responsibility, an explicit source worktree, and a stable request ID. Retain the
-returned run ID and record substantive dispatches and decisions on the target.
-Preserve stable request IDs and request lineage. Include them in dispatch,
-retry, and handoff evidence.
+Read repository instructions, live `strand help`, `strand prime kanban`, the
+feature/task DAG, latest notes, current runs, workflows and actual source custody.
+Launch the coordinator in the assigned repository's **canonical root**, never a
+feature worktree or an alternative disposable coordination checkout. Keep that
+process CWD throughout Land. Record separately:
 
-A task beneath an already claimed feature is not another claimable feature. Use
-a targeted run for that task and state that its assigned worker is the sole
-writer. Use feature assignment only for an assignable open feature.
+- canonical coordinator CWD and coordination `.millstrand` workspace;
+- each source feature, branch/worktree, sole writer/current run and cleanup owner;
+- any retained worker driver CWD, session and Git common-directory dependency.
 
-If publication times out or delivery is uncertain, inspect the same request ID
-and actual runs before an equivalent retry. Never create a second writer because
-the first request's delivery is uncertain. Verify target lifecycle, dependency
-readiness, request publication, invocation attempt, process custody, and current
-run pointer; a run's `ready` status alone proves none of those facts.
+One coordinator and at most one source writer own each slice/worktree. Adopt
+healthy serving runs rather than duplicating them. Never change another writer's
+files, index, flags, source custody or workflow/queue state.
 
-Pass rich card, note, or prompt content as one structured argument, payload, or
-raw-file value. Never interpolate rich prose into shell commands, and do not
-confuse JSON encoding with shell escaping. Read stored content back whenever
-quoting or delivery is uncertain.
+The successor acknowledges exclusive scope on its coordinator task with actual
+identity, tracked request/run, native session/thread, real goal ID/state (or
+provider-visible goal evidence where no ID is exposed), canonical CWD and a
+verified discoverable terminal. Distinguish managed session from native thread
+when they differ. The planner verifies those facts and the ordinary owner/current
+run pointers before releasing custody or closing its preparation/handoff task.
+Publication, a visible TUI, a failed start, silence or a proposed handoff is not
+acknowledgement. Preserve predecessors; never manufacture goal or settlement rows.
 
-Use common APIs such as `strand show`, `strand notes`, `strand ready`,
-`strand agent`, and `strand workflow` to inspect the durable state. Put global
-`--cwd`, `--workspace`, and timeout flags before the operation when crossing
-checkouts.
+Kanban is the **sole completion record**, not a separate checklist or ledger.
+Required source, review, repair, acceptance, cleanup and external handoff outcomes
+belong in existing cards/tasks. Keep the coordinator's own next actions under its
+coordination feature. Each meaningful transition gets a latest task note naming
+current decision/evidence, owner/run, blocker and concrete next action or wake
+condition. Parent-card notes stay lean; keep workspace and predecessor coordinates
+so a cold-start successor can continue from Kanban alone.
 
-## Sustain bounded observation
+Never stop or restart Mill. Never restart or replace a running Weaver without
+explicit user sign-off. Never use deprecated `agent-harness.spool`; maintained
+harness work belongs in `harnesses.spool`. Stop only an identified run or PID,
+never a broad process-name kill. Never edit or push `main`. Use disposable,
+explicit workspaces for workspace-backed tests, never the shared world.
 
-Wait for workers, reviews, and workflow gates with bounded `strand await` calls
-against named queries. Reissue a bounded wait after checking meaningful
-progress rather than tight-polling. A timeout means only that the condition was
-not observed; it is not a failure verdict.
+## Select owned work, then dispatch
 
-Choose query cardinality for the evidence needed:
+Discover live queries with `strand query list` and
+`strand query explain kanban-identity-work`. Use the exact owner recorded on the
+assigned card, not a guessed worker identity:
 
-- `agent-run-terminal --min-count 1` observes a terminal run, not success.
-- `agent-run-settled --min-count 1` requires positive process-settlement
-  evidence before transferring custody or continuing a run lineage.
-- `agent-run-active --max-count 0` observes absence, not completion.
-- `agent-work-complete --min-count 1` observes accepted assignment completion;
-  `agent-work-complete-or-intervention` also identifies work needing
-  intervention.
+```text
+strand list --query kanban-identity-work --param identity=<recorded-owner> --state active
+strand ready --query kanban-identity-work --param identity=<recorded-owner>
+```
 
-Missing IDs never satisfy positive-evidence waits, and no active run does not
-prove completion. After every result or timeout, inspect the current run, parent
-and child notes, target lifecycle, dependencies, source evidence, and workflow
-readiness. Meaningful progress is a substantive note, child attempt, changed
-source or commit, validation result, review verdict, or gate transition—not a
-live PID or elapsed time.
+The query includes directly owned cards/tasks, tasks under owned cards and
+parent-epic context. Ready means dependency-eligible, not permission to dispatch.
+Stay inside the explicit assignment and inspect existing owners/current runs
+first. Empty ready is not completion: inspect active owned work, blockers and
+serving runs. Start narrow with a compact projection; `--limit` is a safety cap,
+not pagination. Narrow a cap error or make one intentional bounded larger read.
 
-| Observed state | Required action |
+Delegate only through tracked Strand, never native/built-in helpers. A task under
+an already claimed feature uses `agent run --target TASK`, not a feature claim.
+Use `agent assign` only for an assignable open feature. Give each child an active,
+dependency-ready target, bounded scope, explicit source worktree, sole writer and
+stable request ID. Writers implement directly without recursively delegating;
+another coordination layer requires explicit parent authorization. Repeat the
+Mill prohibition and any direct-only review constraint in the actual invocation.
+
+Pass rich prose as one structured argument, payload or raw-file value. JSON is
+not shell escaping. Verify stored content if delivery/quoting is uncertain. A
+publication timeout requires `agent show --request REQUEST` and actual run
+inspection before an equivalent retry with the same key. Preserve full returned
+IDs. A `ready` run alone proves neither target eligibility, invocation attempt,
+process custody nor the current run pointer. Never create a second writer to
+work around uncertain delivery.
+
+## Await evidence, not elapsed time
+
+Use bounded event-aware `strand await` queries, or `workflow await` for a workflow
+frontier. Apply the harness-specific launch timing policy and adequate client
+and outer-tool deadlines; act immediately on a positive event. After a result or
+timeout, query owned work and inspect the relevant changed task/run plus the
+coordinator task's latest note. Reissue as needed, not full-history reads or tight
+polling. A timeout alone is not failure; healthy long validation need not produce
+frequent notes. Notes are durable evidence, not a guaranteed live steering channel.
+
+| Query/observation | What it proves; next action |
 | --- | --- |
-| Running with custody and progress | Continue bounded waits and eligible independent work. |
-| Ready or pending | Inspect target, dependencies, request, attempt, queue, and custody. |
-| Request timed out | Read the same request and runs before an idempotent retry. |
-| Terminal | Inspect the semantic result and target; do not infer settlement or success. |
-| Settled | Confirm the result and custody before continuation or transfer. |
-| Review requires rework | Continue the same unfinished milestone with its sole writer and retain predecessor request and run lineage. |
-| Dependency blocks work | Record the prerequisite, owner, evidence, and readiness event. |
+| `agent-run-terminal --min-count 1` | Terminal run, not successful work; inspect semantic result and target. |
+| `agent-run-settled --min-count 1` | Positive settlement; still verify result, resources and eligibility before continuation. |
+| `agent-run-active --max-count 0` | Absence, not successful completion. |
+| `agent-work-complete --min-count 1` | Accepted assignment completion; missing IDs cannot satisfy positive evidence. |
+| `agent-work-complete-or-intervention` | Completion or work needing intervention; inspect which. |
+| Healthy executor-owned workflow gate | Let it run; read its real error/custody, not only static instructions. |
 
-## Review, land, and clean up
+With stop-on-complete, await the run, inspect the result and accept the target;
+waiting only for an open target can wait for your own next action. Terminal,
+settlement and acceptance are distinct. Never fabricate a callback, process exit,
+past review or gate pause. Withholding an await does not pause an executor.
 
-Keep implementation, review, required quality, and landing evidence distinct.
-Record the exact implementation SHA, immutable reviewed SHA, quality command and
-result, required quality marker, and pushed remote or pull-request head. They
-must identify the same candidate; changed source requires affected quality and
-review against the changed candidate.
+## Ask Oracle early; repair in the same lineage
 
-Require the repository's exact review and quality. Verify material findings at
-the concrete contract boundary. Continue material rework on the same unfinished
-milestone with its sole writer, retain predecessor request and run lineage, and
-repeat affected checks and review. Do not substitute optional review for a
-required verdict or broaden accepted work.
+A coordinator may request a tracked bounded Oracle direction task **within its
+assignment without parent preapproval**. Ask when material contract/design,
+review interpretation, ownership or repair direction needs judgment, or an
+attempt produces no explanatory progress; do not wait for a fixed retry count.
+An ordinary timeout or healthy validation is not an escalation trigger.
 
-Follow the installed shared Land workflow. Preserve every gate and strict FIFO
-order, verify the canonical merged commit, complete the assigned cards, and
-perform required branch and worktree cleanup. Repair failed gates through their
-supported workflow path rather than bypassing them. Before deleting a checkout,
-verify its cleanup owner, active runs, clean pushed state, canonical ancestry,
-and retained artifacts.
+Give Oracle a precise decision question, current card contract, immutable
+candidate, relevant error/evidence, attempted remedies and options/constraints.
+Use a distinct eligible target, not the coordinator's reserved target. Preserve
+the declared Oracle role and any direct-only requirement in the actual prompt
+and appended instructions; do not silently substitute another role. Record the
+answer and resulting task/dependency or continuation in Kanban.
 
-## Report or hand off with evidence
+For an understood in-contract defect, record the finding and candidate, keep open
+or reopen the same unfinished source milestone, and delegate a bounded repair to
+its sole writer. Verify **positive prior settlement**, eligible target, native
+session and actual retained CWD/resources before resume or custody transfer.
+Advance the ordinary current run pointer, retaining predecessor/request lineage.
+A prompt cannot retarget frozen session settings; new scope or a different target
+needs an appropriate separately tracked assignment. Repaired candidates need
+fresh required quality/review through the existing workflow, not just exit zero.
 
-Classify failures at the observed boundary: execution service, coordination,
-source, quality, review, workflow, or a healthy long-running operation. Preserve
-the exact candidate, request lineage, partial work, and error evidence. Do not
-fabricate process exits, settlement, callbacks, review acceptance, or historical
-chronology.
+Oracle direction does not expand permissions or waive gates. Escalate to the
+parent for product/scope or cross-repository priority decisions, missing
+permission, unavailable required Oracle, unresolved conflicting ownership or a
+blocker requiring an external decision. State the specific decision and keep
+unrelated eligible work moving.
 
-Finish only with accepted evidence or an acknowledged handoff. The latest note
-must identify the coordination workspace; assigned cards; coordinator and child
-targets, requests, and run IDs; exact candidate and checks; pending workflow
-gate; blockers and owners; preserved artifacts; cleanup owner; next action; and
-an acknowledged next owner. Otherwise report the concrete external action
-required to continue.
+## Accept, land, clean, then finish
+
+Record distinct facts: implementation SHA, immutable reviewed SHA, quality
+command/result and required marker, pushed PR head, merged commit, source cleanup,
+consumer dependency pickup and loaded runtime activation. Review/quality must
+cover the actual candidate; reuse applicable exact-candidate acceptance rather
+than duplicate broad reviews. Verify material findings at their concrete contract
+boundary. A source-only candidate is not reviewed, landed or activated work.
+
+Inspect the installed shared Land graph and drive every required gate and strict
+FIFO turn. Repair failed gates through supported paths, never bypass them.
+**Omit Land's optional `card` parameter while required cleanup or external handoffs
+remain.** Its finish-card cascade can close children as unactioned; that is not
+evidence their outcomes were fulfilled. Close each task only with its own evidence,
+then finish the feature yourself once its contract is satisfied.
+
+Before checkout deletion verify cleanup ownership, active runs, clean pushed
+state, canonical ancestry, retained artifacts and dependent worktrees/common Git
+directory. Never remove the canonical coordinator root. Superseded PR closure,
+if required, is its own Kanban outcome, not implied by replacement landing.
+
+Source landing does not authorize runtime activation. Pins, resolved dependencies,
+loaded code/commands and actual user entry-path acceptance are separate outcomes.
+The authorized runtime owner receives exact source and next pickup/verification
+requirements. If a tool loads directly from a checkout, advancing it can itself
+be activation. Finish the goal only after every required owned outcome is accepted
+or an explicit handoff is acknowledged. A list of active children is not a handoff.
+
+## Cold-start recovery
+
+Read the assigned card and latest coordinator/child notes, then the owner-scoped
+active/ready view. Verify current ownership and run pointers, predecessor
+settlement, open targets, actual coordinator/driver/source CWDs, sole writers,
+exact candidate/review/quality evidence and workflow frontier in its recorded
+workspace. Adopt healthy runs and preserve failed/settled history. Do not replay
+dispatch or cleanup from stale notes, infer success from closed children, or
+resume into a deleted CWD. Where evidence conflicts, record a bounded direction
+task rather than inventing chronology. The latest handoff note must name the
+pending gate/blocker, acknowledged owner, retained resources and exact next action
+or wake condition; otherwise report the concrete external action still required.
