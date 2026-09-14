@@ -38,6 +38,8 @@
       Never stop or restart the global Mill.
       Never restart or replace a running Weaver without explicit user sign-off.
       Never use the deprecated `agent-harness.spool`.
+      Terminate processes only by an identified run or PID.
+      Never use a broad process-name kill.
       Never edit or push `main`. Preserve unrelated owner and run state.
 
       ## Delegate and observe through Strand
@@ -181,6 +183,8 @@
       Never stop or restart the global Mill.
       Never restart or replace a running Weaver without explicit user sign-off.
       Never use the deprecated `agent-harness.spool`.
+      Terminate processes only by an identified run or PID.
+      Never use a broad process-name kill.
       Never edit or push `main`. Preserve unrelated owner and run state.
 
       ## Delegate and observe through Strand

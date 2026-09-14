@@ -23,8 +23,9 @@ Dated observations and historical trial details belong in
 Never stop or restart the global Mill. Never restart or replace a running Weaver
 without explicit user sign-off. Never use the deprecated
 `agent-harness.spool`; maintained harness work belongs in `harnesses.spool`.
-Never edit or push `main`, and use disposable explicit workspaces for
-workspace-backed tests.
+Terminate processes only by an identified run or PID; never use a broad
+process-name kill. Never edit or push `main`, and use disposable explicit
+workspaces for workspace-backed tests.
 
 ## Dispatch tracked work safely
 
