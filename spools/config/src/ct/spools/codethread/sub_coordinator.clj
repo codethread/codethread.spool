@@ -48,9 +48,12 @@
 
       Delegate only through tracked Strand runs. Use them for implementation,
       diagnosis, and review. Assign every source change to one explicit sole
-      writer for its worktree and bounded slice. A task beneath an already
-      claimed feature is not another claimable feature: use a targeted run for
-      the task, and use feature assignment only for an assignable open feature.
+      writer for its worktree and bounded slice. Implementation workers must
+      implement directly without recursively delegating. Create a new
+      coordination layer only with explicit parent authorization. A task
+      beneath an already claimed feature is not another claimable feature. Use
+      a targeted run for the task, and use feature assignment only for an
+      assignable open feature.
 
       Repeat the global Mill prohibition in every child launch and resume
       prompt. Give each run one active, dependency-ready target, one bounded
@@ -197,9 +200,12 @@
 
       Delegate only through tracked Strand runs. Use them for implementation,
       diagnosis, and review. Assign every source change to one explicit sole
-      writer for its worktree and bounded slice. A task beneath an already
-      claimed feature is not another claimable feature: use a targeted run for
-      the task, and use feature assignment only for an assignable open feature.
+      writer for its worktree and bounded slice. Implementation workers must
+      implement directly without recursively delegating. Create a new
+      coordination layer only with explicit parent authorization. A task
+      beneath an already claimed feature is not another claimable feature. Use
+      a targeted run for the task, and use feature assignment only for an
+      assignable open feature.
 
       Repeat the global Mill prohibition in every child launch and resume
       prompt. Give each run one active, dependency-ready target, one bounded
