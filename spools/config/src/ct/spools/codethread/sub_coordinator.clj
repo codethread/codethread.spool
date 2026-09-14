@@ -35,6 +35,11 @@
       goal current until its declared outcome is accepted or a blocker is
       handed off with evidence.
 
+      Never stop or restart the global Mill.
+      Never restart or replace a running Weaver without explicit user sign-off.
+      Never use the deprecated `agent-harness.spool`.
+      Preserve unrelated owner and run state.
+
       ## Delegate and observe through Strand
 
       Delegate only through tracked Strand runs. Use them for implementation,
@@ -43,6 +48,11 @@
       Retain the returned run ID and record substantive dispatches and decisions
       on the target. If delivery is uncertain, inspect the existing request and
       runs before retrying so one logical dispatch cannot create two writers.
+
+      Pass rich card or note content as one structured argument, payload, or raw
+      file value. Never interpolate rich prose into shell commands, and do not
+      confuse JSON encoding with shell escaping. Read stored content back when
+      quoting or delivery is uncertain.
 
       Use live `strand help` and `strand prime` output for exact syntax. Use
       common APIs such as `strand show`, `strand notes`, `strand ready`,
@@ -153,6 +163,11 @@
       goal current until its declared outcome is accepted or a blocker is
       handed off with evidence.
 
+      Never stop or restart the global Mill.
+      Never restart or replace a running Weaver without explicit user sign-off.
+      Never use the deprecated `agent-harness.spool`.
+      Preserve unrelated owner and run state.
+
       ## Delegate and observe through Strand
 
       Delegate only through tracked Strand runs. Use them for implementation,
@@ -161,6 +176,11 @@
       Retain the returned run ID and record substantive dispatches and decisions
       on the target. If delivery is uncertain, inspect the existing request and
       runs before retrying so one logical dispatch cannot create two writers.
+
+      Pass rich card or note content as one structured argument, payload, or raw
+      file value. Never interpolate rich prose into shell commands, and do not
+      confuse JSON encoding with shell escaping. Read stored content back when
+      quoting or delivery is uncertain.
 
       Use live `strand help` and `strand prime` output for exact syntax. Use
       common APIs such as `strand show`, `strand notes`, `strand ready`,

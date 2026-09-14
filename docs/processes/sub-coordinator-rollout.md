@@ -2,26 +2,26 @@
 
 The shared `sub-coordinator` seat is a bounded coordination role, not another
 writer. Its alias-provided system guidance is the complete operational runbook.
-It initially resolves through Pi to `openai-codex/gpt-5.6-luna` at explicit
-`max` effort. Existing `coordinator`, Sol worker, and reviewer aliases are not
-changed. The runbook also makes the global Mill user-controlled: an agent must
-never stop or restart it and must propagate that rule to every child. Deprecated
-`agent-harness.spool` workspaces, source, and APIs are read-only and must never
-be used; active harness work belongs in `harnesses.spool`.
+It initially resolves through Codex to the unqualified native model ID
+`gpt-5.6-luna` at explicit `max` effort. Existing `coordinator`, worker, and
+reviewer aliases are not changed.
 
 A process-local `seat/sub-coordinator-terra` flag selects the authorized
-fallback: Pi with `openai-codex/gpt-5.6-terra` at explicit `high` effort and the
-same runbook. Use that fallback only after repeated, recorded coordination
-mistakes persist under clear corrective guidance. Provider/runtime failures,
-timeouts, and one slow response are not model-quality evidence.
+fallback: Codex with the unqualified native model ID `gpt-5.6-terra` at explicit
+`high` effort and the same runbook. The additive `sub-coordinator-sol` seat
+resolves through Codex to the unqualified native model ID `gpt-5.6-sol` at
+explicit `high` effort. It has self-contained sustained-coordination guidance
+and does not change the Luna default, Terra switch, ordinary `coordinator`, or
+`sol` aliases.
 
-The additive `sub-coordinator-sol` seat instead resolves directly through Pi to
-`openai-codex/gpt-5.6-sol` at explicit `high` effort. It has self-contained
-sustained-coordination guidance and does not change the Luna default, Terra
-switch, ordinary `coordinator`, or `sol` aliases. Persistent Sol seats sustained
-particular coordination assignments after Luna failed closed-target launch
-recovery and Terra twice finalized with owned work pending. That evidence
-explains this additional choice but is not a universal model ranking.
+Both prompt values are provider-neutral Strand coordination guidance. They make
+the global Mill user-controlled, prohibit replacing a running Weaver without
+explicit user sign-off, require payload-safe dispatch, and preserve unrelated
+owner and run state. Deprecated `agent-harness.spool` workspaces, source, and
+APIs must never be used; maintained harness work belongs in `harnesses.spool`.
+Historical selection and trial evidence belongs in
+[coordinator-field-notes.md](coordinator-field-notes.md), not in the shared
+runbook.
 
 ## Additive registration in a running world
 
@@ -178,25 +178,24 @@ exactly these substitutions:
   `ct.spools.codethread.sub-coordinator/register-sol!`;
 - require every pre-existing alias, flag, module status, and captured run's
   frozen launch settings to remain unchanged; and
-- verify the new alias resolves to Pi, `openai-codex/gpt-5.6-sol`, and `high`.
+- verify the new alias resolves to Codex, `gpt-5.6-sol`, and `high`.
 
 Do not call both registration functions, change
 `seat/sub-coordinator-terra`, or replace an existing descriptor as part of that
 additive registration.
 
-## Pilot and fallback
+## Activation handoff and fallback
 
-After review and disposable-world proof, assign one bounded coordination slice
-at an ownership boundary. The parent records the selected canonical workspace,
-execution worktree, target, stable request ID, run ID, initial registry, and
-frozen settings for existing runs. Observe whether the alias follows its own
-runbook for ownership, task-versus-feature dispatch, payload-safe prompts,
-bounded waits, progress checks, rework, and Oracle direction.
+After review and disposable-world proof, the runtime owner may assign one
+bounded coordination slice at an ownership boundary. Record the canonical
+workspace, execution worktree, target, stable request ID, run ID, initial
+registry, and frozen settings for existing runs. Verify ownership,
+task-versus-feature dispatch, payload-safe prompts, bounded waits, progress
+checks, rework, required review, and accepted handoff.
 
-Do not switch models for ordinary latency or infrastructure failure. If Luna
-repeats concrete coordination mistakes after clear steering, record the errors
-and corrections, stop the exact run, and await `agent-run-settled`. The parent
-may then enable the fallback and verify its resolution:
+Do not switch candidates for ordinary latency or infrastructure failure. The
+runtime owner may enable the fallback only after recording the evidence,
+settling the exact run, and accepting custody at an explicit handoff:
 
 ```nu
 ^strand --workspace $coord_ws agent config set seat/sub-coordinator-terra true
@@ -204,11 +203,11 @@ may then enable the fallback and verify its resolution:
 ```
 
 Start a fresh `sub-coordinator` assignment or targeted run with a new stable
-request ID. Do not use native resume for the switch: resume retains the frozen
-Luna model and settings. The Terra candidate receives the same alias runbook.
+request ID after the prior run settles. The Terra candidate receives the same
+provider-neutral alias runbook.
 
-Roll out to another running world only at its own safe handoff after the first
-pilot is accepted. Preserve existing owners, run pointers, settings, dirty
-files, workflow gates, and FIFO position. Durable availability still requires a
-reviewed Codethread pin and the repository's normal coordinated activation;
-live registration is additive staging, not a substitute for pin rollout.
+Roll out to another running world only at its own explicit runtime-owner
+handoff. Preserve existing owners, run pointers, settings, dirty files, workflow
+gates, and FIFO position. Durable availability still requires a reviewed
+Codethread pin and the repository's normal coordinated activation; live
+registration is additive staging, not a substitute for pin rollout.
