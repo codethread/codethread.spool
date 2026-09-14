@@ -12,7 +12,7 @@ Tracking: Codethread epic `w3oqr`, coordinator feature `x4y0z`, notes task
 `kejtr`. The user requested delegation through `strand agent`; delegated
 execution uses Pi. Built-in Codex/ChatGPT delegates were stopped.
 
-## Handoff snapshot (23:50 UTC)
+## Handoff snapshot (00:05 UTC, 14 September)
 
 Read the latest note on `x4y0z` and the local coordinator tasks before acting.
 Their current run and workflow state takes precedence over this dated snapshot.
@@ -31,9 +31,10 @@ Skein is locally coordinated by Sol/high `x6qtq` on `0yu6i`. Terra attempts
 still required coordination. The second exited after a 45-second timeout despite
 an explicit continuation instruction. The Sol seat owns acceptance and the
 remaining eligible P2s. PR479 landed as `a0e88d09` with required quality, basic
-review and FIFO cleanup. Markdown PR480 is in shared land. Sole Sol `onj6j`
-implements prime advice; independent Sol `pc1vy` completes scheduled-review
-selection provenance and the explicit always-run policy disposition. Final audit
+review and FIFO cleanup. Markdown PR480 also landed, as `598817b3`. Prime advice
+is in shared land as PR481 at `aa25c1e3`; independent Sol `pc1vy` completes
+scheduled-review selection provenance and the explicit always-run policy
+disposition. Final audit
 `tirbl` also identified that installed review policy still needs source pickup
 after landing. Repeated optional full-review setup failures remain honest; they
 did not become invented prerequisites for the declared shared landing path.
@@ -54,10 +55,11 @@ Weaver successfully passed actual unmanaged Pi startup checks, but older managed
 runs failed completion under the newly loaded backend because they lacked the
 new reservation metadata. P1 `b9jg1` is now explicitly owned by local `vm5zk`
 through rework, review, normal land, and compatible Weaver-only deployment.
-Candidate `2e1d5f1` repaired earlier native-resume, invocation and negative-custody
-findings. Direct Oracle `q1hmp` found further positive-evidence validation,
-stale-callback and current-predecessor preflight gaps. Sole Sol `6xsnn`, continuing
-`tqaho` on reopened task `vh9jx`, is repairing those concrete contracts. Inherited
+Candidate `7060f46` now includes the positive-evidence validation, stale-callback
+and current-predecessor preflight repairs requested by Oracle `q1hmp`, preserving
+earlier native-resume, invocation and negative-custody fixes. Sole Sol `6xsnn`
+settled with full checks passing (93 tests, 697 assertions). Direct Oracle `g9mu8`
+is verifying the final bounded contracts before normal landing. Inherited
 module-size and alias-docstring debt is outside this compatibility repair unless
 an existing required gate fails. Audit `ywp6w` separately maps remaining
 native-guidance transport work in `g23us`; startup identity is already shipped.
@@ -76,17 +78,21 @@ task `f265p` is superseded, and validation `q8zbg` now depends on integration. T
 four user examples remain untouched. Hourly scheduling is a cadence, not
 evidence that an agent is dead.
 
-Additive Sol alias feature `58cgg` has exact candidate `65f53c3`, passing required
-quality and direct Oracle acceptance `fbb2n`. PR18 is in normal shared land.
-It preserves the original Luna/max default and Terra/high trial option. Parent
-owns staged registration and a first appropriate local seat; no new alias has
-been registered in a live Weaver yet. Current productive coordinators stay put.
+Additive Sol alias feature `58cgg` is complete: PR18 landed as `c47ab534` after
+required quality, direct Oracle `fbb2n`, basic review and FIFO cleanup. It preserves
+the original Luna/max default and Terra/high trial option. Parent staged the new
+alias only in Millhouse, with existing aliases, flags, modules, frozen runs and
+Mill/Weaver custody unchanged. Pilot `0pln0` / `crisp-tidy-beaver` is running on
+task `qxlcv`, acknowledged local ownership, and created source feature `7vglh`.
+Parent task `p3bvq` observes its continuing delivery; durable pins remain with
+Harnesses `ta2ip`. Current productive coordinators in other repos stay put.
 
 Millhouse now owns the inherited sibling questions on epic `iktli`, coordinator
-feature `qn4qp`, and direct Oracle task `eawh6`. Oracle `exvpk` is bounding Skein
-`5enye` and `seg5v` against current Millhouse `0669388`: queue ownership protection
-and context/return semantics. This precedes implementation and preserves accepted
-defer isolation. Historical stale-lock card `h50b1` remains P3 context only.
+feature `qn4qp`, and accepted Oracle task `eawh6`. Oracle `exvpk` confirmed one
+current Land queue-ownership P2 for Skein `5enye`, now owned by the local pilot.
+It found no current P1/P2 in `seg5v` context/return behavior; preserve accepted
+defer isolation and defer additional product semantics. Historical stale-lock
+card `h50b1` remains P3 context only.
 
 ## Recent corrections to the coordination loop
 
@@ -914,3 +920,19 @@ publication. The parent inspected and adopted that review, explicitly handed
 the whole compatibility feature to the local owner, and removed only its unused
 extra checkout. Reservation rejection is useful coordination evidence; it does
 not justify another reviewer on a different target.
+
+## Verify an operation before retrying its checker
+
+The first Sol alias registration succeeded and every preservation check passed,
+but the parent verifier then read compact `agent list` fields from the different
+`agent list --full` shape. The full entry places model and effort in its selected
+candidate. An independent compact read confirmed Pi/Sol/high. The parent retained
+the failed check, added a correction with both shapes, and did not register again.
+Evidence lives in `sub-coordinator-sol-millhouse-20260913T235813Z` under the shared
+evidence directory. Classify the failed assertion before repeating a mutation.
+
+Likewise, direct Oracle inspection may use a write tool for permitted disposable
+probes or reports. Check the actual path and action; a tool-name allowlist alone
+does not distinguish an allowed temporary fixture from a prohibited source edit
+or helper launch. Millhouse direction `exvpk` wrote only its own disposable probe
+and report files, and its direct evidence remained valid.
