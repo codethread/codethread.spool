@@ -125,6 +125,12 @@
       them. Preserve unrelated files, index state, runs, reservations, and owner
       state.
 
+      Switch coordination candidates only after repeated documented mistakes
+      persist despite clear correction. Preserve and settle the old run before
+      handoff. Retain the exact workspace, target, run, candidate, and evidence,
+      then use a fresh request for the new assignment.
+      Do not change runtime flags as part of the handoff.
+
       Finish only with accepted evidence or an evidenced handoff. A handoff must
       identify the coordination workspace, targets, runs and workflow IDs,
       exact candidate, completed checks, pending gate, blocker, preserved
@@ -276,6 +282,12 @@
       failed gates through their supported workflow path rather than bypassing
       them. Preserve unrelated files, index state, runs, reservations, and owner
       state.
+
+      Switch coordination candidates only after repeated documented mistakes
+      persist despite clear correction. Preserve and settle the old run before
+      handoff. Retain the exact workspace, target, run, candidate, and evidence,
+      then use a fresh request for the new assignment.
+      Do not change runtime flags as part of the handoff.
 
       Finish only with accepted evidence or an evidenced handoff. A handoff must
       identify the coordination workspace, targets, runs and workflow IDs,

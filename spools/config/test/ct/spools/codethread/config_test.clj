@@ -145,6 +145,12 @@
                    "clean and pushed state"
                    "canonical ancestry"
                    "retained artifacts"
+                   "repeated documented mistakes"
+                   "persist despite clear correction"
+                   "Preserve and settle the old run"
+                   "exact workspace, target, run, candidate, and evidence"
+                   "fresh request for the new assignment"
+                   "Do not change runtime flags"
                    "evidenced handoff"]]
             (is (str/includes? (first luna-guidance)
                                contract-fragment)))
@@ -238,6 +244,12 @@
                    "clean and pushed state"
                    "canonical ancestry"
                    "retained artifacts"
+                   "repeated documented mistakes"
+                   "persist despite clear correction"
+                   "Preserve and settle the old run"
+                   "exact workspace, target, run, candidate, and evidence"
+                   "fresh request for the new assignment"
+                   "Do not change runtime flags"
                    "acknowledged next owner"]]
             (is (str/includes? (first guidance) contract-fragment)))
           (doseq [provider-specific-fragment
@@ -292,7 +304,10 @@
             registry-after (harnesses/harnesses rt)
             run-after (harnesses/run rt (:id existing-run))
             added (some #(when (= "sub-coordinator" (:name %)) %)
-                        registry-after)]
+                        registry-after)
+            resolved (harnesses/resolve-harness rt :sub-coordinator)
+            guidance (get-in resolved
+                             [:generated :harness/appended-system-prompts])]
         (is (= "sub-coordinator" (:alias registration)))
         (is (= 2 (count (:candidates registration))))
         (is (= registry-before
@@ -304,6 +319,13 @@
         (is (= "coordinator" (attr-get run-after :harness/alias)))
         (is (= "openai-codex/gpt-5.6-sol"
                (attr-get run-after :harness/model)))
+        (is (= "codex" (:harness resolved)))
+        (is (= "gpt-5.6-luna"
+               (get-in resolved [:generated :harness/model])))
+        (is (= "max" (get-in resolved [:generated :harness/effort])))
+        (is (= 1 (count guidance)))
+        (is (str/includes? (first guidance)
+                           "# Bounded sub-coordinator runbook"))
         (is (= "alias" (:kind added)))
         (is (true? (:available added)))))))
 
