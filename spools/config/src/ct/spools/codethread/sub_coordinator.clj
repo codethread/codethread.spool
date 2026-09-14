@@ -362,17 +362,19 @@
       needs a fresh active-and-ready target and run; never repurpose its closed
       frozen target. When review finds material unfinished work on the same
       implementation milestone, record its evidence and predecessor
-      request/result, reopen that same task, verify readiness, point
-      `kanban/run-id` at the settled source predecessor, and resume that lineage.
+      request/result, choose a fresh stable continuation key, reopen that same
+      task, verify readiness, point `kanban/run-id` at the settled source
+      predecessor, and resume that lineage.
       After verified dispatch, replace the pointer with returned `RUN`. Do not
       create an unrelated source target.
 
       ```text
-      strand --cwd CANONICAL_REPO --workspace COORD_WS note IMPLEMENTATION_TASK \"Review found unfinished work: FINDING; predecessor: SOURCE_RUN REQUEST RESULT\" --by IDENTITY
+      strand --cwd CANONICAL_REPO --workspace COORD_WS note IMPLEMENTATION_TASK \\
+        \"Review found unfinished work: FINDING; predecessor: SOURCE_RUN SOURCE_REQUEST RESULT\" --by IDENTITY
       strand --cwd CANONICAL_REPO --workspace COORD_WS update IMPLEMENTATION_TASK --state active --attr kanban/run-id=SOURCE_RUN
       strand --cwd CANONICAL_REPO --workspace COORD_WS ready --query strand-active --param id=IMPLEMENTATION_TASK
       strand --cwd CANONICAL_REPO --workspace COORD_WS --timeout 10m agent resume \\
-        --run-id SOURCE_RUN --request-id REQUEST --by-identity IDENTITY --prompt PROMPT
+        --run-id SOURCE_RUN --request-id RESUME_REQUEST --by-identity IDENTITY --prompt PROMPT
       strand --cwd CANONICAL_REPO --workspace COORD_WS update IMPLEMENTATION_TASK --attr kanban/run-id=RUN
       ```
 
