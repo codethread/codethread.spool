@@ -311,10 +311,8 @@
       ```text
       strand --cwd CANONICAL_REPO --workspace COORD_WS show TARGET
       strand --cwd CANONICAL_REPO --workspace COORD_WS kanban-export FEATURE
-      strand --cwd CANONICAL_REPO --workspace COORD_WS \\
-        list --query blockers-active --param id=TARGET
-      strand --cwd CANONICAL_REPO --workspace COORD_WS \\
-        ready --query strand-active --param id=TARGET
+      strand --cwd CANONICAL_REPO --workspace COORD_WS list --query blockers-active --param id=TARGET
+      strand --cwd CANONICAL_REPO --workspace COORD_WS ready --query strand-active --param id=TARGET
       ```
 
       The target appears in the final result only when it is active and ready.
@@ -328,13 +326,10 @@
       identity:
 
       ```text
-      strand --cwd CANONICAL_REPO --workspace COORD_WS --timeout 10m \\
-        agent run sol --target TASK --cwd SOURCE_WORKTREE \\
-        --request-id REQUEST --by-identity IDENTITY --prompt PROMPT
-
-      strand --cwd CANONICAL_REPO --workspace COORD_WS --timeout 10m \\
-        agent run oracle --target REVIEW_TASK --cwd SOURCE_WORKTREE \\
-        --request-id REVIEW_REQUEST --by-identity IDENTITY --prompt REVIEW_PROMPT
+      strand --cwd CANONICAL_REPO --workspace COORD_WS --timeout 10m agent run sol \\
+        --target TASK --cwd SOURCE_WORKTREE --request-id REQUEST --by-identity IDENTITY --prompt PROMPT
+      strand --cwd CANONICAL_REPO --workspace COORD_WS --timeout 10m agent run oracle \\
+        --target REVIEW_TASK --cwd SOURCE_WORKTREE --request-id REVIEW_REQUEST --by-identity IDENTITY --prompt REVIEW_PROMPT
       ```
 
       A task below an already claimed feature is not itself claimable as a
@@ -349,10 +344,8 @@
       evidence, and active-and-ready target:
 
       ```text
-      strand --cwd CANONICAL_REPO --workspace COORD_WS --timeout 30s \\
-        agent show --request REQUEST --by-identity IDENTITY
-      strand --cwd CANONICAL_REPO --workspace COORD_WS --timeout 30s \\
-        agent show RUN --by-identity IDENTITY
+      strand --cwd CANONICAL_REPO --workspace COORD_WS --timeout 30s agent show --request REQUEST --by-identity IDENTITY
+      strand --cwd CANONICAL_REPO --workspace COORD_WS --timeout 30s agent show RUN --by-identity IDENTITY
       ```
 
       If a request times out, query that same request ID and actual child runs
@@ -365,16 +358,22 @@
       so inspect current run, request, and target evidence before declaring lost
       custody or relaunching.
 
-      A closed frozen target needs a fresh open target, not a native continuation
-      whose prompt merely names different work. After a resumed or successor
-      dispatch is verified, preserve the predecessor run, request, and result in
-      a feature note, then refresh the ordinary primary run pointer:
+      A genuinely completed coordinator/review task or genuinely different work
+      needs a fresh active-and-ready target and run; never repurpose its closed
+      frozen target. When review finds material unfinished work on the same
+      implementation milestone, record its evidence and predecessor
+      request/result, reopen that same task, verify readiness, point
+      `kanban/run-id` at the settled source predecessor, and resume that lineage.
+      After verified dispatch, replace the pointer with returned `RUN`. Do not
+      create an unrelated source target.
 
       ```text
-      strand --cwd CANONICAL_REPO --workspace COORD_WS \\
-        note FEATURE \"Superseded OLD_RUN with RUN after verified dispatch.\" --by IDENTITY
-      strand --cwd CANONICAL_REPO --workspace COORD_WS \\
-        update FEATURE --attr kanban/run-id=RUN
+      strand --cwd CANONICAL_REPO --workspace COORD_WS note IMPLEMENTATION_TASK \"Review found unfinished work: FINDING; predecessor: SOURCE_RUN REQUEST RESULT\" --by IDENTITY
+      strand --cwd CANONICAL_REPO --workspace COORD_WS update IMPLEMENTATION_TASK --state active --attr kanban/run-id=SOURCE_RUN
+      strand --cwd CANONICAL_REPO --workspace COORD_WS ready --query strand-active --param id=IMPLEMENTATION_TASK
+      strand --cwd CANONICAL_REPO --workspace COORD_WS --timeout 10m agent resume \\
+        --run-id SOURCE_RUN --request-id REQUEST --by-identity IDENTITY --prompt PROMPT
+      strand --cwd CANONICAL_REPO --workspace COORD_WS update IMPLEMENTATION_TASK --attr kanban/run-id=RUN
       ```
 
       ## Sustain bounded observation
@@ -384,11 +383,9 @@
 
       ```text
       strand --cwd CANONICAL_REPO --workspace COORD_WS --timeout 55s await \\
-        --query agent-run-terminal --param run-id=RUN \\
-        --min-count 1 --timeout-secs 45
+        --query agent-run-terminal --param run-id=RUN --min-count 1 --timeout-secs 45
       strand --cwd CANONICAL_REPO --workspace COORD_WS --timeout 55s await \\
-        --query agent-run-settled --param run-id=RUN \\
-        --min-count 1 --timeout-secs 45
+        --query agent-run-settled --param run-id=RUN --min-count 1 --timeout-secs 45
       strand --cwd CANONICAL_REPO --workspace COORD_WS --timeout 55s \\
         workflow await WORKFLOW_RUN --timeout-secs 45
       ```
@@ -401,10 +398,8 @@
       ```text
       strand --cwd CANONICAL_REPO --workspace COORD_WS notes COORDINATOR_TARGET
       strand --cwd CANONICAL_REPO --workspace COORD_WS notes CHILD_TARGET
-      strand --cwd CANONICAL_REPO --workspace COORD_WS \\
-        agent show RUN --by-identity IDENTITY
-      strand --cwd CANONICAL_REPO --workspace COORD_WS \\
-        ready --query strand-active --param id=CHILD_TARGET
+      strand --cwd CANONICAL_REPO --workspace COORD_WS agent show RUN --by-identity IDENTITY
+      strand --cwd CANONICAL_REPO --workspace COORD_WS ready --query strand-active --param id=CHILD_TARGET
       ```
 
       A timeout means only that the condition was not observed. Check meaningful
@@ -435,12 +430,9 @@
       checks, record that evidence, and close only that implementation task:
 
       ```text
-      strand --cwd CANONICAL_REPO --workspace COORD_WS \\
-        note IMPLEMENTATION_TASK \"Accepted exact pushed SHA and checks: EVIDENCE\" --by IDENTITY
-      strand --cwd CANONICAL_REPO --workspace COORD_WS \\
-        update IMPLEMENTATION_TASK --state closed
-      strand --cwd CANONICAL_REPO --workspace COORD_WS \\
-        ready --query strand-active --param id=REVIEW_TASK
+      strand --cwd CANONICAL_REPO --workspace COORD_WS note IMPLEMENTATION_TASK \"Accepted exact pushed SHA and checks: EVIDENCE\" --by IDENTITY
+      strand --cwd CANONICAL_REPO --workspace COORD_WS update IMPLEMENTATION_TASK --state closed
+      strand --cwd CANONICAL_REPO --workspace COORD_WS ready --query strand-active --param id=REVIEW_TASK
       ```
 
       That closure records source implementation and legitimately releases a
