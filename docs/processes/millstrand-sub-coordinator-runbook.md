@@ -46,6 +46,10 @@ Use a bounded await, normally 45 seconds with a longer request deadline. After
 each result, read current run state, the latest task notes, workflow readiness,
 and source or gate progress. Record a concise next action when something changes.
 
+Read both the coordinator task's notes and the active child's notes. The parent
+may leave new scope or handoff guidance on the coordinator task; watching only a
+child's output misses that mailbox. Acknowledge changed ownership explicitly.
+
 | Observed state | Next action |
 | --- | --- |
 | Running with valid custody and progress | Continue waiting; advance independent eligible work. |

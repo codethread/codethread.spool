@@ -12,7 +12,7 @@ Tracking: Codethread epic `w3oqr`, coordinator feature `x4y0z`, notes task
 `kejtr`. The user requested delegation through `strand agent`; delegated
 execution uses Pi. Built-in Codex/ChatGPT delegates were stopped.
 
-## Handoff snapshot (00:05 UTC, 14 September)
+## Handoff snapshot (00:27 UTC, 14 September)
 
 Read the latest note on `x4y0z` and the local coordinator tasks before acting.
 Their current run and workflow state takes precedence over this dated snapshot.
@@ -59,7 +59,9 @@ Candidate `7060f46` now includes the positive-evidence validation, stale-callbac
 and current-predecessor preflight repairs requested by Oracle `q1hmp`, preserving
 earlier native-resume, invocation and negative-custody fixes. Sole Sol `6xsnn`
 settled with full checks passing (93 tests, 697 assertions). Direct Oracle `g9mu8`
-is verifying the final bounded contracts before normal landing. Inherited
+accepted the bounded contracts with 482 direct probes. PR14 landed as `10279584`;
+normal shared land and actual canonical fast-forward are complete after repair
+of the recovered checkout's layout. Installed activation is still pending. Inherited
 module-size and alias-docstring debt is outside this compatibility repair unless
 an existing required gate fails. Audit `ywp6w` separately maps remaining
 native-guidance transport work in `g23us`; startup identity is already shipped.
@@ -69,11 +71,15 @@ reviewers settle. The running Mill and historical run outcomes remain intact.
 
 Orphan reconciliation `0xq77` has clean published candidate `fc69a46` and focused
 worker checks. Its original Sol `0mvqk` exited normally but encountered that same
-legacy completion error. Integration task `7i8o9` waits for accepted `b9jg1`,
-then needs a fresh eligible Sol run in the retained source worktree. Follow-up
+legacy completion error. Integration task `7i8o9` now has fresh Sol `8rjmv` /
+`golden-quiet-heron`, integrating the retained candidate with accepted `b9jg1`
+in its original feature worktree. Root verified publication and custody. Follow-up
 Oracle `8e3c4` used prohibited native helpers; it was stopped, and that evidence
-is excluded. Parent owns the waiting feature and a new direct-only Oracle after
-final integration. Source task `6wndt` records only implementation; old review
+is excluded. Local `vm5zk` offered to adopt orphan source acceptance and landing;
+root accepted that handoff, preserving `8rjmv` and requiring a fresh direct-only
+Oracle. Root proposed taking B9/orphan live activation and historical-run handling,
+and waits for explicit operator acknowledgement before replacing any Weaver.
+Source task `6wndt` records only implementation; old review
 task `f265p` is superseded, and validation `q8zbg` now depends on integration. The
 four user examples remain untouched. Hourly scheduling is a cadence, not
 evidence that an agent is dead.
