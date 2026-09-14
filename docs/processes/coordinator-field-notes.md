@@ -57,6 +57,30 @@ looked up by its stable idempotency key with `strand agent show --request
 <request-id>` before retrying. A ready run still needs an active,
 dependency-eligible target and real attempt/custody evidence.
 
+A later root prompt incorrectly suggested `goal_wait` while Terra was waiting on
+workers. The correction belongs to the prompt contract, not to model evaluation:
+worker, review, and workflow observation uses `strand await`. `goal_wait` is only
+for an already-active Pi goal intentionally parked for an arranged external wake
+or deadline; naming a query in a note does not subscribe the goal to that query.
+
+Live help reports a 1,800-second default for `strand await` and recommends
+reissuing waits at about 50 minutes to preserve the provider prompt cache. The
+45-second inner and 55-second client pattern remains useful for short loops.
+`reason=timeout` is not a failure. Positive `agent-run-terminal` evidence means
+stopped or failed, not successful; positive `agent-run-settled` additionally
+requires provider process settlement before native resume. A failed row alone is
+not settlement. `agent-run-active --max-count 0` observes departure, not success.
+
+Assignment completion has its own evidence. `agent-work-complete --param
+target=FEATURE --min-count 1` observes accepted done;
+`agent-work-complete-or-intervention` also detects abandonment or a failed
+serving head. Missing IDs do not satisfy positive waits, and an empty active-run
+list is not completion. With `stop-on-complete`, await the run, inspect its
+semantic result, and have the authorized coordinator accept and finish the
+target. After every bounded await, read coordinator and child mailboxes and
+check meaningful source, review, quality, or workflow progress before acting or
+waiting again.
+
 ## Handoff snapshot (04:25 UTC, 14 September)
 
 Read the latest note on `x4y0z` and the local coordinator tasks before acting.

@@ -89,8 +89,38 @@ TASK --prompt ...`; do not ask a worker to claim a task as a Kanban card.
 
 ## Sustain the loop
 
-Use a bounded await, normally 45 seconds with a client deadline longer than the
-inner wait. After every result or timeout:
+Waiting on a delegated worker, review, or workflow is always `strand await` on
+a named query; it is never `goal_wait` and never an agent verb. Reserve
+`goal_wait` for an already-active Pi goal intentionally waiting for an arranged
+external wake event or deadline. It is not a worker wait or wake subscription.
+The root's earlier `goal_wait` suggestion was a prompt defect corrected here,
+not evidence of a Terra model failure.
+
+`strand await` defaults to `--timeout-secs 1800`. Cap long waits at about 50
+minutes and reissue them so an idle provider prompt cache does not expire. A
+45-second inner wait with a 55-second client deadline remains appropriate for a
+short observation loop. A returned `reason=timeout` says only that the condition
+was not observed; it is not a failure verdict.
+
+Use the query whose evidence matches the decision:
+
+- `agent-run-terminal` with `--param run-id=RUN --min-count 1` observes a stopped
+  or failed run, not success. Inspect its semantic result and target yourself.
+- `agent-run-settled` with the same positive cardinality requires provider
+  process-exit or settlement evidence before native `agent resume`. A failed
+  registry row is not automatically settled.
+- `agent-run-active` with `--max-count 0` observes departure or absence from the
+  active set. It does not prove successful work.
+- `agent-work-complete --param target=FEATURE --min-count 1` observes accepted
+  assignment completion. `agent-work-complete-or-intervention` additionally
+  wakes for abandonment or a failed serving head.
+
+Missing IDs never satisfy positive-evidence waits. No active runs is not target
+completion. With `stop-on-complete`, await the run first, inspect its result,
+then accept and finish the target yourself; policy text and exit zero are not
+acceptance. `strand agent runs --active` lists live runs without logs.
+
+After every bounded result or timeout:
 
 1. inspect the current run, target lifecycle, dependencies, and workflow;
 2. read `notes COORDINATOR_TASK` **and** `notes CHILD_TASK` in the canonical

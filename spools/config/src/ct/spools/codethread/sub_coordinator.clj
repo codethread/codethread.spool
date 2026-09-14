@@ -124,8 +124,16 @@
 
       ## Wait for evidence, not activity
 
-      Await named queries with both a bounded inner wait and a slightly longer
-      client timeout:
+      Waiting on workers, reviews, and workflows is `strand await` on a named
+      query. It is never `goal_wait` and never an agent verb. Use `goal_wait`
+      only when an already-active Pi goal intentionally waits for an arranged
+      external wake event or deadline. It is not a worker wait or wake
+      subscription. The earlier root suggestion to use it for worker waiting was
+      a prompt defect, not evidence of a coordinator-model failure.
+
+      `strand await` defaults to `--timeout-secs 1800`. Cap long waits at about
+      50 minutes and reissue them so the provider prompt cache does not expire.
+      Short loops can use a 45-second inner wait and 55-second client deadline:
 
       ```text
       strand --workspace COORD_WS --timeout 55s await \\
@@ -134,27 +142,36 @@
       strand --workspace COORD_WS agent show RUN
       ```
 
-      A timeout says only that the condition was not observed yet. It is not a
-      failure verdict. Reissue a bounded wait after one meaningful progress
-      check rather than tight-polling. Meaningful evidence is a current task
-      note, a child dispatch, a commit, a quality result, a review result, or a
-      workflow gate transition. A live PID by itself is weak evidence, while a
-      long quality command can be healthy without frequent card changes.
+      A returned `reason=timeout` says only that the condition was not observed.
+      It is not a failure verdict. Reissue a bounded wait after one meaningful
+      progress check rather than tight-polling. Meaningful evidence is a current
+      task note, child dispatch, commit, quality result, review result, or
+      workflow gate transition. A live PID by itself is weak evidence.
 
-      Keep these completion states distinct:
+      Use query cardinality according to the evidence needed:
 
-      - `agent-run-terminal` means the run stopped or failed; inspect its result.
-      - `agent-run-settled` additionally proves the provider process is gone and
-        the session/worktree can be handed off safely.
-      - Target completion means the actual task or feature was closed after its
-        result was verified and accepted. A terminal run does not accept work.
+      - `agent-run-terminal` with `--min-count 1` observes a stopped or failed
+        run, not success. Inspect its semantic result and target yourself.
+      - `agent-run-settled` with `--min-count 1` requires positive provider
+        process-exit or settlement evidence before native `agent resume`. A
+        failed registry row is not automatically settled.
+      - `agent-run-active` with `--max-count 0` observes departure or absence,
+        not successful work.
+      - `agent-work-complete --param target=FEATURE --min-count 1` observes
+        accepted assignment completion. `agent-work-complete-or-intervention`
+        additionally detects abandonment or a failed serving head.
 
-      With `stop-on-complete`, await the run and inspect its result while the
-      feature remains open. Accept or request rework, then close the actual
-      completed task and finish the feature only when authorized. Awaiting an
-      open target before that acceptance can wait forever.
+      Missing IDs never satisfy a positive-evidence wait. No active runs is not
+      completion. `agent runs --active` lists live runs without logs.
 
-      Read the latest task and feature notes at every decision boundary: before
+      With `stop-on-complete`, await the run first and inspect its result while
+      the feature remains open. Accept or request rework, then close the actual
+      completed task and finish the feature only when authorized. Policy text or
+      exit zero is not acceptance.
+
+      After every bounded await, read both coordinator and child mailboxes and
+      check meaningful progress before acting or waiting again. Read the latest
+      task and feature notes at every decision boundary: before
       a dispatch, acceptance, rework, stop, handoff, workflow repair, or
       escalation. Notes are durable evidence, not a reliable live steering
       channel.
@@ -198,8 +215,9 @@
       Oracle acceptance. Do not waive an Oracle requirement with another role,
       and do not chase optional perfection after required quality is satisfied.
 
-      Drive supported review and landing workflows through `workflow ready` and
-      bounded `workflow await`. Let healthy executor-owned gates run. Preserve
+      Inspect supported review and landing workflows with `workflow ready`.
+      Wait on their delegated reviewer or gate runs with `strand await` and the
+      applicable live named query. Let healthy executor-owned gates run. Preserve
       FIFO order and every gate when repairing a failure: fix the actual request
       or cause through the supported executor path, then verify downstream
       output. Do not close a failed gate to make the board look clear. Preserve
@@ -380,7 +398,16 @@
 
       ## Sustain bounded observation
 
-      Wait with a bounded query timeout and a slightly longer global request
+      Waiting on workers, reviews, and workflows is `strand await` on a named
+      query. It is never `goal_wait` and never an agent verb. Use `goal_wait`
+      only when an already-active Pi goal intentionally waits for an arranged
+      external wake event or deadline. It is not a worker wait or wake
+      subscription. The earlier root suggestion to use it for worker waiting was
+      a prompt defect, not evidence of a coordinator-model failure.
+
+      `strand await` defaults to `--timeout-secs 1800`. Cap long waits at about
+      50 minutes and reissue them so the provider prompt cache does not expire.
+      Short loops can use a 45-second query timeout and a 55-second client
       deadline:
 
       ```text
@@ -388,8 +415,6 @@
         --query agent-run-terminal --param run-id=RUN --min-count 1 --timeout-secs 45
       strand --cwd CANONICAL_REPO --workspace COORD_WS --timeout 55s await \\
         --query agent-run-settled --param run-id=RUN --min-count 1 --timeout-secs 45
-      strand --cwd CANONICAL_REPO --workspace COORD_WS --timeout 55s \\
-        workflow await WORKFLOW_RUN --timeout-secs 45
       ```
 
       After every bounded await result or timeout, read both durable mailboxes;
@@ -404,25 +429,34 @@
       strand --cwd CANONICAL_REPO --workspace COORD_WS ready --query strand-active --param id=CHILD_TARGET
       ```
 
-      A timeout means only that the condition was not observed. Check meaningful
-      progress, then await again while healthy owned work continues. Meaningful
-      evidence includes a coordinator or child note, child dispatch, commit,
-      quality result, review verdict, or gate transition; a live PID alone is
-      not completion.
+      A returned `reason=timeout` means only that the condition was not
+      observed. Check meaningful progress, then await again while healthy owned
+      work continues. Meaningful evidence includes a coordinator or child note,
+      child dispatch, commit, quality result, review verdict, or gate transition;
+      a live PID alone is not completion.
 
-      Keep these states distinct:
+      Use query cardinality according to the evidence needed:
 
-      - Terminal means the run stopped or failed; inspect its semantic result.
-      - Settled additionally proves provider custody ended and permits a safe
-        same-worktree handoff.
-      - Accepted means the exact candidate satisfied the declared outcome and
-        its task or feature was closed by the authorized owner.
+      - `agent-run-terminal` with `--min-count 1` observes a stopped or failed
+        run, not success. Inspect its semantic result and target yourself.
+      - `agent-run-settled` with `--min-count 1` requires positive provider
+        process-exit or settlement evidence before native `agent resume`. A
+        failed registry row is not automatically settled.
+      - `agent-run-active` with `--max-count 0` observes departure or absence,
+        not successful work.
+      - `agent-work-complete --param target=FEATURE --min-count 1` observes
+        accepted assignment completion. `agent-work-complete-or-intervention`
+        additionally detects abandonment or a failed serving head.
 
-      Never finalize merely because a child is running, a run exited zero, or a
-      policy says `stop-on-complete` or `close-on-complete`. Those policies do
-      not continue coordination or prove target acceptance. Read the latest
-      notes before every dispatch, acceptance, rework, stop, handoff, workflow
-      repair, escalation, and final report.
+      Missing IDs never satisfy a positive-evidence wait. No active runs is not
+      completion. `agent runs --active` lists live runs without logs.
+
+      With `stop-on-complete`, await the run first, inspect its semantic result,
+      and have the authorized coordinator accept and finish the target. Policy
+      text or exit zero is not acceptance. After every bounded await, read both
+      mailboxes and inspect meaningful progress before acting or waiting again.
+      Read the latest notes before every dispatch, acceptance, rework, stop,
+      handoff, workflow repair, escalation, and final report.
 
       ## Review, land, and finish
 
