@@ -66,8 +66,7 @@ lifecycle resource:
 (lifecycle/defresource! dispatcher
   "Own automatic card admission for this repository."
   {:open 'acme.auto-run/open!
-   :close 'acme.auto-run/close!
-   :after #{:harness-execution-runtime}})
+   :close 'acme.auto-run/close!})
 ```
 
 Register this file with `runtime/module!`, after the repo workflow module and
