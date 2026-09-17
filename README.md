@@ -126,6 +126,12 @@ optional `harness/prompt` and `harness/cwd`. The executor creates a tracked run
 and closes the gate only after it delivers a successful non-blank result.
 Waiting is done through `strand await` queries, not an `agent await` command.
 
+Opt-in [automatic card pickup](docs/processes/auto-run.md) is also available
+from the config root. Repositories supply delivery workflows, worker defaults,
+worktree preparation, and a concurrency limit; the dispatcher assigns labelled,
+ready features once without a coordinator agent. It is not activated by the
+shared bootstrap.
+
 Activate `codethread/ralph` separately after Millhouse Workflow.
 
 Ralph validates and hands a committed slice to consumer-owned landing policy.
