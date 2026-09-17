@@ -126,6 +126,14 @@ cannot admit work. The concurrency limit counts unsettled dispatcher assignments
 not cards waiting for human acceptance. Existing active target writers are
 excluded, and Harnesses enforces target exclusivity at assignment publication.
 
+Admission begins when `auto-run/status=preparing` is recorded, before filesystem
+preparation. Lane/label edits are not cancellation of admitted work. The dispatcher
+checks for intervening edits before pouring the workflow, but that check is not
+atomic with Harnesses assignment; a late edit can coexist with an accepted run.
+The worker must still claim the pending card before doing work. To withdraw work,
+disable admission, inspect its receipt, and stop the exact accepted run if needed.
+Do not use board edits as a substitute for the Harnesses stop operation.
+
 Every card is admitted once. Moving lanes, changing settings, removing/readding
 the label, or restarting Weaver does not rearm it. A scan adopts an accepted run
 whose receipt was interrupted. Interrupted preparation without an accepted run

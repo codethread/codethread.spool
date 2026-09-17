@@ -18,7 +18,8 @@
                [ct.spools.harnesses :as harnesses]
                [ct.spools.harnesses.assignment :as assignment]
                [millhouse.spools.workflow :as workflow]
-               [millstrand.api.lifecycle.alpha :as lifecycle]))
+               [millstrand.api.lifecycle.alpha :as lifecycle]
+               [millstrand.api.weaver.alpha :as weaver]))
    (lifecycle/use-resource! harnesses/harness-core-runtime assignment/assignment-runtime)
    (workflow/defworkflow! deliver
      \"A worker-driven delivery ending at human acceptance.\"
@@ -32,6 +33,9 @@
      (let [cwd (io/file repo (:id card))]
        (.mkdirs cwd)
        {:cwd (.getCanonicalPath cwd) :branch (str \"auto/\" (:id card))}))
+   (defn withdrawn! [rt {:keys [card] :as request}]
+     (weaver/update! rt (:id card) {:attributes {:kanban/lane \"refinement\"}})
+     (prepare! rt request))
    (defn broken! [_rt _request] (throw (ex-info \"No worktree capacity\" {})))")
 
 (defn- with-world [f]
@@ -132,6 +136,18 @@
         (is (= "No worktree capacity" (show rt broken :auto-run/error)))
         (is (empty? (:dispatched (auto-run/scan! rt))))
         (is (empty? (weaver/list rt [:= [:attr "harness/run"] "true"] {})))))))
+
+(deftest board-edits-during-preparation-do-not-pour-an-unused-workflow
+  (with-world
+    (fn [rt config]
+      (auto-run/configure! rt (assoc config :prepare 'auto-run.fixture/withdrawn!))
+      (let [card (card! rt {})]
+        (auto-run/scan! rt)
+        (is (= "error" (show rt card :auto-run/status)))
+        (is (= "refinement" (show rt card :kanban/lane)))
+        (is (empty? (weaver/list rt [:= [:attr "harness/run"] "true"] {})))
+        (current/with-runtime rt
+          (is (nil? (workflow/current-root (show rt card :auto-run/workflow-run-id)))))))))
 
 (deftest interrupted-publication-adopts-but-incomplete-preparation-needs-intervention
   (with-world

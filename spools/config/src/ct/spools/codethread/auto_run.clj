@@ -209,12 +209,8 @@
             (weaver/update! rt (:id card)
                             {:attributes {:auto-run/worktree cwd
                                           :auto-run/branch branch}})
-            (current/with-runtime rt
-              (workflow/start! workflow-run-id (keyword workflow)
-                               {:card (:id card) :feature (:title card)
-                                :worktree cwd :branch branch
-                                :seat seat :effort effort}))
-            ;; A human may have claimed or withdrawn the card during preparation.
+            ;; Admission was recorded before preparation. Detect intervening board
+            ;; edits before pouring a workflow; this is not a cancellation API.
             (let [latest (weaver/show rt (:id card))]
               (when-not (and (= "active" (:state latest))
                              (= "pending" (attr-get latest :kanban/lane))
@@ -223,6 +219,11 @@
                              (assignment/target-ready? rt (:id card)))
                 (fail! "Card changed during preparation; automatic assignment cancelled"
                        {:card (:id card)})))
+            (current/with-runtime rt
+              (workflow/start! workflow-run-id (keyword workflow)
+                               {:card (:id card) :feature (:title card)
+                                :worktree cwd :branch branch
+                                :seat seat :effort effort}))
             (let [run (assignment/assign!
                        rt (cond-> {:harness seat :target (:id card) :cwd cwd
                                    :policy "auto-run-workflow"
