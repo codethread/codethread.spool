@@ -270,16 +270,18 @@
                            :auto-run/branch branch
                            :auto-run/run-id nil}
                   latest (require-admitted! rt (weaver/show rt (:id card)) receipt)
+                  additional-params
+                  (additional-workflow-params
+                   rt config latest {:seat seat :effort effort :workflow workflow}
+                   {:cwd cwd :branch branch})
+                  ;; A repository callback is synchronous trusted code, but it is
+                  ;; still an extra mutation boundary before workflow publication.
+                  final (require-admitted! rt (weaver/show rt (:id card)) receipt)
                   workflow-params
-                  (merge {:card (:id latest) :feature (:title latest)
+                  (merge {:card (:id final) :feature (:title final)
                           :worktree cwd :branch branch
                           :seat seat :effort effort}
-                         (additional-workflow-params
-                          rt config latest {:seat seat :effort effort :workflow workflow}
-                          {:cwd cwd :branch branch}))]
-              ;; A repository callback is synchronous trusted code, but it is
-              ;; still an extra mutation boundary before workflow publication.
-              (require-admitted! rt (weaver/show rt (:id card)) receipt)
+                         additional-params)]
               (current/with-runtime rt
                 (workflow/start! workflow-run-id (keyword workflow) workflow-params)))
             (let [run (assignment/assign!

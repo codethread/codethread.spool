@@ -52,6 +52,9 @@
    (defn withdraw-start-params! [rt {:keys [card]}]
      (weaver/update! rt (:id card) {:attributes {:kanban/lane \"refinement\"}})
      {:repository-param \"withdrawn\"})
+   (defn retitle-start-params! [rt {:keys [card]}]
+     (weaver/update! rt (:id card) {:title \"Retitled feature\"})
+     {:repository-param \"retitled\"})
    (defn corrupt-start-params! [rt {:keys [card]}]
      (weaver/update! rt (:id card)
                      {:attributes
@@ -174,6 +177,18 @@
         (auto-run/scan! rt)
         (is (= run-id (show rt card :auto-run/run-id)))
         (is (= 1 (count (weaver/list rt [:= [:attr "harness/run"] "true"] {}))))))))
+
+(deftest callback-title-edits-reach-workflow-context
+  (with-world
+    (fn [rt config]
+      (auto-run/configure! rt (assoc config
+                                   :start-params 'auto-run.fixture/retitle-start-params!))
+      (let [card (card! rt {})]
+        (auto-run/scan! rt)
+        (current/with-runtime rt
+          (let [root (workflow/current-root (show rt card :auto-run/workflow-run-id))]
+            (is (= "Retitled feature" (get (attr-get root :workflow/context) :feature)))
+            (is (= (:id card) (get (attr-get root :workflow/context) :card)))))))))
 
 (deftest card-edits-during-workflow-parameter-callback-cancel-admission
   (with-world
