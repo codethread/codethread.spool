@@ -4,6 +4,7 @@
   One assignment owns a card's delivery. This module only admits work; it never
   advances lanes, retries workers, interprets results, or approves a merge."
   (:require [clojure.java.io :as io]
+            [clojure.set :as set]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [ct.spools.harnesses :as harnesses]
@@ -30,11 +31,14 @@
 (s/def ::max-running pos-int?)
 (s/def ::interval-ms pos-int?)
 (s/def ::prepare qualified-symbol?)
+(s/def ::start-params qualified-symbol?)
 (s/def ::workflows (s/coll-of ::text :kind set? :min-count 1))
+(s/def ::workflow-params map?)
 (s/def ::config
   (s/and (s/keys :req-un [::repo ::seat ::effort ::workflow ::workflows ::prepare
-                         ::enabled? ::max-running ::interval-ms])
-         #(every? #{:repo :seat :effort :workflow :workflows :prepare
+                         ::enabled? ::max-running ::interval-ms]
+                  :opt-un [::start-params])
+         #(every? #{:repo :seat :effort :workflow :workflows :prepare :start-params
                     :enabled? :max-running :interval-ms} (keys %))
          #(contains? (:workflows %) (:workflow %))))
 (s/def ::cwd ::text)
@@ -73,6 +77,11 @@
   and enabled flag. Preparation receives runtime and {:repo ... :card ...}, and
   returns {:cwd ... :branch ...}. It must not claim the card.
 
+  Optional :start-params names a qualified callback. It receives runtime and
+  {:repo ... :card ... :settings ... :prepared {:cwd ... :branch ...}}, then
+  returns additional workflow start parameters. It must return a map and cannot
+  replace :card, :feature, :worktree, :branch, :seat, or :effort.
+
   Invalid configuration fails activation. Disabling prevents new admission;
   it never stops existing workers. Reconfiguration is serialized with scans."
   [rt config]
@@ -81,6 +90,10 @@
     (fail! "Auto-run repository directory does not exist" {:repo (:repo config)}))
   (when-not (ifn? @(runtime/resolve-var rt (:prepare config)))
     (fail! "Auto-run preparation callback is not callable" {:prepare (:prepare config)}))
+  (when-let [start-params (:start-params config)]
+    (when-not (ifn? @(runtime/resolve-var rt start-params))
+      (fail! "Auto-run workflow parameter callback is not callable"
+             {:start-params start-params})))
   (current/with-runtime rt
     (doseq [name (:workflows config)]
       (when-not (contains? (:entrypoints (workflow/resolve-workflow (keyword name))) :start)
@@ -163,6 +176,41 @@
       (fail! "Auto-run seat must support headless execution" request))
     request))
 
+(def ^:private reserved-workflow-params
+  #{:card :feature :worktree :branch :seat :effort})
+
+(defn- require-admitted! [rt card receipt]
+  (when-not (and (= "active" (:state card))
+                 (= "true" (attr-get card :kanban/card))
+                 (= "feature" (attr-get card :kanban/type))
+                 (= "pending" (attr-get card :kanban/lane))
+                 (= "true" (attr-get card :kanban.label/auto-run))
+                 (nil? (attr-get card :owner))
+                 (assignment/target-ready? rt (:id card))
+                 (every? (fn [[attribute value]]
+                           (= value (attr-get card attribute)))
+                         receipt))
+    (fail! "Card changed before automatic assignment; automatic assignment cancelled"
+           {:card (:id card)}))
+  card)
+
+(defn- additional-workflow-params [rt config card settings prepared]
+  (if-let [callback (:start-params config)]
+    (let [params (require-valid!
+                  ::workflow-params
+                  ((runtime/resolve-var rt callback)
+                   rt {:repo (:repo config)
+                       :card card
+                       :settings settings
+                       :prepared prepared})
+                  "Invalid auto-run workflow parameter result")
+          reserved (set/intersection reserved-workflow-params (set (keys params)))]
+      (when (seq reserved)
+        (fail! "Auto-run workflow parameters cannot override dispatcher fields"
+               {:reserved reserved}))
+      params)
+    {}))
+
 (defn- guidance [workflow-name workflow-run-id]
   (format/prose
    "
@@ -211,19 +259,28 @@
                                           :auto-run/branch branch}})
             ;; Admission was recorded before preparation. Detect intervening board
             ;; edits before pouring a workflow; this is not a cancellation API.
-            (let [latest (weaver/show rt (:id card))]
-              (when-not (and (= "active" (:state latest))
-                             (= "pending" (attr-get latest :kanban/lane))
-                             (= "true" (attr-get latest :kanban.label/auto-run))
-                             (nil? (attr-get latest :owner))
-                             (assignment/target-ready? rt (:id card)))
-                (fail! "Card changed during preparation; automatic assignment cancelled"
-                       {:card (:id card)})))
-            (current/with-runtime rt
-              (workflow/start! workflow-run-id (keyword workflow)
-                               {:card (:id card) :feature (:title card)
-                                :worktree cwd :branch branch
-                                :seat seat :effort effort}))
+            (let [receipt {:auto-run/status "preparing"
+                           :auto-run/request-id request-id
+                           :auto-run/workflow-run-id workflow-run-id
+                           :auto-run/effective-seat seat
+                           :auto-run/effective-effort effort
+                           :auto-run/effective-workflow workflow
+                           :auto-run/worktree cwd
+                           :auto-run/branch branch
+                           :auto-run/run-id nil}
+                  latest (require-admitted! rt (weaver/show rt (:id card)) receipt)
+                  workflow-params
+                  (merge {:card latest :feature (:title latest)
+                          :worktree cwd :branch branch
+                          :seat seat :effort effort}
+                         (additional-workflow-params
+                          rt config latest {:seat seat :effort effort :workflow workflow}
+                          {:cwd cwd :branch branch}))]
+              ;; A repository callback is synchronous trusted code, but it is
+              ;; still an extra mutation boundary before workflow publication.
+              (require-admitted! rt (weaver/show rt (:id card)) receipt)
+              (current/with-runtime rt
+                (workflow/start! workflow-run-id (keyword workflow) workflow-params)))
             (let [run (assignment/assign!
                        rt (cond-> {:harness seat :target (:id card) :cwd cwd
                                    :policy "auto-run-workflow"
@@ -287,8 +344,11 @@
   [rt]
   (let [config @(:config (state rt))]
     {:enabled (boolean (:enabled? config))
-     :config (when config (-> config (dissoc :generation)
-                              (update :prepare str) (update :workflows sort)))
+     :config (when config
+               (cond-> (dissoc config :generation)
+                 (:start-params config) (update :start-params str)
+                 true (update :prepare str)
+                 true (update :workflows sort)))
      :cards (weaver/list rt [:not [:missing [:attr "auto-run/status"]]] {})}))
 
 (millstrand/defop auto-run
