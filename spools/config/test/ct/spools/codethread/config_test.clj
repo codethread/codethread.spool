@@ -42,13 +42,13 @@
            (get-in config-deps ['io.millstrand/batteries :git/sha])))
     (is (not (contains? config-deps 'millstrand.spools/batteries)))
     (doseq [[library sha] [['millhouse.spools/workflow
-                            "3132c8f7f10455c893da28fef0e9ca0047560f82"]
+                            "d86740a5bc8a99ee1637df995d85ff725be31dc6"]
                            ['millhouse.spools/identity
-                            "b1955a96ad91bf2909a407859fca1565ec4b9fdb"]
+                            "d86740a5bc8a99ee1637df995d85ff725be31dc6"]
                            ['millhouse.spools/kanban
-                            "3132c8f7f10455c893da28fef0e9ca0047560f82"]
+                            "d86740a5bc8a99ee1637df995d85ff725be31dc6"]
                            ['millhouse.spools/land
-                            "89e5e32f8a948547c233d5dd183bb73f9c5abe4a"]]]
+                            "d86740a5bc8a99ee1637df995d85ff725be31dc6"]]]
       (is (= sha (get-in config-deps [library :git/sha]))))
     (is (= "6410da676b3b41be55a58f4abc5fe773cfc75cb9"
            (get-in config-deps ['ct.spools/harnesses :git/sha])))
