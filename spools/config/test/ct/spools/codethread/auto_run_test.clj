@@ -15,15 +15,20 @@
 (def ^:private fixture
   "(ns auto-run.fixture
      (:require [clojure.java.io :as io]
+               [clojure.spec.alpha :as s]
+               [clojure.string :as str]
                [ct.spools.harnesses :as harnesses]
                [ct.spools.harnesses.assignment :as assignment]
                [millhouse.spools.workflow :as workflow]
                [millstrand.api.lifecycle.alpha :as lifecycle]
+               [millstrand.api.spool.alpha :refer [attr-get]]
                [millstrand.api.weaver.alpha :as weaver]))
    (lifecycle/use-resource! harnesses/harness-core-runtime assignment/assignment-runtime)
+   (s/def ::card (s/and string? (complement str/blank?)))
+   (s/def ::delivery-params (s/keys :req-un [::card]))
    (workflow/defworkflow! deliver
      \"A worker-driven delivery ending at human acceptance.\"
-     {:entrypoints #{:start}}
+     {:entrypoints #{:start} :param-spec ::delivery-params}
      (workflow/workflow \"Delivery\"
        (workflow/step :implement \"Implement\" :self)
        (workflow/checkpoint :accept \"Human acceptance\"
@@ -36,7 +41,32 @@
    (defn withdrawn! [rt {:keys [card] :as request}]
      (weaver/update! rt (:id card) {:attributes {:kanban/lane \"refinement\"}})
      (prepare! rt request))
-   (defn broken! [_rt _request] (throw (ex-info \"No worktree capacity\" {})))")
+   (defn revised! [rt {:keys [card] :as request}]
+     (weaver/update! rt (:id card) {:attributes {:acme/review-scope \"prepared\"}})
+     (prepare! rt request))
+   (defn broken! [_rt _request] (throw (ex-info \"No worktree capacity\" {})))
+   (defn start-params! [_rt {:keys [card settings prepared]}]
+     {:repository-param (str (:id card) \"/\" (:workflow settings) \"/\"
+                             (:branch prepared))
+      :review-scope (attr-get card :acme/review-scope)})
+   (defn withdraw-start-params! [rt {:keys [card]}]
+     (weaver/update! rt (:id card) {:attributes {:kanban/lane \"refinement\"}})
+     {:repository-param \"withdrawn\"})
+   (defn retitle-start-params! [rt {:keys [card]}]
+     (weaver/update! rt (:id card) {:title \"Retitled feature\"})
+     {:repository-param \"retitled\"})
+   (defn corrupt-start-params! [rt {:keys [card]}]
+     (weaver/update! rt (:id card)
+                     {:attributes
+                      (case (attr-get card :acme/mutation)
+                        \"type\" {:kanban/type \"epic\"}
+                        \"card\" {:kanban/card nil}
+                        \"receipt\" {:auto-run/request-id \"replacement\"})})
+     {:repository-param \"corrupt\"})
+   (defn invalid-start-params! [_rt _request] [:not-a-map])
+   (defn conflicting-start-params! [_rt _request] {:seat \"other\"})
+   (defn broken-start-params! [_rt _request]
+     (throw (ex-info \"No repository workflow parameters\" {})))")
 
 (defn- with-world [f]
   (t/with-weaver-world
@@ -110,7 +140,12 @@
         (is (nil? (show rt selected :owner)))
         (is (= "fake" (show rt selected :auto-run/effective-seat)))
         (current/with-runtime rt
-          (is (some? (workflow/current-root (show rt selected :auto-run/workflow-run-id)))))
+          (let [root (workflow/current-root (show rt selected :auto-run/workflow-run-id))]
+            (is (some? root))
+            (is (= #{:card :feature :worktree :branch :seat :effort}
+                   (set (keys (attr-get root :workflow/context)))))
+            (is (= (:id selected)
+                   (get (attr-get root :workflow/context) :card)))))
         (doseq [untouched [blocked unlabelled refinement owner later]]
           (is (nil? (show rt untouched :auto-run/status))))
         (is (empty? (:dispatched (auto-run/scan! rt))))
@@ -121,6 +156,85 @@
           (weaver/update! rt (:id blocker) {:state "closed"})
           (is (= [(:id blocked)] (mapv :card (:dispatched (auto-run/scan! rt)))))
         (is (= 2 (count (weaver/list rt [:= [:attr "harness/run"] "true"] {})))))))))
+
+(deftest repository-parameters-reach-workflows-without-recovery-duplication
+  (with-world
+    (fn [rt config]
+      (auto-run/configure! rt (assoc config
+                                   :prepare 'auto-run.fixture/revised!
+                                   :start-params 'auto-run.fixture/start-params!))
+      (let [card (card! rt {:acme/review-scope "initial"})
+            run-id (get-in (auto-run/scan! rt) [:dispatched 0 :run])
+            workflow-run-id (show rt card :auto-run/workflow-run-id)]
+        (current/with-runtime rt
+          (let [root (workflow/current-root workflow-run-id)]
+            (is (= (str (:id card) "/deliver/auto/" (:id card))
+                   (get (attr-get root :workflow/context) :repository-param)))
+            (is (= "prepared"
+                   (get (attr-get root :workflow/context) :review-scope)))))
+        (weaver/update! rt (:id card)
+                        {:attributes {:auto-run/status "preparing" :auto-run/run-id nil}})
+        (auto-run/scan! rt)
+        (is (= run-id (show rt card :auto-run/run-id)))
+        (is (= 1 (count (weaver/list rt [:= [:attr "harness/run"] "true"] {}))))))))
+
+(deftest callback-title-edits-reach-workflow-context
+  (with-world
+    (fn [rt config]
+      (auto-run/configure! rt (assoc config
+                                   :start-params 'auto-run.fixture/retitle-start-params!))
+      (let [card (card! rt {})]
+        (auto-run/scan! rt)
+        (current/with-runtime rt
+          (let [root (workflow/current-root (show rt card :auto-run/workflow-run-id))]
+            (is (= "Retitled feature" (get (attr-get root :workflow/context) :feature)))
+            (is (= (:id card) (get (attr-get root :workflow/context) :card)))))))))
+
+(deftest card-edits-during-workflow-parameter-callback-cancel-admission
+  (with-world
+    (fn [rt config]
+      (auto-run/configure! rt (assoc config
+                                   :start-params 'auto-run.fixture/withdraw-start-params!))
+      (let [card (card! rt {})]
+        (auto-run/scan! rt)
+        (is (= "error" (show rt card :auto-run/status)))
+        (is (= "refinement" (show rt card :kanban/lane)))
+        (is (empty? (weaver/list rt [:= [:attr "harness/run"] "true"] {})))
+        (current/with-runtime rt
+          (is (nil? (workflow/current-root (show rt card :auto-run/workflow-run-id)))))))))
+
+(deftest callback-cannot-corrupt-card-or-dispatch-receipt
+  (with-world
+    (fn [rt config]
+      (auto-run/configure! rt (assoc config
+                                   :start-params 'auto-run.fixture/corrupt-start-params!))
+      (doseq [mutation ["type" "card" "receipt"]]
+        (let [card (card! rt {:acme/mutation mutation})]
+          (auto-run/scan! rt)
+          (is (= "error" (show rt card :auto-run/status)))
+          (is (empty? (weaver/list rt [:= [:attr "harness/run"] "true"] {})))
+          (current/with-runtime rt
+            (is (nil? (workflow/current-root
+                       (show rt card :auto-run/workflow-run-id))))))))))
+
+(deftest invalid-workflow-parameter-callbacks-stall-without-assignment
+  (with-world
+    (fn [rt config]
+      (doseq [[callback error]
+              [['auto-run.fixture/invalid-start-params! "Invalid auto-run workflow parameter result"]
+               ['auto-run.fixture/conflicting-start-params!
+                "Auto-run workflow parameters cannot override dispatcher fields"]
+               ['auto-run.fixture/broken-start-params! "No repository workflow parameters"]]]
+        (auto-run/configure! rt (assoc config :start-params callback))
+        (let [card (card! rt {})]
+          (auto-run/scan! rt)
+          (is (= "error" (show rt card :auto-run/status)))
+          (is (re-find (re-pattern error) (show rt card :auto-run/error)))
+          (is (nil? (show rt card :auto-run/run-id)))
+          (is (empty? (:dispatched (auto-run/scan! rt))))
+          (current/with-runtime rt
+            (is (nil? (workflow/current-root (show rt card :auto-run/workflow-run-id)))))))
+      (is (empty? (weaver/list rt [:= [:attr "harness/run"] "true"] {}))))))
 
 (deftest invalid-card-and-preparation-errors-stall-without-retry
   (with-world

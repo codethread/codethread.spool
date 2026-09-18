@@ -56,6 +56,7 @@ lifecycle resource:
     :workflow "prepare-for-review"
     :workflows #{"prepare-for-review" "deliver-autonomously"}
     :prepare 'ct.spools.codethread.auto-run-worktree/prepare!
+    :start-params 'acme.auto-run/start-params!
     :enabled? true
     :max-running 2
     :interval-ms 15000}))
@@ -67,6 +68,22 @@ lifecycle resource:
   "Own automatic card admission for this repository."
   {:open 'acme.auto-run/open!
    :close 'acme.auto-run/close!})
+```
+
+A repository callback can project and validate its own card attributes without
+making them shared dispatcher policy:
+
+```clojure
+(ns acme.auto-run
+  (:require [millstrand.api.spool.alpha :refer [attr-get fail!]]))
+
+(defn start-params! [_rt {:keys [card settings prepared]}]
+  (let [review-scope (attr-get card :acme/review-scope)]
+    (when-not (contains? #{"small" "full"} review-scope)
+      (fail! "Invalid Acme review scope" {:card (:id card) :value review-scope}))
+    {:review-scope review-scope
+     :selected-workflow (:workflow settings)
+     :prepared-branch (:branch prepared)}))
 ```
 
 Register this file with `runtime/module!`, after the repo workflow module and
@@ -88,13 +105,28 @@ function accepting `[runtime {:repo ... :card ...}]` and returning
 synchronous code: keep it bounded and move long build/test work into workflow
 gates. A failure retains resources for inspection; nothing is silently deleted.
 
+`:start-params` is optional. Its qualified callback receives `[runtime request]`
+after preparation and the first intervening-edit check, where `request` is
+`{:repo ... :card <live-card-map> :settings {:seat ... :effort ... :workflow ...}
+:prepared {:cwd ... :branch ...}}`. The callback's `:card` is the full live
+card map. It returns a map of additional workflow start parameters. The
+callback owns parsing and validation of card attributes; the dispatcher does
+not interpret repository policy. The dispatcher rechecks admission after the
+callback returns. It must return a map and may not return
+`:card` (the ID string), `:feature`, `:worktree`, `:branch`, `:seat`, or
+`:effort`: conflicts fail the card with `auto-run/status=error` before either a
+workflow or Harnesses assignment is created.
+
 ## Delivery workflows
 
-The dispatcher starts the selected workflow with `card`, `feature` (title),
-`branch`, `worktree`, `seat`, and `effort` parameters, then assigns the worker in
-that worktree. Start with an ordinary worker-owned implementation step, not a
-second worker-launching agent gate. The worker receives the exact workflow run
-ID and must drive it rather than invent another process.
+The dispatcher starts the selected workflow with `card` (the card ID string),
+`feature` (title), `branch`, `worktree`, `seat`, and `effort` parameters, plus
+the declared `:start-params` output when configured, then assigns the worker in
+that worktree.
+Shared fields are reserved and are never overwritten by repository output.
+Start with an ordinary worker-owned implementation step, not a second
+worker-launching agent gate. The worker receives the exact workflow run ID and
+must drive it rather than invent another process.
 
 A review workflow can require implementation, browser evidence, PR creation,
 automated quality/CI checks, a review package, and a human checkpoint. The worker
@@ -147,6 +179,7 @@ Do not erase receipts to simulate a retry. Repository shutdown/disable stops
 admission only; use the normal exact-run stop API to stop an accepted worker.
 
 Tests use disposable in-memory Weaver worlds and non-executing fake providers.
-They cover admission, dependency readiness, seat/effort propagation, capacity,
-one-shot behavior, failure visibility, interrupted receipt adoption, and stale
+They cover admission, dependency readiness, seat/effort propagation, optional
+repository workflow parameters, reserved-field conflicts, capacity, one-shot
+behavior, failure visibility, interrupted receipt adoption, and stale
 wake/disable behavior without launching paid agents.
