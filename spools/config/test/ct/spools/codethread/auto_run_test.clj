@@ -15,6 +15,8 @@
 (def ^:private fixture
   "(ns auto-run.fixture
      (:require [clojure.java.io :as io]
+               [clojure.spec.alpha :as s]
+               [clojure.string :as str]
                [ct.spools.harnesses :as harnesses]
                [ct.spools.harnesses.assignment :as assignment]
                [millhouse.spools.workflow :as workflow]
@@ -22,9 +24,11 @@
                [millstrand.api.spool.alpha :refer [attr-get]]
                [millstrand.api.weaver.alpha :as weaver]))
    (lifecycle/use-resource! harnesses/harness-core-runtime assignment/assignment-runtime)
+   (s/def ::card (s/and string? (complement str/blank?)))
+   (s/def ::delivery-params (s/keys :req-un [::card]))
    (workflow/defworkflow! deliver
      \"A worker-driven delivery ending at human acceptance.\"
-     {:entrypoints #{:start}}
+     {:entrypoints #{:start} :param-spec ::delivery-params}
      (workflow/workflow \"Delivery\"
        (workflow/step :implement \"Implement\" :self)
        (workflow/checkpoint :accept \"Human acceptance\"
@@ -136,7 +140,9 @@
           (let [root (workflow/current-root (show rt selected :auto-run/workflow-run-id))]
             (is (some? root))
             (is (= #{:card :feature :worktree :branch :seat :effort}
-                   (set (keys (attr-get root :workflow/context)))))))
+                   (set (keys (attr-get root :workflow/context)))))
+            (is (= (:id selected)
+                   (get (attr-get root :workflow/context) :card)))))
         (doseq [untouched [blocked unlabelled refinement owner later]]
           (is (nil? (show rt untouched :auto-run/status))))
         (is (empty? (:dispatched (auto-run/scan! rt))))

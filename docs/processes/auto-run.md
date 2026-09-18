@@ -107,20 +107,22 @@ gates. A failure retains resources for inspection; nothing is silently deleted.
 
 `:start-params` is optional. Its qualified callback receives `[runtime request]`
 after preparation and the first intervening-edit check, where `request` is
-`{:repo ... :card <live-card> :settings {:seat ... :effort ... :workflow ...}
-:prepared {:cwd ... :branch ...}}`. It returns a map of additional workflow
-start parameters. The callback owns parsing and validation of card attributes;
-the dispatcher does not interpret repository policy. The dispatcher rechecks
-admission after the callback returns. It must return a map and may not return
-`:card`, `:feature`, `:worktree`, `:branch`, `:seat`, or
+`{:repo ... :card <live-card-map> :settings {:seat ... :effort ... :workflow ...}
+:prepared {:cwd ... :branch ...}}`. The callback's `:card` is the full live
+card map. It returns a map of additional workflow start parameters. The
+callback owns parsing and validation of card attributes; the dispatcher does
+not interpret repository policy. The dispatcher rechecks admission after the
+callback returns. It must return a map and may not return
+`:card` (the ID string), `:feature`, `:worktree`, `:branch`, `:seat`, or
 `:effort`: conflicts fail the card with `auto-run/status=error` before either a
 workflow or Harnesses assignment is created.
 
 ## Delivery workflows
 
-The dispatcher starts the selected workflow with `card`, `feature` (title),
-`branch`, `worktree`, `seat`, and `effort` parameters, plus the declared output
-of `:start-params` when configured, then assigns the worker in that worktree.
+The dispatcher starts the selected workflow with `card` (the card ID string),
+`feature` (title), `branch`, `worktree`, `seat`, and `effort` parameters, plus
+the declared `:start-params` output when configured, then assigns the worker in
+that worktree.
 Shared fields are reserved and are never overwritten by repository output.
 Start with an ordinary worker-owned implementation step, not a second
 worker-launching agent gate. The worker receives the exact workflow run ID and

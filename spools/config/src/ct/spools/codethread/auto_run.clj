@@ -80,7 +80,8 @@
   Optional :start-params names a qualified callback. It receives runtime and
   {:repo ... :card ... :settings ... :prepared {:cwd ... :branch ...}}, then
   returns additional workflow start parameters. It must return a map and cannot
-  replace :card, :feature, :worktree, :branch, :seat, or :effort.
+  replace :card (the card ID string), :feature, :worktree, :branch, :seat, or
+  :effort.
 
   Invalid configuration fails activation. Disabling prevents new admission;
   it never stops existing workers. Reconfiguration is serialized with scans."
@@ -270,7 +271,7 @@
                            :auto-run/run-id nil}
                   latest (require-admitted! rt (weaver/show rt (:id card)) receipt)
                   workflow-params
-                  (merge {:card latest :feature (:title latest)
+                  (merge {:card (:id latest) :feature (:title latest)
                           :worktree cwd :branch branch
                           :seat seat :effort effort}
                          (additional-workflow-params
