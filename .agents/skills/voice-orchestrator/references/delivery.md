@@ -3,7 +3,8 @@
 Read target AGENTS.md, delivery documentation and live `prime auto-run`,
 `auto-run status`, `workflow list` and `workflow show NAME`. Defaults, available
 workflows, capacity and authorization are repository-specific, not seat defaults.
-This repository's full contract is [automatic delivery](../../../../docs/auto-run.md).
+This repository's full contract is
+[automatic delivery](../../../../docs/processes/repository-auto-run.md).
 
 Opt in only a scoped, graph-ready feature with explicit delivery authorization.
 Prepare overrides while still in refinement; add the label, then promote last.
