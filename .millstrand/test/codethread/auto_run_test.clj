@@ -57,10 +57,28 @@
   (git! candidate "config" "user.email" "test@example.com")
   (git! candidate "config" "user.name" "Test User")
   (spit (io/file candidate "candidate.txt") "candidate\n")
-  (git! candidate "add" "candidate.txt")
+  (spit (io/file candidate "Makefile")
+        ".PHONY: quality\n\nquality:\n\t@printf '%s\\n' \"$(CURDIR)\" > quality-ran-from.txt\n")
+  (git! candidate "add" "candidate.txt" "Makefile")
   (git! candidate "commit" "-m" "initial candidate")
   (git! candidate "remote" "add" "origin" (.getPath remote))
   (git! candidate "push" "-u" "origin" "auto/fixture-card"))
+
+(deftest published-candidate-gate-accepts-clean-matching-candidate
+  (let [remote (temp-dir)
+        candidate (temp-dir)]
+    (try
+      (git! remote "init" "--bare")
+      (published-candidate! remote candidate)
+      (let [result (candidate-gate! candidate)]
+        (testing "a clean candidate matching its fetched upstream succeeds"
+          (is (zero? (:exit result)) result))
+        (testing "the quality target runs from the candidate worktree"
+          (is (= (str (.getCanonicalPath candidate) "\n")
+                 (slurp (io/file candidate "quality-ran-from.txt"))))))
+      (finally
+        (delete-tree! candidate)
+        (delete-tree! remote)))))
 
 (deftest repository-activation-and-autonomous-delivery-contract
   (t/with-weaver-world
