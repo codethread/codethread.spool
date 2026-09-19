@@ -40,25 +40,47 @@
          Implement the scoped outcome, add focused tests, and record evidence on
          the card's tasks. Use disposable workspaces for workspace-backed tests.
          Run repository quality while iterating, commit the verified change, then
-         complete this step. The following gates own publication and landing.
+         complete this step. The following steps publish that commit before the
+         quality gate and own landing.
 
          {failure-policy}
        " {:card card :failure-policy (autonomous/failure-policy card)})))
-   (shell-gate :quality "Pass repository quality checks" [:implement]
+   (workflow/step
+    :publish "Publish the committed branch before quality" :self
+    :depends-on [:implement]
+    (fn [{:keys [card branch]}]
+      (format/prose
+       "
+         Publish the committed branch before any workflow quality gate. Establish
+         its upstream with:
+
+         ```text
+         git push --set-upstream origin {branch}
+         ```
+
+         Confirm `HEAD` is the published commit, then record the exact HEAD on
+         card {card}. Do not change the worktree after publishing: the next gate
+         validates this remote candidate.
+
+         {failure-policy}
+       " {:card card :branch branch
+          :failure-policy (autonomous/failure-policy card)})))
+   (shell-gate :quality "Pass repository quality checks for published HEAD" [:publish]
                ["make" "quality"] 5400)
    (workflow/step
-    :prepare-pr "Publish the exact change and review package" :self
+    :prepare-pr "Prepare the published change for review" :self
     :depends-on [:quality]
     (fn [{:keys [card branch]}]
       (format/prose
        "
-         Push branch {branch} and create or update its ready PR against main.
-         Include nonempty Summary, Walkthrough, and Verification sections. The
-         walkthrough must explain the affected boundaries and data flow with a
-         useful Mermaid diagram. Record the PR URL and exact HEAD on card {card}.
+         Create or update branch {branch}'s ready PR against main. Include
+         nonempty Summary, Walkthrough, and Verification sections. The walkthrough
+         must explain the affected boundaries and data flow with a useful Mermaid
+         diagram. Record the PR URL and exact HEAD on card {card}.
 
-         Complete this step only when the branch is committed and the PR is ready
-         for review. The next gates independently verify CI and move the card.
+         Complete this step only when the published, quality-checked branch has a
+         PR ready for review. The next gates independently verify CI and move the
+         card.
 
          {failure-policy}
        " {:card card :branch branch

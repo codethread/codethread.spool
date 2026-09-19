@@ -54,11 +54,20 @@
               strands (:strands (graph/subgraph rt [(:id root)]))
               views (map workflow/step-view strands)
               gates (set (keep #(attr-get % :workflow/gate) strands))
+              publish (first (filter #(= "Publish the committed branch before quality"
+                                       (:title %))
+                                    views))
               handoff (workflow/step-view (role-step strands "handoff-worker"))
               finisher (workflow/step-view (role-step strands "finisher"))]
-          (testing "implementation, quality, CI, and review precede landing"
+          (testing "implementation and publication precede quality, CI, and review"
             (is (= ["Implement and verify the assigned feature"]
                    (mapv :title (:ready result))))
+            (is (= ["Publish the committed branch before quality"]
+                   (mapv :title (:ready (workflow/complete! "test-auto-full-land")))))
+            (is (str/includes? (:instruction publish)
+                               "git push --set-upstream origin auto/fixture-card"))
+            (is (= ["Pass repository quality checks for published HEAD"]
+                   (mapv :title (:ready (workflow/complete! "test-auto-full-land")))))
             (is (contains? gates "shell"))
             (is (contains? gates "code"))
             (is (not (contains? gates "agent"))))

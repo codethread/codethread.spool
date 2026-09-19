@@ -13,11 +13,15 @@ Malformed or unavailable overrides fail visibly and never fall back.
 
 The workflow owns these stages:
 
-1. The assigned worker implements and tests the feature in its prepared worktree.
-2. A shell gate runs `make quality`.
-3. The worker publishes a ready PR, and a shell gate waits for CI.
-4. A code gate moves the verified card into review.
-5. Shared autonomous land runs mandatory review. The worker stops before
+1. The assigned worker implements, tests, and commits the feature in its prepared
+   worktree.
+2. The worker pushes that exact branch with `git push --set-upstream origin
+   <branch>`, establishing upstream before a workflow quality gate can run.
+3. A shell gate runs `make quality` against the published candidate; the worker
+   must not modify the worktree after publication.
+4. The worker creates or updates the ready PR, and a shell gate waits for CI.
+5. A code gate moves the verified card into review.
+6. Shared autonomous land runs mandatory review. The worker stops before
    sign-off and accepts a distinct canonical-root `grunt` against the dependent
    finisher step. That finisher owns sign-off, FIFO merge, cleanup, and final
    card closure.
