@@ -23,6 +23,10 @@
      'codethread/ralph {:local/root (str project-root "/spools/ralph")}}}))
 (def ^:private workspace-init-clj
   (slurp (io/file project-root ".millstrand/init.clj")))
+(def ^:private workspace-files
+  (into {}
+        (for [path ["me/auto_run_workflows.clj" "me/auto_run.clj"]]
+          [path (slurp (io/file project-root ".millstrand" path))])))
 
 (deftest workspace-deps-compose-library-roots-and-current-harnesses
   (let [{:keys [deps]} (edn/read-string
@@ -382,7 +386,8 @@
 (deftest workspace-init-stages-and-activates-the-complete-cli-surface
   (t/with-weaver-world [ctx {:storage :sqlite-memory
                              :deps-edn deps-edn
-                             :init-clj workspace-init-clj}]
+                             :init-clj workspace-init-clj
+                             :files workspace-files}]
     (let [rt (:runtime ctx)
           status (runtime/status rt)
           aliases (weaver/op! rt 'agent ["list"])
@@ -404,10 +409,12 @@
                    "sub-coordinator" "sub-coordinator-sol"]))
       (is (= ["docs-and-tests" "runtime-correctness" "source-form"]
              (mapv :name (:reviewers reviewer-result))))
-      (is (= #{"intake" "land" "publish-spool-kondo" "ralph-iterate" "review"}
+      (is (= #{"auto-full-land" "intake" "land" "publish-spool-kondo"
+               "ralph-iterate" "review"}
              (set (map :name (:definitions workflow-result)))))
       (is (= "land" (:name land-result)))
       (is (= "reviewer" (get-in land-result [:params :defaults :reviewer])))
+      (is (contains? op-names "auto-run"))
       (is (contains? op-names "merge-queue")))))
 
 (deftest optional-workspace-config-keeps-the-devflow-kanban-election

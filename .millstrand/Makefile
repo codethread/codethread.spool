@@ -1,6 +1,9 @@
 CLJ_KONDO := clj-kondo
 
-.PHONY: kondo kondo-import kondo-lint clean-kondo
+.PHONY: test kondo kondo-import kondo-lint clean-kondo
+
+test:
+	clojure -M:test
 
 kondo:
 	$(MAKE) kondo-import
@@ -15,7 +18,7 @@ kondo-import:
 
 kondo-lint:
 	@echo "==> .millstrand clj-kondo"
-	@$(CLJ_KONDO) --repro --parallel --lint init.clj me
+	@$(CLJ_KONDO) --repro --parallel --lint init.clj me test
 
 clean-kondo:
 	rm -rf .clj-kondo/imports .clj-kondo/.cache

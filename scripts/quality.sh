@@ -2,6 +2,10 @@
 set -eu
 
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+
+echo "==> repository auto-run"
+(cd "$root/.millstrand" && clojure -M:test)
+
 for spool in config ralph; do
   echo "==> $spool"
   (cd "$root/spools/$spool" && clojure -M:test)
