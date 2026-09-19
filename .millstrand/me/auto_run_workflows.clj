@@ -66,7 +66,9 @@
        " {:card card :branch branch
           :failure-policy (autonomous/failure-policy card)})))
    (shell-gate :quality "Pass repository quality checks for published HEAD" [:publish]
-               ["make" "quality"] 5400)
+               (fn [{:keys [branch]}]
+                 ["sh" "scripts/verify-published-candidate.sh" branch])
+               5400)
    (workflow/step
     :prepare-pr "Prepare the published change for review" :self
     :depends-on [:quality]

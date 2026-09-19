@@ -2,6 +2,7 @@
   "Exercise repository auto-run startup in a disposable Weaver world."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.string :as str]
             [clojure.test :refer [deftest is run-tests testing]]
             [ct.spools.codethread.auto-run :as auto-run]
@@ -28,6 +29,38 @@
 
 (defn- role-step [strands role]
   (first (filter #(= role (attr-get % :auto-run/role)) strands)))
+
+(defn- temp-dir []
+  (let [path (java.io.File/createTempFile "codethread-auto-run-" "")]
+    (.delete path)
+    (.mkdir path)
+    path))
+
+(defn- delete-tree! [root]
+  (doseq [file (reverse (file-seq root))]
+    (.delete file)))
+
+(defn- git! [dir & args]
+  (let [{:keys [exit out err]} (apply shell/sh "git" (concat args [:dir dir]))]
+    (when-not (zero? exit)
+      (throw (ex-info "Git fixture command failed" {:args args :out out :err err})))
+    out))
+
+(defn- candidate-gate! [dir]
+  (shell/sh "sh"
+            (.getCanonicalPath (io/file ".." "scripts" "verify-published-candidate.sh"))
+            "auto/fixture-card"
+            :dir dir))
+
+(defn- published-candidate! [remote candidate]
+  (git! candidate "init" "-b" "auto/fixture-card")
+  (git! candidate "config" "user.email" "test@example.com")
+  (git! candidate "config" "user.name" "Test User")
+  (spit (io/file candidate "candidate.txt") "candidate\n")
+  (git! candidate "add" "candidate.txt")
+  (git! candidate "commit" "-m" "initial candidate")
+  (git! candidate "remote" "add" "origin" (.getPath remote))
+  (git! candidate "push" "-u" "origin" "auto/fixture-card"))
 
 (deftest repository-activation-and-autonomous-delivery-contract
   (t/with-weaver-world
@@ -57,6 +90,10 @@
               publish (first (filter #(= "Publish the committed branch before quality"
                                        (:title %))
                                     views))
+              quality (first (filter #(= "Pass repository quality checks for published HEAD"
+                                       (:title %))
+                                    views))
+              quality-gate (first (filter #(= (:id quality) (:id %)) strands))
               handoff (workflow/step-view (role-step strands "handoff-worker"))
               finisher (workflow/step-view (role-step strands "finisher"))]
           (testing "implementation and publication precede quality, CI, and review"
@@ -68,6 +105,8 @@
                                "git push --set-upstream origin auto/fixture-card"))
             (is (= ["Pass repository quality checks for published HEAD"]
                    (mapv :title (:ready (workflow/complete! "test-auto-full-land")))))
+            (is (= ["sh" "scripts/verify-published-candidate.sh" "auto/fixture-card"]
+                   (attr-get quality-gate :shell/argv)))
             (is (contains? gates "shell"))
             (is (contains? gates "code"))
             (is (not (contains? gates "agent"))))
@@ -89,6 +128,34 @@
               (is (str/includes? (:instruction view) "`auto-run-failure`"))
               (is (str/includes? (:instruction view)
                                  "Stop and leave the card open")))))))))
+
+(deftest published-candidate-gate-rejects-invalid-repository-state
+  (let [remote (temp-dir)
+        candidate (temp-dir)
+        peer (temp-dir)]
+    (try
+      (git! remote "init" "--bare")
+      (published-candidate! remote candidate)
+      (spit (io/file candidate "untracked.txt") "dirty\n")
+      (testing "a dirty worktree is rejected"
+        (is (not (zero? (:exit (candidate-gate! candidate))))))
+      (.delete (io/file candidate "untracked.txt"))
+      (git! candidate "switch" "-c" "wrong-branch")
+      (testing "a different checked-out branch is rejected"
+        (is (not (zero? (:exit (candidate-gate! candidate))))))
+      (git! candidate "switch" "auto/fixture-card")
+      (git! peer "clone" "--branch" "auto/fixture-card" (.getPath remote) ".")
+      (git! peer "config" "user.email" "test@example.com")
+      (git! peer "config" "user.name" "Test User")
+      (spit (io/file peer "candidate.txt") "remote change\n")
+      (git! peer "commit" "-am" "remote change")
+      (git! peer "push")
+      (testing "a HEAD that differs from the fetched upstream is rejected"
+        (is (not (zero? (:exit (candidate-gate! candidate))))))
+      (finally
+        (delete-tree! peer)
+        (delete-tree! candidate)
+        (delete-tree! remote)))))
 
 (defn -main
   "Run disposable workspace activation tests."
