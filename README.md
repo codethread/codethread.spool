@@ -12,6 +12,7 @@ their own layout:
 
 - [Clojure lint and editor configuration](docs/processes/kondo-and-lsp.md)
 - [Shared review and landing](docs/processes/shared-landing.md)
+- [Repository automatic delivery](docs/processes/repository-auto-run.md)
 
 ## Roots
 

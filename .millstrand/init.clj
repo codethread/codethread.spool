@@ -44,8 +44,19 @@
                   :after [:millhouse/spools-workflow]
                   :required? true})
 
+(runtime/module! runtime :codethread/auto-run-workflows
+                 {:file "me/auto_run_workflows.clj"
+                  :after [:millhouse/spools-workflow-providers]
+                  :required? true})
+(runtime/module! runtime :codethread/auto-run
+                 {:file "me/auto_run.clj"
+                  :after [:codethread/auto-run-workflows
+                          :millstrand/spools-harnesses]
+                  :required? true})
+
 (codethread/register-executor!
  runtime [:millhouse/spools-workflow-providers
           :devflow/kanban-adapter
           :codethread/config
-          :codethread/ralph])
+          :codethread/ralph
+          :codethread/auto-run])
