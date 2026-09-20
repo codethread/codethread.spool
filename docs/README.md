@@ -11,6 +11,9 @@ for its own layout and links back to this documentation.
 - [Shared review and landing](processes/shared-landing.md): Kanban/worktree
   discipline, review evidence, FIFO landing, consumer activation, and rollout
   verification.
+- [Attribution dependency activation](processes/attribution-activation.md):
+  compatible pins, durable-history smoke, operator restart boundary, and
+  consumer follow-ups.
 - [Planner/coordinator protocol](processes/millstrand-sub-coordinator-runbook.md):
   Sol preparation, Luna ready-work execution, Kanban acceptance and cold starts.
 - [Working handoff briefs](processes/coordinator-handoff.md): acknowledged headed
