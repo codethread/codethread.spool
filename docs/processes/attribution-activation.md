@@ -28,11 +28,11 @@ Run these in a source checkout or disposable test world. They do not authorize
 or perform live deployment:
 
 ```text
-cd spools/config && clojure -M:test
+(cd spools/config && clojure -M:test)
 make quality
-cd spools/config && clojure -M:consumer-smoke \
+(cd spools/config && clojure -M:consumer-smoke \
   /path/to/millhouse.spool /path/to/codethread.spool \
-  /path/to/harnesses.spool /path/to/devflow.spool /path/to/consumer
+  /path/to/harnesses.spool /path/to/devflow.spool /path/to/consumer)
 ```
 
 `clojure -M:test` runs the provenance smoke using the accepted Git coordinates
@@ -60,8 +60,8 @@ Confirm dependency resolution rather than relying on a previously loaded
 classloader:
 
 ```text
-cd spools/config && clojure -Spath
-cd .millstrand && clojure -Spath
+(cd spools/config && clojure -Spath)
+(cd .millstrand && clojure -Spath)
 ```
 
 Check that every selected Millhouse root is `bd96f5357a335bd17cd22042da1be5bd2200f807`,
