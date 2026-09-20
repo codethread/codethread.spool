@@ -71,8 +71,15 @@
 (defn- with-world [f]
   (t/with-weaver-world
     [ctx {:storage :sqlite-memory
-          :deps-edn (pr-str {:deps {'codethread/config
-                                   {:local/root (.getCanonicalPath (io/file "."))}}})
+          :deps-edn
+          (pr-str
+           {:deps
+            {'millhouse.spools/identity
+             {:git/url "https://github.com/codethread/millhouse.spool.git"
+              :git/sha "bd96f5357a335bd17cd22042da1be5bd2200f807"
+              :deps/root "spools/identity"}
+             'codethread/config
+             {:local/root (.getCanonicalPath (io/file "."))}}})
           :init-clj
           "(require '[millstrand.api.current.alpha :as current]
                     '[millstrand.api.runtime.alpha :as runtime])

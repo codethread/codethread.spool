@@ -112,6 +112,9 @@
                                        (:title %))
                                     views))
               quality-gate (first (filter #(= (:id quality) (:id %)) strands))
+              ci (first (filter #(= "Wait for the PR checks" (:title %)) views))
+              ci-gate (first (filter #(= (:id ci) (:id %)) strands))
+              ci-argv (attr-get ci-gate :shell/argv)
               handoff (workflow/step-view (role-step strands "handoff-worker"))
               finisher (workflow/step-view (role-step strands "finisher"))]
           (testing "implementation and publication precede quality, CI, and review"
@@ -125,6 +128,9 @@
                    (mapv :title (:ready (workflow/complete! "test-auto-full-land")))))
             (is (= ["sh" "scripts/verify-published-candidate.sh" "auto/fixture-card"]
                    (attr-get quality-gate :shell/argv)))
+            (is (= ["sh" "-c"] (subvec ci-argv 0 2)))
+            (is (= ["pr-checks" "allow-empty" "auto/fixture-card" "120" "5"]
+                   (subvec ci-argv (- (count ci-argv) 5))))
             (is (contains? gates "shell"))
             (is (contains? gates "code"))
             (is (not (contains? gates "agent"))))
