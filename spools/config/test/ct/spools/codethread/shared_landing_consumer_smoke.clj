@@ -1,9 +1,10 @@
 (ns ct.spools.codethread.shared-landing-consumer-smoke
-  "Verify shared landing through actual consumer workspace configuration.
+  "Exercise local shared landing source through consumer workspace configuration.
 
   Every consumer runs in a disposable Weaver world. The fixture preserves its
   checked-in init and workspace files while replacing published coordinates
-  with explicit local checkout roots supplied by the caller."
+  with explicit local checkout roots supplied by the caller. This smoke covers
+  consumer integration with the supplied source, not the checked-in pins."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [millstrand.api.runtime.alpha :as runtime]
@@ -130,13 +131,14 @@
                (:name (weaver/op! runtime 'workflow ["show" workflow-name])))
             "Continuation workflow is not visible"
             {:consumer consumer-path :workflow workflow-name}))
-         (println "shared landing smoke: clean" consumer-path))))))
+         (println "shared landing local-source smoke: clean"
+                  consumer-path))))))
 
 (defn -main
-  "Verify each consumer using disposable local dependency overrides.
+  "Exercise each consumer using disposable local dependency overrides.
 
   Arguments are MILLHOUSE CODETHREAD HARNESSES DEVFLOW followed by one or more
-  consumer checkout roots."
+  consumer checkout roots. This command does not verify published pins."
   [& paths]
   (when (< (count paths) 5)
     (throw (ex-info

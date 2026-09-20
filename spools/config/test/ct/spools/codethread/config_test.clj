@@ -17,62 +17,41 @@
             [millstrand.test.alpha :as t]))
 
 (def ^:private project-root (.getCanonicalPath (io/file "../..")))
-(def ^:private deps-edn
+(def ^:private workspace-root (io/file project-root ".millstrand"))
+(def ^:private workspace-deps
+  (edn/read-string (slurp (io/file workspace-root "deps.edn"))))
+(def ^:private local-deps-edn
   (pr-str
    {:deps
-    {'millhouse.spools/identity
-     {:git/url "https://github.com/codethread/millhouse.spool.git"
-      :git/sha "bd96f5357a335bd17cd22042da1be5bd2200f807"
-      :deps/root "spools/identity"}
-     'codethread/config {:local/root (str project-root "/spools/config")}
-     'codethread/ralph {:local/root (str project-root "/spools/ralph")}}}))
+    (assoc (select-keys (:deps workspace-deps) ['millhouse.spools/identity])
+           'codethread/config {:local/root (str project-root "/spools/config")}
+           'codethread/ralph {:local/root (str project-root "/spools/ralph")})}))
+
+(defn- checked-in-workspace-deps-edn []
+  (-> workspace-deps
+      (update :deps
+              (fn [deps]
+                (into {}
+                      (map (fn [[library coordinate]]
+                             [library
+                              (if-let [path (:local/root coordinate)]
+                                {:local/root
+                                 (.getCanonicalPath
+                                  (io/file workspace-root path))}
+                                coordinate)]))
+                      deps)))
+      pr-str))
+
 (def ^:private workspace-init-clj
-  (slurp (io/file project-root ".millstrand/init.clj")))
+  (slurp (io/file workspace-root "init.clj")))
 (def ^:private workspace-files
   (into {}
         (for [path ["me/auto_run_workflows.clj" "me/auto_run.clj"]]
-          [path (slurp (io/file project-root ".millstrand" path))])))
-
-(deftest workspace-deps-compose-library-roots-and-current-harnesses
-  (let [{:keys [deps]} (edn/read-string
-                        (slurp (io/file project-root ".millstrand/deps.edn")))
-        workspace-root (io/file project-root ".millstrand")
-        config-root (io/file workspace-root (get-in deps ['codethread/config :local/root]))
-        ralph-root (io/file workspace-root (get-in deps ['codethread/ralph :local/root]))
-        config-deps (:deps (edn/read-string (slurp (io/file config-root "deps.edn"))))]
-    (is (= {:local/root "../spools/config"}
-           (get deps 'codethread/config)))
-    (is (= {:local/root "../spools/ralph"}
-           (get deps 'codethread/ralph)))
-    (is (= "bd96f5357a335bd17cd22042da1be5bd2200f807"
-           (get-in deps ['millhouse.spools/identity :git/sha])))
-    (is (.isFile (io/file config-root "deps.edn")))
-    (is (.isFile (io/file ralph-root "deps.edn")))
-    (is (.isFile (io/file ralph-root "bin/ralph")))
-    (is (= "8e220eab7de2fabe7880c6a4c71de6cd903c34bb"
-           (get-in config-deps ['io.millstrand/batteries :git/sha])))
-    (is (not (contains? config-deps 'millstrand.spools/batteries)))
-    (doseq [[library sha] [['millhouse.spools/workflow
-                            "bd96f5357a335bd17cd22042da1be5bd2200f807"]
-                           ['millhouse.spools/identity
-                            "bd96f5357a335bd17cd22042da1be5bd2200f807"]
-                           ['millhouse.spools/kanban
-                            "bd96f5357a335bd17cd22042da1be5bd2200f807"]
-                           ['millhouse.spools/land
-                            "bd96f5357a335bd17cd22042da1be5bd2200f807"]]]
-      (is (= sha (get-in config-deps [library :git/sha]))))
-    (is (= "6b5ad39d8711a033dc7f33fd52c78901393ea44e"
-           (get-in config-deps ['ct.spools/harnesses :git/sha])))
-    (is (not-any? #{'ct.spools/agent-run 'ct.spools/delegation}
-                  (keys config-deps)))
-    (is (= "3d880109f68e84e9c0d019e34d6ec434daf7c8d8"
-           (get-in config-deps ['codethread/devflow :git/sha])))
-    (is (= "3d880109f68e84e9c0d019e34d6ec434daf7c8d8"
-           (get-in config-deps
-                   ['codethread/devflow-kanban-adapter :git/sha])))))
+          [path (slurp (io/file workspace-root path))])))
 
 (deftest bootstrap-registers-catalog-and-reviewers-without-an-executor
-  (t/with-weaver-world [ctx {:storage :sqlite-memory :deps-edn deps-edn}]
+  (t/with-weaver-world [ctx {:storage :sqlite-memory
+                             :deps-edn local-deps-edn}]
     (let [rt (:runtime ctx)
           expected (mapv first codethread/module-definitions)
           result (codethread/register! rt)]
@@ -265,7 +244,8 @@
           (is (not (contains? (set (keys (workflow/executors))) :agent))))))))
 
 (deftest live-sub-coordinator-registration-is-additive
-  (t/with-weaver-world [ctx {:storage :sqlite-memory :deps-edn deps-edn}]
+  (t/with-weaver-world [ctx {:storage :sqlite-memory
+                             :deps-edn local-deps-edn}]
     (let [rt (:runtime ctx)]
       (codethread/register! rt)
       (is (true? (harnesses/unregister-alias!
@@ -309,7 +289,8 @@
         (is (true? (:available added)))))))
 
 (deftest live-sol-sub-coordinator-registration-is-additive
-  (t/with-weaver-world [ctx {:storage :sqlite-memory :deps-edn deps-edn}]
+  (t/with-weaver-world [ctx {:storage :sqlite-memory
+                             :deps-edn local-deps-edn}]
     (let [rt (:runtime ctx)]
       (codethread/register! rt)
       (is (true? (harnesses/unregister-alias!
@@ -362,7 +343,8 @@
         (is (true? (:available added)))))))
 
 (deftest consumer-modules-reconcile-before-explicit-executor-activation
-  (t/with-weaver-world [ctx {:storage :sqlite-memory :deps-edn deps-edn}]
+  (t/with-weaver-world [ctx {:storage :sqlite-memory
+                             :deps-edn local-deps-edn}]
     (let [rt (:runtime ctx)]
       (codethread/register! rt)
       (let [consumer-result
@@ -394,9 +376,9 @@
         (current/with-runtime rt
           (is (contains? (set (keys (workflow/executors))) :agent)))))))
 
-(deftest workspace-init-stages-and-activates-the-complete-cli-surface
+(deftest checked-in-current-basis-activates-the-complete-cli-surface
   (t/with-weaver-world [ctx {:storage :sqlite-memory
-                             :deps-edn deps-edn
+                             :deps-edn (checked-in-workspace-deps-edn)
                              :init-clj workspace-init-clj
                              :files workspace-files}]
     (let [rt (:runtime ctx)
@@ -429,7 +411,8 @@
       (is (contains? op-names "merge-queue")))))
 
 (deftest optional-workspace-config-keeps-the-devflow-kanban-election
-  (t/with-weaver-world [ctx {:storage :sqlite-memory :deps-edn deps-edn}]
+  (t/with-weaver-world [ctx {:storage :sqlite-memory
+                             :deps-edn local-deps-edn}]
     (let [rt (:runtime ctx)]
       (runtime/module! rt :millstrand/spools-batteries
                        {:ns 'millstrand.spools.batteries})
