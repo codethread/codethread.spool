@@ -3,16 +3,16 @@
                                  :git/sha "310368dff9174bd889ad21d4ed8196952684eaf9"
                                  :deps/root "spools/batteries"}
         millhouse.spools/workflow {:git/url "https://github.com/codethread/millhouse.spool.git"
-                                   :git/sha "d86740a5bc8a99ee1637df995d85ff725be31dc6"
+                                   :git/sha "bd96f5357a335bd17cd22042da1be5bd2200f807"
                                    :deps/root "spools/workflow"}
         millhouse.spools/identity {:git/url "https://github.com/codethread/millhouse.spool.git"
-                                   :git/sha "d86740a5bc8a99ee1637df995d85ff725be31dc6"
+                                   :git/sha "bd96f5357a335bd17cd22042da1be5bd2200f807"
                                    :deps/root "spools/identity"}
         millhouse.spools/kanban {:git/url "https://github.com/codethread/millhouse.spool.git"
-                                 :git/sha "d86740a5bc8a99ee1637df995d85ff725be31dc6"
+                                 :git/sha "bd96f5357a335bd17cd22042da1be5bd2200f807"
                                  :deps/root "spools/kanban"}
         millhouse.spools/land {:git/url "https://github.com/codethread/millhouse.spool.git"
-                               :git/sha "d86740a5bc8a99ee1637df995d85ff725be31dc6"
+                               :git/sha "bd96f5357a335bd17cd22042da1be5bd2200f807"
                                :deps/root "spools/land"}
         ct.spools/harnesses {:git/url "https://github.com/codethread/harnesses.spool.git"
                              :git/sha "6410da676b3b41be55a58f4abc5fe773cfc75cb9"}

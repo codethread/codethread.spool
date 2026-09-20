@@ -19,7 +19,11 @@
 (def ^:private deps-edn
   (pr-str
    {:deps
-    {'codethread/config {:local/root (str project-root "/spools/config")}
+    {'millhouse.spools/identity
+     {:git/url "https://github.com/codethread/millhouse.spool.git"
+      :git/sha "bd96f5357a335bd17cd22042da1be5bd2200f807"
+      :deps/root "spools/identity"}
+     'codethread/config {:local/root (str project-root "/spools/config")}
      'codethread/ralph {:local/root (str project-root "/spools/ralph")}}}))
 (def ^:private workspace-init-clj
   (slurp (io/file project-root ".millstrand/init.clj")))
@@ -39,6 +43,8 @@
            (get deps 'codethread/config)))
     (is (= {:local/root "../spools/ralph"}
            (get deps 'codethread/ralph)))
+    (is (= "bd96f5357a335bd17cd22042da1be5bd2200f807"
+           (get-in deps ['millhouse.spools/identity :git/sha])))
     (is (.isFile (io/file config-root "deps.edn")))
     (is (.isFile (io/file ralph-root "deps.edn")))
     (is (.isFile (io/file ralph-root "bin/ralph")))
@@ -46,13 +52,13 @@
            (get-in config-deps ['io.millstrand/batteries :git/sha])))
     (is (not (contains? config-deps 'millstrand.spools/batteries)))
     (doseq [[library sha] [['millhouse.spools/workflow
-                            "d86740a5bc8a99ee1637df995d85ff725be31dc6"]
+                            "bd96f5357a335bd17cd22042da1be5bd2200f807"]
                            ['millhouse.spools/identity
-                            "d86740a5bc8a99ee1637df995d85ff725be31dc6"]
+                            "bd96f5357a335bd17cd22042da1be5bd2200f807"]
                            ['millhouse.spools/kanban
-                            "d86740a5bc8a99ee1637df995d85ff725be31dc6"]
+                            "bd96f5357a335bd17cd22042da1be5bd2200f807"]
                            ['millhouse.spools/land
-                            "d86740a5bc8a99ee1637df995d85ff725be31dc6"]]]
+                            "bd96f5357a335bd17cd22042da1be5bd2200f807"]]]
       (is (= sha (get-in config-deps [library :git/sha]))))
     (is (= "6410da676b3b41be55a58f4abc5fe773cfc75cb9"
            (get-in config-deps ['ct.spools/harnesses :git/sha])))

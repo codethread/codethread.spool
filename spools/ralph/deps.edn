@@ -2,7 +2,7 @@
  :deps {io.millstrand/millstrand {:git/url "https://github.com/codethread/millstrand.git"
                                   :git/sha "310368dff9174bd889ad21d4ed8196952684eaf9"}
         millhouse.spools/workflow {:git/url "https://github.com/codethread/millhouse.spool.git"
-                                   :git/sha "d86740a5bc8a99ee1637df995d85ff725be31dc6"
+                                   :git/sha "bd96f5357a335bd17cd22042da1be5bd2200f807"
                                    :deps/root "spools/workflow"}}
  :aliases {:test {:extra-paths ["test"]
                   :main-opts ["-m" "ct.spools.codethread.ralph-test"]}}}
