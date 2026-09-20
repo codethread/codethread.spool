@@ -60,7 +60,7 @@
                            ['millhouse.spools/land
                             "bd96f5357a335bd17cd22042da1be5bd2200f807"]]]
       (is (= sha (get-in config-deps [library :git/sha]))))
-    (is (= "6410da676b3b41be55a58f4abc5fe773cfc75cb9"
+    (is (= "6b5ad39d8711a033dc7f33fd52c78901393ea44e"
            (get-in config-deps ['ct.spools/harnesses :git/sha])))
     (is (not-any? #{'ct.spools/agent-run 'ct.spools/delegation}
                   (keys config-deps)))
