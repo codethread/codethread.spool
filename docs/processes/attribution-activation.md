@@ -35,9 +35,11 @@ cd spools/config && clojure -M:consumer-smoke \
   /path/to/harnesses.spool /path/to/devflow.spool /path/to/consumer
 ```
 
-The provenance smoke uses the accepted Git coordinates above for Millstrand,
-Millhouse, and Harnesses, a disposable SQLite Weaver, and a small consumer
-module. It proves all of the following from durable graph records:
+`clojure -M:test` runs the provenance smoke using the accepted Git coordinates
+above for Millstrand, Millhouse, and Harnesses, a disposable SQLite Weaver, and
+a small consumer module. The separate `-M:consumer-smoke` command verifies the
+shared landing surface of a checked-in consumer. The provenance smoke proves all
+of the following from durable graph records:
 
 - an unowned card can retain a reporter;
 - an unresolved note actor remains valid and resolves after a later local
