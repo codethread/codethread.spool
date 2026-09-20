@@ -28,7 +28,7 @@ Drive the **existing assigned run**, not a new workflow with the same intent:
 strand --workspace $ws workflow ready $delivery_run
 strand --workspace $ws workflow await $delivery_run --timeout-secs 1800
 # Only after evidence for an ordinary worker-owned step:
-strand --workspace $ws workflow complete $delivery_run --step $step --by $actor
+strand --workspace $ws workflow complete $delivery_run --step $step --by-identity $actor
 ```
 
 Read every rendered instruction. `ready` returns the whole frontier. Await healthy

@@ -1,6 +1,6 @@
 {:paths ["src"]
  :deps {io.millstrand/batteries {:git/url "https://github.com/codethread/millstrand.git"
-                                 :git/sha "310368dff9174bd889ad21d4ed8196952684eaf9"
+                                 :git/sha "8e220eab7de2fabe7880c6a4c71de6cd903c34bb"
                                  :deps/root "spools/batteries"}
         millhouse.spools/workflow {:git/url "https://github.com/codethread/millhouse.spool.git"
                                    :git/sha "bd96f5357a335bd17cd22042da1be5bd2200f807"
@@ -25,13 +25,13 @@
  :aliases {:test {:extra-paths ["test"]
                   :extra-deps {io.millstrand/millstrand
                                {:git/url "https://github.com/codethread/millstrand.git"
-                                :git/sha "310368dff9174bd889ad21d4ed8196952684eaf9"}}
+                                :git/sha "8e220eab7de2fabe7880c6a4c71de6cd903c34bb"}}
                   :main-opts ["-m" "ct.spools.codethread.config-test"]}
            :consumer-smoke
            {:extra-paths ["test"]
             :extra-deps {io.millstrand/millstrand
                          {:git/url "https://github.com/codethread/millstrand.git"
-                          :git/sha "310368dff9174bd889ad21d4ed8196952684eaf9"}}
+                          :git/sha "8e220eab7de2fabe7880c6a4c71de6cd903c34bb"}}
             :main-opts
             ["-m"
              "ct.spools.codethread.shared-landing-consumer-smoke"]}}}

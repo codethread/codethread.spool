@@ -3,7 +3,6 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [millhouse.spools.land.autonomous :as autonomous]
-            [millhouse.spools.land.support :as land-support]
             [millhouse.spools.workflow :as workflow]
             [millstrand.api.format.alpha :as format]))
 
@@ -90,7 +89,8 @@
           :failure-policy (autonomous/failure-policy card)})))
    (shell-gate :ci "Wait for the PR checks" [:prepare-pr]
                (fn [{:keys [branch]}]
-                 (land-support/pr-checks-argv "allow-empty" branch))
+                 ["sh" "scripts/verify-pr-checks.sh"
+                  "allow-empty" branch "120" "5"])
                2100)
    (workflow/gate
     :review-card "Move the verified feature into review" :code

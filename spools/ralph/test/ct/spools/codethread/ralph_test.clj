@@ -43,11 +43,19 @@
           (is (str/includes? (:prime prime) "Prepare the whole epic"))
           (is (str/includes? (:prime prime) "strand kanban label add <epic-id> ralph")))
         (let [definition (current/with-runtime rt
-                           (workflow/resolve-workflow :ralph-iterate))]
+                           (workflow/resolve-workflow :ralph-iterate))
+              claim-instruction
+              ((get-in definition
+                       [:value :steps 1 :attributes "workflow/instruction"])
+               {})]
           (is (str/includes? (pr-str definition)
                              "consumer-owned landing policy"))
+          (is (str/includes? claim-instruction
+                             "--owner <owner> --by-identity <actor>"))
           (is (str/includes? (pr-str definition)
-                             "doing-task body and latest note as the claim evidence"))
+                             "Task assignment is not another feature claim"))
+          (is (str/includes? (pr-str definition)
+                             "durable current-ownership projection"))
           (is (str/includes? (pr-str definition)
                              "do not claim it landed without the consumer's landing evidence"))
           (is (not (re-find #"ralph/(?:feature|branch|worktree|card)|--context"

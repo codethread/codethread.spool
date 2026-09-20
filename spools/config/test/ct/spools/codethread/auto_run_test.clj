@@ -5,6 +5,7 @@
             [ct.spools.codethread.auto-run :as auto-run]
             [ct.spools.codethread.auto-run-worktree :as worktree]
             [ct.spools.harnesses :as harnesses]
+            [millhouse.spools.kanban :as kanban]
             [millhouse.spools.workflow :as workflow]
             [millstrand.api.current.alpha :as current]
             [millstrand.api.scheduler.alpha :as scheduler]
@@ -115,17 +116,35 @@
 (defn- show [rt card key]
   (attr-get (weaver/show rt (:id card)) key))
 
-(deftest eligibility-is-explicit-and-one-shot
-  (let [base {:state "active"
-              :attributes {:kanban/card "true" :kanban/type "feature"
-                           :kanban/lane "pending" :kanban.label/auto-run "true"}}]
-    (is (auto-run/eligible? base))
-    (doseq [[key value] [[:kanban/type "epic"] [:kanban/lane "refinement"]
-                        [:kanban.label/auto-run "false"] [:owner "someone"]
-                        [:auto-run/status "assigned"] [:auto-run/status "error"]
-                        [:auto-run/request-id "previous"]]]
-      (is (not (auto-run/eligible? (assoc-in base [:attributes key] value)))))
-    (is (not (auto-run/eligible? (assoc base :state "closed"))))))
+(defn- claim-card! [rt card owner]
+  (kanban/claim! rt (:id card)
+                 {"--owner" owner
+                  "--branch" (str "claimed/" (:id card))})
+  ;; Keep the card otherwise admissible so this fixture isolates the durable
+  ;; ownership projection from the legacy scalar and lane snapshots.
+  (weaver/update! rt (:id card)
+                  {:attributes {:kanban/lane "pending" :owner nil}})
+  card)
+
+(deftest eligibility-uses-current-ownership-not-scalar-or-participation-history
+  (with-world
+    (fn [rt _config]
+      (let [unowned (card! rt {:owner "legacy-snapshot"
+                               :identity/by-identity "historical-actor"
+                               :kanban/reported-by "original-reporter"})
+            owned (claim-card! rt (card! rt {}) "unregistered-owner")]
+        (is (auto-run/eligible? rt (weaver/show rt (:id unowned))))
+        (is (not (auto-run/eligible? rt (weaver/show rt (:id owned)))))
+        (is (= "unregistered-owner"
+               (:owner (kanban/current-ownership rt (:id owned)))))
+        (doseq [[key value] [[:kanban/type "epic"] [:kanban/lane "refinement"]
+                            [:kanban.label/auto-run "false"]
+                            [:auto-run/status "assigned"] [:auto-run/status "error"]
+                            [:auto-run/request-id "previous"]]]
+          (let [card (card! rt {key value})]
+            (is (not (auto-run/eligible? rt (weaver/show rt (:id card)))))))
+        (weaver/update! rt (:id unowned) {:state "closed"})
+        (is (not (auto-run/eligible? rt (weaver/show rt (:id unowned)))))))))
 
 (deftest admission-respects-dependencies-overrides-capacity-and-replay
   (with-world
@@ -134,14 +153,15 @@
             blocked (card! rt {} [{:type "depends-on" :to (:id blocker)}])
             unlabelled (card! rt {:kanban.label/auto-run nil})
             refinement (card! rt {:kanban/lane "refinement"})
-            owner (card! rt {:owner "manual-worker"})
+            owner (claim-card! rt (card! rt {}) "unresolved-manual-worker")
             selected (card! rt {:kanban/priority "p1" :auto-run/effort "low"})
             later (card! rt {:kanban/priority "p3"})
-            result (auto-run/scan! rt)
+            result (auto-run/scan! rt "manual-scanner")
             run (weaver/show rt (get-in result [:dispatched 0 :run]))]
         (is (= [(:id selected)] (mapv :card (:dispatched result))))
         (is (= "low" (attr-get run :harness/effort)))
         (is (= (:id selected) (attr-get run :harness/target)))
+        (is (= "manual-scanner" (attr-get run :identity/by-identity)))
         (is (= "assigned" (show rt selected :auto-run/status)))
         (is (= "pending" (show rt selected :kanban/lane)) "Worker, not dispatcher, claims")
         (is (nil? (show rt selected :owner)))
@@ -300,7 +320,10 @@
         (is (nil? (show rt card :auto-run/status)))
         (let [fresh (some #(when (= "codethread/auto-run" (:key %)) %) (scheduler/pending rt))]
           (auto-run/wake! {:runtime rt :payload (:payload fresh)})
-          (is (= "assigned" (show rt card :auto-run/status))))
+          (is (= "assigned" (show rt card :auto-run/status)))
+          (let [run (weaver/show rt (show rt card :auto-run/run-id))]
+            (is (nil? (attr-get run :identity/by-identity))
+                "scheduler wakes do not fabricate a caller")))
         (auto-run/stop! rt)
         (is (false? (:enabled (auto-run/status rt))))))))
 

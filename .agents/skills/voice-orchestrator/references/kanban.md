@@ -32,17 +32,20 @@ strand --workspace $ws add 'Verify the outcome' --attr $'body=($verification)'
 strand --workspace $ws update $card --edge $'parent-of:($task)'
 # Dependent -> prerequisite, not the reverse:
 strand --workspace $ws update $dependent --edge $'depends-on:($prerequisite)'
-strand --workspace $ws note $card $decision --by $actor
+strand --workspace $ws note $card $decision --by-identity $actor
 strand --workspace $ws update $card --attr kanban/lane=pending
 ```
 
 For atomic multi-card creation, inspect `pattern explain kanban-batch` and
 `help weave`; use its current input contract rather than inventing a batch schema.
 
-Workers claim themselves with `kanban claim CARD --owner ACTOR --branch BRANCH
---worktree PATH --run-id RUN`. Claim uses **--owner**, not --by-identity. Never
-preclaim for a delegated worker. Use `update TASK --state closed` as each task
-finishes: feature finish marks remaining tasks unactioned, not completed.
+Workers claim features themselves with `kanban claim CARD --owner OWNER
+--by-identity ACTOR --branch BRANCH --worktree PATH --run-id RUN`.
+`--owner` names the new owner; `--by-identity` names the actor and may name the
+same friendly identity. Never preclaim for a delegated worker, and never issue a feature claim
+against a task. Use the task's assignment/ownership path, then `update TASK
+--state closed` as each task finishes. Feature finish marks remaining tasks
+unactioned, not completed.
 
 Lane patches use `update CARD --attr kanban/lane=LANE`: pending for promotion,
 in_review for review, claimed for rework, in_production only for remaining
@@ -50,7 +53,10 @@ post-merge observation. They are not guarded workflow transitions. Preserve
 structured `kanban claim`, `finish`, and `reopen`; inspect their help before use.
 Do not close a feature early to release dependents.
 
-Attribution is command-specific: `note --by`; claim `--owner`; agent commands
-`--by-identity`; workflow transitions `--by`. `kanban add`, label operations,
-`add`, and `update` have no universal attribution flag. Record an attributed note
-when provenance matters; never append unsupported flags.
+Attribution is command-specific: notes, agent commands, workflow transitions,
+and claim actors use `--by-identity`; claim ownership uses `--owner`.
+`kanban add`, label operations, `add`, and `update` have no universal attribution
+flag. Record an attributed note when provenance matters; never append unsupported
+flags. Reporter, actor, worker, and current owner are distinct. Reporter and
+ordered claim/participation history survive handoff; current owner is only the
+latest explicit claim.

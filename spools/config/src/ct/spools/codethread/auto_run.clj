@@ -9,6 +9,7 @@
             [clojure.string :as str]
             [ct.spools.harnesses :as harnesses]
             [ct.spools.harnesses.assignment :as assignment]
+            [millhouse.spools.kanban :as kanban]
             [millhouse.spools.workflow :as workflow]
             [millstrand.api.current.alpha :as current]
             [millstrand.api.format.alpha :as format]
@@ -122,15 +123,16 @@
 (defn eligible?
   "Return whether a graph-ready strand permits a first automatic assignment.
 
-  Readiness itself belongs to Weaver. This predicate checks only card state,
-  opt-in, absence of an owner, and absence of a previous dispatch receipt."
-  [card]
+  Readiness itself belongs to Weaver. This predicate checks card state, opt-in,
+  authoritative current ownership, and previous dispatch receipts. Reporter,
+  actor, and other participation history do not make an unclaimed card owned."
+  [rt card]
   (and (= "active" (:state card))
        (= "true" (attr-get card :kanban/card))
        (= "feature" (attr-get card :kanban/type))
        (= "pending" (attr-get card :kanban/lane))
        (= "true" (attr-get card :kanban.label/auto-run))
-       (nil? (attr-get card :owner))
+       (nil? (kanban/current-ownership rt (:id card)))
        (nil? (attr-get card :auto-run/status))
        (nil? (attr-get card :auto-run/request-id))))
 
@@ -186,7 +188,7 @@
                  (= "feature" (attr-get card :kanban/type))
                  (= "pending" (attr-get card :kanban/lane))
                  (= "true" (attr-get card :kanban.label/auto-run))
-                 (nil? (attr-get card :owner))
+                 (nil? (kanban/current-ownership rt (:id card)))
                  (assignment/target-ready? rt (:id card))
                  (every? (fn [[attribute value]]
                            (= value (attr-get card attribute)))
@@ -236,7 +238,7 @@
 
 (defn- dispatch! [rt config initial by-identity]
   (let [card (weaver/show rt (:id initial))]
-    (when (eligible? card)
+    (when (eligible? rt card)
       (try
         (let [{:keys [seat effort workflow]} (settings rt config card)
               request-id (str "auto-run/" (:id card))
@@ -304,7 +306,9 @@
 (defn scan!
   "Admit ready cards up to repository capacity, returning dispatch receipts.
 
-  Scheduled and manual scans serialize on runtime-owned state. Errors stay on
+  Scheduled and manual scans serialize on runtime-owned state. A manual caller
+  may supply its friendly identity for best-effort assignment attribution;
+  scheduler-driven scans supply none and never fabricate one. Errors stay on
   their card and are never retried by another scan. Accepted assignments remain
   assigned after process exit; moving a card or toggling its label cannot rearm
   it. Use explicit Harnesses continuation for subsequent work."
@@ -324,7 +328,7 @@
                  busy (count (filter #(contains? active-ids (attr-get % :auto-run/run-id)) assigned))
                  capacity (max 0 (- (:max-running config) busy))
                  candidates (->> (weaver/ready rt)
-                                 (filter eligible?)
+                                 (filter #(eligible? rt %))
                                  (remove #(contains? occupied-targets (:id %)))
                                  (sort-by (juxt #(attr-get % :kanban/priority)
                                                 :created_at :id))

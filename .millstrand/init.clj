@@ -51,6 +51,7 @@
 (runtime/module! runtime :codethread/auto-run
                  {:file "me/auto_run.clj"
                   :after [:codethread/auto-run-workflows
+                          :codethread/config-agents
                           :millstrand/spools-harnesses]
                   :required? true})
 

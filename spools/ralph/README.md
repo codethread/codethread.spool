@@ -50,7 +50,12 @@ Every iteration writes its raw stream to `<log-dir>/iter-<n>.jsonl` and stderr t
 
 ### Agent contract and exit codes
 
-The generated prompt starts `ralph-iterate`. In one iteration, the agent orients from live state, claims one feature, works its tasks, validates the slice, hands it to the consumer's landing policy, and closes the epic only when no feature cards remain.
+The generated prompt starts `ralph-iterate`. In one iteration, the agent orients
+from live state, claims one feature with explicit `--owner` and canonical
+`--by-identity` actor attribution, works its tasks without treating task
+assignment as another feature claim, validates the slice, and hands it to the
+consumer's landing policy. Reporter and ordered ownership/participation history
+survive handoff. The epic closes only when no feature cards remain.
 
 Only the final non-empty agent-output line can trigger `RALPH-STOP:`. A marker without a reason is malformed and does not silently stop the loop.
 
@@ -98,7 +103,7 @@ The panes are hand-rolled cursor lists rather than `bubbles/list`, which brings 
 
 Tests use a disposable fake `strand` script and a fake agent script, and drive the engine off its own message channel rather than sleeping. Board tests exercise the subprocess error boundary, the planned-replacement read reissue, the shared timeout, cancellation, and the no-retry mutation path. If you need a new loop behaviour covered, add a `newWorld` fixture in `internal/loop/loop_test.go` — do not reach for a timer.
 
-The restart-aware client and repository tooling pin Millstrand `8312ad49d02f0f9f20fa167a8305e86a36f3fcae`. Build the `mill` and `strand` tooling from that exact checkout when running a real disposable replacement-world exercise. The normal Ralph gate remains:
+The restart-aware client and repository tooling pin Millstrand `8e220eab7de2fabe7880c6a4c71de6cd903c34bb`. Build the `mill` and `strand` tooling from that exact checkout when running a real disposable replacement-world exercise. The normal Ralph gate remains:
 
 ```sh
 cd spools/ralph && go test ./...

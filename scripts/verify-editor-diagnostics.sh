@@ -25,10 +25,10 @@ cat > "$workspace/deps.edn" <<'EOF'
 {:paths ["src"]
  :deps {io.millstrand/millstrand
         {:git/url "https://github.com/codethread/millstrand.git"
-         :git/sha "310368dff9174bd889ad21d4ed8196952684eaf9"}
+         :git/sha "8e220eab7de2fabe7880c6a4c71de6cd903c34bb"}
         millhouse.spools/chime
         {:git/url "https://github.com/codethread/millhouse.spool.git"
-         :git/sha "f487eb42ea9523e8bd405e64a7c319013217d988"
+         :git/sha "bd96f5357a335bd17cd22042da1be5bd2200f807"
          :deps/root "spools/chime"}}}
 EOF
 cat > "$workspace/src/consumer.clj" <<'EOF'

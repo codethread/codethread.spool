@@ -67,9 +67,10 @@ consumers must not register its namespace separately.
 
 The stable catalog module ids, in order, are
 `:millhouse/spools-identity`, `:millhouse/spools-workflow`,
-`:millstrand/spools-harnesses`, `:codethread/config-agents`,
-`:codethread/config-reviewers`, `:millhouse/spools-kanban`, and
-`:millhouse/spools-land`.
+`:millhouse/spools-kanban`, `:millstrand/spools-harnesses`,
+`:codethread/config-agents`, `:codethread/config-reviewers`, and
+`:millhouse/spools-land`. Kanban activates before Harnesses because assignment
+prompts consume Kanban's current-ownership projections.
 Repository-specific workflows are not activated by the catalog bootstrap.
 
 Consumers that need landing without the Codethread agent catalog can depend on
