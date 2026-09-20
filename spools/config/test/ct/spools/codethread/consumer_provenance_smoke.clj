@@ -215,6 +215,8 @@
                        (get-in workflow-history [0 :events])))
              (is (some #(= "consumer-executor" (:executor %))
                        (get-in workflow-history [0 :events])))
+             (is (some #(= (:id continued) (:executor-run-id %))
+                       (get-in workflow-history [0 :events])))
              (is (every? #(or (:by-identity %) (:executor %))
                          (get-in workflow-history [0 :events]))))
            (reset! evidence {:card-id card-id
@@ -224,15 +226,18 @@
                              :actor-id (:id actor)
                              :owner-b-id (:id owner-b)
                              :delegated-id (:id delegated)
-                             :continued-id (:id continued)}))))
+                             :continued-id (:id continued)
+                             :workflow-run-id workflow-run-id}))))
       (t/run-with-weaver-world
        (consumer-world-options root)
        (fn [{:keys [runtime]}]
          (t/await-quiescent! runtime)
          (let [{:keys [card-id note-id second-claim reporter-id actor-id owner-b-id
-                       delegated-id continued-id]} @evidence
+                       delegated-id continued-id workflow-run-id]} @evidence
                view (kanban/card-view runtime card-id)
-               attribution (first (identity/inspect-attributions runtime [note-id]))]
+               attribution (first (identity/inspect-attributions runtime [note-id]))
+               workflow-history
+               (current/with-runtime runtime (workflow/run-history workflow-run-id))]
            (testing "restart reconstructs graph projections from source records"
              (is (= "original-reporter" (get-in view [:reporter :identity])))
              (is (= "owner-a-unresolved" (get-in view [:ownership :current :owner])))
@@ -248,6 +253,8 @@
              (is (= delegated-id
                     (context-value (weaver/show runtime continued-id)
                                    "assignment/after")))
+             (is (some #(= continued-id (:executor-run-id %))
+                       (get-in workflow-history [0 :events])))
              (is (zero? (:writes (identity/reconcile-attributions! runtime))))))))
       (finally
         (delete-tree! root)))))
