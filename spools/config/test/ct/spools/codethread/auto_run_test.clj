@@ -46,6 +46,9 @@
      (weaver/update! rt (:id card) {:attributes {:acme/review-scope \"prepared\"}})
      (prepare! rt request))
    (defn broken! [_rt _request] (throw (ex-info \"No worktree capacity\" {})))
+   (defn no-land! [_rt _request] nil)
+   (defn unreadable-land! [_rt _request]
+     (throw (ex-info \"Land evidence store is offline\" {})))
    (defn start-params! [_rt {:keys [card settings prepared]}]
      {:repository-param (str (:id card) \"/\" (:workflow settings) \"/\"
                              (:branch prepared))
@@ -327,6 +330,100 @@
                 "scheduler wakes do not fabricate a caller")))
         (auto-run/stop! rt)
         (is (false? (:enabled (auto-run/status rt))))))))
+
+(deftest explanation-is-read-only-and-land-availability-is-bounded
+  (with-world
+    (fn [rt config]
+      (let [card (card! rt {})
+            _ (auto-run/scan! rt)
+            snapshot #(hash-map
+                       :strands (count (weaver/list rt [:not [:missing :id]] {}))
+                       :runs (count (weaver/list rt [:= [:attr "harness/run"] "true"] {}))
+                       :wakes (count (scheduler/pending rt)))
+            before (snapshot)
+            unsupported (auto-run/explain rt (:id card))]
+        (is (= before (snapshot)))
+        (is (= "codethread.auto-run.explain/v1" (:schema-version unsupported)))
+        (is (= "unsupported" (get-in unsupported [:land :availability])))
+        (is (= "unknown" (get-in unsupported [:evidence :merge-boundary :value])))
+        (auto-run/configure! rt (assoc config :evidence-adapters
+                                       {:land 'auto-run.fixture/no-land!}))
+        (is (= "absent" (get-in (auto-run/explain rt (:id card))
+                                  [:land :availability])))
+        (auto-run/configure! rt (assoc config :evidence-adapters
+                                       {:land 'auto-run.fixture/unreadable-land!}))
+        (let [unknown (auto-run/explain rt (:id card))]
+          (is (= "unknown" (get-in unknown [:land :availability])))
+          (is (= "Land evidence store is offline" (get-in unknown [:land :reason]))))))))
+
+(deftest unpublished-run-is-evidence-but-not-an-active-accepted-head
+  (with-world
+    (fn [rt _config]
+      (let [card (card! rt {:auto-run/status "assigned"
+                            :auto-run/request-id "auto-run/skeleton"})
+            skeleton (weaver/add!
+                      rt {:title "Unpublished assignment skeleton"
+                          :attributes {:harness/run "true"
+                                       :harness/status "ready"
+                                       :harness/request-id "auto-run/skeleton"
+                                       :harness/target (:id card)}})
+            explanation (auto-run/explain rt (:id card))]
+        (is (= [(:id skeleton)] (get-in explanation [:agents :unpublished])))
+        (is (empty? (get-in explanation [:agents :accepted-heads])))
+        (is (not= "active" (:disposition explanation)))
+        (is (= "publication" (:phase explanation)))))))
+
+(deftest accepted-continuation-head-ignores-unpublished-sibling
+  (with-world
+    (fn [rt _config]
+      (let [card (card! rt {:auto-run/status "assigned"
+                            :auto-run/request-id "auto-run/lineage"})
+            original (weaver/add!
+                      rt {:title "Original" :state "closed"
+                          :attributes {:harness/run "true" :harness/published "true"
+                                       :harness/logical-id "logical-worker"
+                                       :harness/status "stopped" :harness/settled "true"
+                                       :harness/request-id "auto-run/lineage"
+                                       :harness/target (:id card)}})
+            continuation (weaver/add!
+                          rt {:title "Accepted continuation"
+                              :attributes {:harness/run "true" :harness/published "true"
+                                           :harness/logical-id "logical-worker"
+                                           :harness/status "running" :harness/settled "false"
+                                           :harness/after (:id original)}
+                              :edges [{:type "continues" :to (:id original)}]})
+            sibling (weaver/add!
+                     rt {:title "Unpublished sibling"
+                         :attributes {:harness/run "true" :harness/status "ready"
+                                      :harness/after (:id original)}
+                         :edges [{:type "continues" :to (:id original)}]})
+            explanation (auto-run/explain rt (:id card))]
+        (is (= [(:id continuation)] (get-in explanation [:agents :accepted-heads])))
+        (is (= [(:id sibling)] (get-in explanation [:agents :unpublished])))
+        (is (= "active" (:disposition explanation)))
+        (is (nil? (get-in explanation [:next :permission])))))))
+
+(deftest classifier-separates-current-failure-from-history-and-human-wait
+  (let [base {:card {:state "active"}
+              :admission {:blockers []}
+              :land {:availability "unsupported"}
+              :evidence {:merge-boundary {:value "unknown"}}}
+        human (auto-run/classify
+               (assoc base :agents {:lineages []}
+                      :workflow {:frontier [{:id "accept" :title "Human acceptance"
+                                            :role "checkpoint"
+                                            :phase "human-checkpoint"}]}))
+        failed (auto-run/classify
+                (assoc base
+                       :agents {:lineages [{:id "old" :error "old"
+                                           :accepted-head false :status "failed"}
+                                          {:id "head" :accepted-head true
+                                           :status "failed"}]}
+                       :workflow {:frontier [{:id "quality" :phase "validation"}]}))]
+    (is (= ["human-checkpoint" "waiting" "human"]
+           [(:phase human) (:disposition human) (get-in human [:next :role])]))
+    (is (= ["validation" "failed" "operator"]
+           [(:phase failed) (:disposition failed) (get-in failed [:next :role])]))))
 
 (deftest wktree-output-is-a-strict-boundary
   (is (= {:cwd "/tmp/feature" :branch "auto/abc" :script nil}
