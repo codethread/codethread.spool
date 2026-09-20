@@ -402,8 +402,8 @@
                    "sub-coordinator" "sub-coordinator-sol"]))
       (is (= ["docs-and-tests" "runtime-correctness" "source-form"]
              (mapv :name (:reviewers reviewer-result))))
-      (is (= #{"auto-full-land" "intake" "land" "publish-spool-kondo"
-               "ralph-iterate" "review"}
+      (is (= #{"auto-full-land" "auto-human-review" "intake" "land"
+               "publish-spool-kondo" "ralph-iterate" "review"}
              (set (map :name (:definitions workflow-result)))))
       (is (= "land" (:name land-result)))
       (is (= "reviewer" (get-in land-result [:params :defaults :reviewer])))
