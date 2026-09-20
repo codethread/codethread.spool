@@ -63,5 +63,11 @@ Sol/high configuration, starts `auto-full-land`, and proves that the handoff and
 finisher are distinct targets. It does not launch agents or mutate the live
 workspace.
 
-Source-only policy changes use normal module refresh. If dependency pins change,
-a supported Weaver restart requires explicit operator approval. Never stop Mill.
+Source-only policy changes use normal module refresh. The repository lifecycle
+reconciler reapplies dispatcher policy when the workflow registry changes, so a
+new workflow definition and its allow-list entry take effect in the running
+runtime without stopping accepted workers. An unchanged refresh preserves the
+existing configuration and wake.
+
+If dependency pins change, a supported Weaver restart requires explicit operator
+approval. Never stop Mill.
