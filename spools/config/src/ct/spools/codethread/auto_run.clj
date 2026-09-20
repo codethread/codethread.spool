@@ -9,6 +9,7 @@
             [clojure.string :as str]
             [ct.spools.harnesses :as harnesses]
             [ct.spools.harnesses.assignment :as assignment]
+            [ct.spools.codethread.auto-run-explain :as explanation]
             [millhouse.spools.kanban :as kanban]
             [millhouse.spools.workflow :as workflow]
             [millstrand.api.current.alpha :as current]
@@ -35,12 +36,14 @@
 (s/def ::start-params qualified-symbol?)
 (s/def ::workflows (s/coll-of ::text :kind set? :min-count 1))
 (s/def ::workflow-params map?)
+(s/def ::land qualified-symbol?)
+(s/def ::evidence-adapters (s/keys :opt-un [::land]))
 (s/def ::config
   (s/and (s/keys :req-un [::repo ::seat ::effort ::workflow ::workflows ::prepare
                          ::enabled? ::max-running ::interval-ms]
-                  :opt-un [::start-params])
+                  :opt-un [::start-params ::evidence-adapters])
          #(every? #{:repo :seat :effort :workflow :workflows :prepare :start-params
-                    :enabled? :max-running :interval-ms} (keys %))
+                    :evidence-adapters :enabled? :max-running :interval-ms} (keys %))
          #(contains? (:workflows %) (:workflow %))))
 (s/def ::cwd ::text)
 (s/def ::branch ::text)
@@ -96,6 +99,10 @@
     (when-not (ifn? @(runtime/resolve-var rt start-params))
       (fail! "Auto-run workflow parameter callback is not callable"
              {:start-params start-params})))
+  (when-let [land-adapter (get-in config [:evidence-adapters :land])]
+    (when-not (ifn? @(runtime/resolve-var rt land-adapter))
+      (fail! "Auto-run Land evidence adapter is not callable"
+             {:land-adapter land-adapter})))
   (current/with-runtime rt
     (doseq [name (:workflows config)]
       (when-not (contains? (:entrypoints (workflow/resolve-workflow (keyword name))) :start)
@@ -346,6 +353,19 @@
           (arm! runtime config)
           (scan! runtime))))))
 
+(defn classify
+  "Classify already-collected delivery evidence without mutation."
+  [collected]
+  (explanation/classify collected))
+
+(defn explain
+  "Return one bounded, read-only delivery explanation for `card-id`."
+  [rt card-id]
+  (let [config @(:config (state rt))]
+    (when-not config
+      (fail! "Auto-run is not configured for this runtime" {}))
+    (explanation/explain rt config card-id)))
+
 (defn status
   "Return configuration and durable card receipts without inferring completion."
   [rt]
@@ -354,6 +374,8 @@
      :config (when config
                (cond-> (dissoc config :generation)
                  (:start-params config) (update :start-params str)
+                 (get-in config [:evidence-adapters :land])
+                 (update-in [:evidence-adapters :land] str)
                  true (update :prepare str)
                  true (update :workflows sort)))
      :cards (weaver/list rt [:not [:missing [:attr "auto-run/status"]]] {})}))
@@ -364,6 +386,9 @@
    {:subcommands
     {"status" {:doc "Show configuration and durable dispatch receipts."
                :hook-class :read :deadline-class :standard}
+     "explain" {:doc "Explain one feature's recorded delivery evidence without mutation."
+                 :hook-class :read :deadline-class :standard
+                 :positionals [{:name :card-id :type :string :required? true}]}
      "scan" {:doc "Admit eligible cards once, respecting configured capacity."
              :hook-class :mutating :deadline-class :standard
              :flags {:by-identity {:type :string
@@ -376,4 +401,5 @@
   [{:op/keys [runtime args]}]
   (case (:subcommand args)
     ["status"] (status runtime)
+    ["explain"] (explain runtime (:card-id args))
     ["scan"] (scan! runtime (:by-identity args))))

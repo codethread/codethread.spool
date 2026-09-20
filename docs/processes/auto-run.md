@@ -200,8 +200,127 @@ worktree and workflow, correct the cause, then explicitly arrange the assignment
 Do not erase receipts to simulate a retry. Repository shutdown/disable stops
 admission only; use the normal exact-run stop API to stop an accepted worker.
 
+## Consumer state reference
+
+Auto-run composes existing Kanban, Workflow, and Harnesses contracts. Consumers
+must not treat one stored attribute as a delivery state machine.
+
+### Labels and Kanban lifecycle
+
+| Stored field | Allowed values | Meaning |
+| --- | --- | --- |
+| `kanban.label/auto-run` | `"true"` or absent | Opts a card into consideration. It does not prove eligibility or trigger a retry. |
+| `kanban.label/auto-run-failure` | `"true"` or absent | Repository delivery-policy marker. It is not a dispatcher status or proof of the current cause. |
+| top-level `state` | `active`, `closed` | Graph lifecycle. Closed alone does not prove delivery bookkeeping finished. |
+| `kanban/lane` | `refinement`, `pending`, `claimed`, `in_review`, `in_production` | Kanban lifecycle projection. Only `pending` is eligible for first admission. |
+| completion outcome | consumer-defined recorded outcome | Kanban's recorded close outcome; interpret it with linked delivery evidence. |
+
+First admission additionally requires an active feature/card marker, graph
+readiness, no current ownership claim, no previous request or status receipt,
+available receipt-based capacity, and allowed seat/workflow settings. The latest
+Kanban ownership claim is authoritative; legacy `owner`, reporter, and actor
+attributes are not.
+
+### Dispatcher attributes
+
+| Attribute | Values or shape | Authority and meaning |
+| --- | --- | --- |
+| `auto-run/seat` | registered alias string | Optional requested override. |
+| `auto-run/effort` | provider effort string | Optional requested override. |
+| `auto-run/workflow` | allowed workflow name | Optional requested override. |
+| `auto-run/status` | `preparing`, `assigned`, `error`, or absent | Dispatcher receipt phase. Absent is not by itself proof of eligibility. |
+| `auto-run/request-id` | string | Immutable assignment publication key. |
+| `auto-run/run-id` | Harnesses run ID | Original accepted run receipt; retain it when continuations or finishers exist. |
+| `auto-run/workflow-run-id` | Workflow run ID | Selected delivery run. |
+| `auto-run/worktree` | absolute path string | Preparation receipt, not a live filesystem check. |
+| `auto-run/branch` | branch string | Preparation receipt, not a freshly verified Git head. |
+| `auto-run/error` | error text or absent | Retained dispatcher failure. It may be historical and is not automatically a current blocker. |
+| `auto-run/effective-seat` | concrete accepted alias | Selection frozen at admission. |
+| `auto-run/effective-effort` | concrete accepted effort | Selection frozen at admission. |
+| `auto-run/effective-workflow` | concrete accepted workflow | Selection frozen at admission. |
+
+The dispatcher writes these fields. `assigned` persists after process exit: it
+does not mean running, successfully settled, or delivered. Worker/finisher
+receipts used by a repository workflow or Land preset belong to that workflow;
+they are not universal auto-run card attributes.
+
+### Linked and derived state
+
+Harnesses is authoritative for publication, logical lineage, target, identity,
+provider/seat/model/effort, attempt, invocation, lifecycle, settlement, and
+`resumes`/`continues` edges. Only published children become accepted lineage
+heads. An unpublished child remains evidence and cannot make `assigned` mean
+worker-running. A stale predecessor's generic resume eligibility is not
+permission to bypass the accepted-head guard.
+
+Workflow is authoritative for retained roots, parallel frontiers, gate executor
+provenance, outcomes, failures, and human checkpoints. Kanban remains
+authoritative for card lifecycle and ownership. Optional repository adapters
+may add recorded PR, CI, quality, or Land evidence. The generic library does not
+require those systems. Codethread's preset chooses its own quality and delivery
+workflows outside this reusable contract.
+
+`auto-run explain` derives, but never stores:
+
+- disposition: `waiting`, `active`, `failed`, `completed`, or `unknown`;
+- phase: `admission`, `publication`, `implementation`, `validation`, `review`,
+  `human-checkpoint`, `handoff`, `merge`, `cleanup`, or `bookkeeping`;
+- evidence availability: `unsupported`, `absent`, `unknown`, or `present`;
+- merge boundary: `pre-merge`, `post-merge`, or `unknown`.
+
+These values are diagnostics, not recovery authority. Future recovery episode
+fields are not part of the shipping contract until implemented.
+
+## Read-only delivery explanation
+
+```text
+strand auto-run explain CARD_ID
+```
+
+The JSON schema is `codethread.auto-run.explain/v1`. It reports the workspace,
+card, observation time, admission predicates and receipt-based capacity,
+accepted agent lineages, exact Workflow frontier/history, optional Land
+evidence, recorded external references, runtime status, and the next responsible
+role. Historical errors are separate from current accepted-head failures.
+Recorded PR/head/review/check references are labelled `recorded`; this command
+does not poll GitHub, inspect processes, run recovery, or scan the dispatcher.
+
+Land evidence is `unsupported` when no adapter was selected, `absent` when a
+successful adapter read proves no link, `unknown` when the adapter cannot read,
+and `present` only with actual references. Missing adapters never imply
+pre-merge safety. A consumer selects an adapter with
+`:evidence-adapters {:land 'qualified.namespace/read-land}` in `configure!`.
+The function receives `[runtime {:card ... :workflow ... :agents ...}]`; it
+returns a JSON-safe reference map when linked evidence is present or nil after a
+successful read proving no link. Throwing preserves the specific unavailable
+reason as `unknown`. The reusable collector never requires or activates Land.
+
+Use the emitted `mill weaver status --workspace ... --json` command when
+in-process runtime status does not expose the needed generation evidence.
+
+A normal human-review flow therefore reads as: opt-in label → `preparing` →
+`assigned` → published Harnesses worker → Workflow implementation/validation →
+human checkpoint. A dispatcher error stops at `error`; an assigned worker
+failure is instead visible on its accepted Harnesses head. Completion needs
+positive delivery evidence in addition to a closed card; post-merge cleanup or
+bookkeeping remains visible rather than becoming wholly done.
+
+Useful read queries are:
+
+```text
+strand auto-run status
+strand auto-run explain CARD_ID
+strand agent runs --task CARD_ID
+strand workflow ready WORKFLOW_RUN_ID
+strand workflow history WORKFLOW_RUN_ID
+```
+
+Consult `strand help auto-run`, the schema/version in the explanation, and
+`ct.spools.codethread.auto-run` for the executable contract.
+
 Tests use disposable in-memory Weaver worlds and non-executing fake providers.
 They cover admission, dependency readiness, seat/effort propagation, optional
 repository workflow parameters, reserved-field conflicts, capacity, one-shot
-behavior, failure visibility, interrupted receipt adoption, and stale
-wake/disable behavior without launching paid agents.
+behavior, failure visibility, interrupted receipt adoption, stale wake/disable
+behavior, accepted continuation heads, unpublished skeletons, and optional Land
+evidence without launching paid agents.
