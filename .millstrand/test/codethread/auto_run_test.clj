@@ -201,6 +201,8 @@
             refresh-result))
       (is (= ["auto-full-land" "auto-human-review"]
              (get-in (auto-run/status rt) [:config :workflows])))
+      (is (= ((runtime/resolve-var rt 'me.auto-run/desired-config) {:runtime rt})
+             ((runtime/resolve-var rt 'me.auto-run/actual-config) {:runtime rt})))
       (current/with-runtime rt
         (is (= #{"start"}
                (set (map name (:entrypoints
