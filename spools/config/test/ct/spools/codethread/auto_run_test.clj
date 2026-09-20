@@ -320,7 +320,8 @@
         (is (nil? (show rt card :auto-run/status)))
         (let [fresh (some #(when (= "codethread/auto-run" (:key %)) %) (scheduler/pending rt))]
           (auto-run/wake! {:runtime rt :payload (:payload fresh)})
-          (is (= "assigned" (show rt card :auto-run/status)))
+          (is (= "assigned" (show rt card :auto-run/status))
+              (show rt card :auto-run/error))
           (let [run (weaver/show rt (show rt card :auto-run/run-id))]
             (is (nil? (attr-get run :identity/by-identity))
                 "scheduler wakes do not fabricate a caller")))

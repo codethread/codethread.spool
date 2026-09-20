@@ -9,23 +9,48 @@
             [millhouse.spools.workflow :as workflow]
             [millstrand.api.current.alpha :as current]
             [millstrand.api.graph.alpha :as graph]
+            [millstrand.api.runtime.alpha :as runtime]
+            [millstrand.api.scheduler.alpha :as scheduler]
             [millstrand.api.spool.alpha :refer [attr-get]]
+            [millstrand.api.weaver.alpha :as weaver]
             [millstrand.test.alpha :as t]))
 
-(defn- world-options []
-  (let [deps (:deps (edn/read-string (slurp "deps.edn")))]
-    {:storage :sqlite-memory
-     :deps-edn
-     (pr-str
-      {:deps
-       (update-vals deps
-                    #(if-let [root (:local/root %)]
-                       (assoc % :local/root (.getCanonicalPath (io/file root)))
-                       %))})
-     :init-clj (slurp "init.clj")
-     :files (into {}
-                  (for [path ["me/auto_run_workflows.clj" "me/auto_run.clj"]]
-                    [path (slurp path)]))}))
+(defn- world-options
+  ([] (world-options (fn [_path source] source)))
+  ([source-transform]
+   (let [deps (:deps (edn/read-string (slurp "deps.edn")))]
+     {:storage :sqlite-memory
+      :deps-edn
+      (pr-str
+       {:deps
+        (update-vals deps
+                     #(if-let [root (:local/root %)]
+                        (assoc % :local/root (.getCanonicalPath (io/file root)))
+                        %))})
+      :init-clj (slurp "init.clj")
+      :files (into {}
+                   (for [path ["me/auto_run_workflows.clj" "me/auto_run.clj"]]
+                     [path (source-transform path (slurp path))]))})))
+
+(defn- without-human-review [path source]
+  (case path
+    "me/auto_run.clj"
+    (-> source
+        (str/replace "#{\"auto-full-land\" \"auto-human-review\"}"
+                     "#{\"auto-full-land\"}")
+        (str/replace
+         #"(?s)\n\(lifecycle/defreconcile! auto-run-dispatcher.*$"
+         "\n\n(defn open! [{:keys [runtime] :as context}]\n  (auto-run/configure! runtime (desired-config context)))\n\n(defn close! [{:keys [runtime]}]\n  (auto-run/stop! runtime))\n\n(lifecycle/defresource! auto-run-dispatcher\n  \"Own repository automatic delivery for the module lifetime.\"\n  {:open 'me.auto-run/open!\n   :close 'me.auto-run/close!})\n"))
+
+    "me/auto_run_workflows.clj"
+    (str/replace source
+                 #"(?s)\n\(workflow/defworkflow! auto-human-review.*?\n\n(?=\(workflow/defworkflow! auto-full-land)"
+                 "\n")
+
+    source))
+
+(defn- pending-auto-run-wakes [rt]
+  (filter #(= "codethread/auto-run" (:key %)) (scheduler/pending rt)))
 
 (defn- role-step [strands role]
   (first (filter #(= role (attr-get % :auto-run/role)) strands)))
@@ -153,6 +178,40 @@
               (is (str/includes? (:instruction view) "`auto-run-failure`"))
               (is (str/includes? (:instruction view)
                                  "Stop and leave the card open")))))))))
+
+(deftest source-refresh-reconciles-the-running-dispatcher
+  (t/with-weaver-world
+    [ctx (world-options without-human-review)]
+    (let [rt (:runtime ctx)
+          accepted (weaver/add!
+                    rt {:title "Accepted worker"
+                        :attributes {:harness/run "true"
+                                     :harness/status "running"
+                                     :harness/settled "false"}})]
+      (is (= ["auto-full-land"]
+             (get-in (auto-run/status rt) [:config :workflows])))
+      (is (= 1 (count (pending-auto-run-wakes rt))))
+      (doseq [path ["me/auto_run_workflows.clj" "me/auto_run.clj"]]
+        (spit (io/file (:config-dir ctx) path) (slurp path)))
+      (let [refresh-result (runtime/refresh! rt)]
+        (is (= :applied
+               (get-in refresh-result
+                       [:modules :codethread/auto-run :lifecycle/outcomes
+                        :auto-run-dispatcher :status]))
+            refresh-result))
+      (is (= ["auto-full-land" "auto-human-review"]
+             (get-in (auto-run/status rt) [:config :workflows])))
+      (is (= ((runtime/resolve-var rt 'me.auto-run/desired-config) {:runtime rt})
+             ((runtime/resolve-var rt 'me.auto-run/actual-config) {:runtime rt})))
+      (current/with-runtime rt
+        (is (= #{"start"}
+               (set (map name (:entrypoints
+                               (workflow/resolve-workflow :auto-human-review)))))))
+      (is (= 1 (count (pending-auto-run-wakes rt))))
+      (is (= "running" (attr-get (weaver/show rt (:id accepted)) :harness/status)))
+      (runtime/refresh! rt)
+      (is (= 1 (count (pending-auto-run-wakes rt))))
+      (is (= 1 (count (weaver/list rt [:= [:attr "harness/run"] "true"] {})))))))
 
 (deftest human-review-delivery-stops-without-land
   (t/with-weaver-world
