@@ -91,7 +91,8 @@
         (is (= "sol" (get-in status [:config :seat])))
         (is (= "high" (get-in status [:config :effort])))
         (is (= "auto-full-land" (get-in status [:config :workflow])))
-        (is (= ["auto-full-land"] (get-in status [:config :workflows])))
+        (is (= ["auto-full-land" "auto-human-review"]
+               (get-in status [:config :workflows])))
         (is (empty? (:cards status)))
         (is (empty? (:dispatched (auto-run/scan! rt)))))
       (current/with-runtime rt
@@ -152,6 +153,41 @@
               (is (str/includes? (:instruction view) "`auto-run-failure`"))
               (is (str/includes? (:instruction view)
                                  "Stop and leave the card open")))))))))
+
+(deftest human-review-delivery-stops-without-land
+  (t/with-weaver-world
+    [ctx (world-options)]
+    (let [rt (:runtime ctx)]
+      (current/with-runtime rt
+        (let [result (workflow/start!
+                      "test-auto-human-review" :auto-human-review
+                      {:card "fixture-card"
+                       :feature "Disposable feature"
+                       :branch "auto/fixture-card"
+                       :worktree (:config-dir ctx)})
+              root (workflow/current-root "test-auto-human-review")
+              strands (:strands (graph/subgraph rt [(:id root)]))
+              views (map workflow/step-view strands)
+              checkpoint (first (filter #(= "Human review: return the passing PR and stop"
+                                            (:title %))
+                                        views))]
+          (testing "the allowed human workflow reuses delivery stages"
+            (is (= ["Implement and verify the assigned feature"]
+                   (mapv :title (:ready result))))
+            (is (some #(= "Pass repository quality checks for published HEAD"
+                          (:title %))
+                      views))
+            (is (some #(= "Wait for the PR checks" (:title %)) views))
+            (is (some #(= "Move the verified feature into review" (:title %))
+                      views)))
+          (testing "human acceptance is a real stop boundary"
+            (is (= "checkpoint" (:role checkpoint)))
+            (is (str/includes? (:instruction checkpoint)
+                               "Do not choose this checkpoint"))
+            (is (str/includes? (:instruction checkpoint)
+                               "launch a finisher"))
+            (is (nil? (role-step strands "handoff-worker")))
+            (is (nil? (role-step strands "finisher")))))))))
 
 (deftest published-candidate-gate-rejects-invalid-repository-state
   (let [remote (temp-dir)
