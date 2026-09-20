@@ -8,9 +8,13 @@ worker retry. Repository policy decides where delivery stops.
 ## Card contract
 
 A card is eligible when it is an active pending feature, has the `auto-run`
-label, has no owner or previous dispatch receipt, and is graph-ready. Existing
-`depends-on` edges remain authoritative. Epics and refinement cards never run.
-Pending features are ordered by priority, creation time, then ID.
+label, has no current explicit ownership claim or previous dispatch receipt, and
+is graph-ready. Current ownership comes from Kanban's durable latest-claim
+projection, not the legacy scalar `owner` attribute. An unresolved latest owner
+still excludes the card; reporter, note author, workflow actor, worker, and other
+historical participation alone do not. Existing `depends-on` edges remain
+authoritative. Epics and refinement cards never run. Pending features are ordered
+by priority, creation time, then ID.
 
 Optional card overrides are:
 
@@ -88,9 +92,23 @@ making them shared dispatcher policy:
 
 Register this file with `runtime/module!`, after the repo workflow module and
 Harnesses. Definitions must be available before configuration validation. No
-bootstrap activates dispatch automatically. Source-only module edits use normal
-refresh; changing a dependency pin requires the supported Weaver restart with
-operator approval. No classloader or runtime mutation bypass is supported.
+bootstrap activates dispatch automatically.
+
+The compatible producer set is Millstrand
+`8e220eab7de2fabe7880c6a4c71de6cd903c34bb`, Millhouse
+`bd96f5357a335bd17cd22042da1be5bd2200f807`, and Harnesses
+`6b5ad39d8711a033dc7f33fd52c78901393ea44e`. The accepted Millhouse identity
+feature landed at `f17ad387b2825887b736cab597b33af84cff13cb`; the pinned
+`bd96f5357a335bd17cd22042da1be5bd2200f807` is its reviewed descendant and
+matches Harnesses' direct Workflow/Kanban coordinates. Keep independently
+published tools.deps roots on the compatible commits. Activate Identity and
+Workflow, then Kanban, then the ownership-aware Harnesses surface; register the
+agent executor only after consumer aliases, workflows, and policy modules.
+
+Source acceptance or a checked-in pin does not change a running Weaver.
+Source-only module edits use normal refresh; changing a dependency pin requires
+the supported Weaver restart with operator approval. No classloader or runtime
+mutation bypass is supported.
 
 The example uses a canonical absolute repository path for clarity. A portable
 repo module should derive it from the selected runtime workspace metadata, not
@@ -150,6 +168,10 @@ strand auto-run scan --by-identity YOUR_IDENTITY
 strand agent show RUN_ID --by-identity YOUR_IDENTITY
 strand workflow ready WORKFLOW_RUN_ID
 ```
+
+A manual scan forwards the supplied friendly identity as best-effort assignment
+caller attribution. It does not resolve, invent, or convert that string into
+ownership. Scheduler-driven scans have no caller and must not fabricate one.
 
 Normal operation uses durable scheduler wakes, not an agent polling loop. A
 runtime-owned lock serializes scans and configuration; stale wake generations

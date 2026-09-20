@@ -15,9 +15,16 @@
    [:millhouse/spools-workflow
     {:ns 'millhouse.spools.workflow
      :required? true}]
+   [:millhouse/spools-kanban
+    {:ns 'millhouse.spools.kanban
+     :after [:millhouse/spools-identity
+             :millhouse/spools-workflow]
+     :required? true}]
    [:millstrand/spools-harnesses
     {:ns 'ct.spools.harnesses.spool
-     :after [:millhouse/spools-identity]
+     :after [:millhouse/spools-identity
+             :millhouse/spools-kanban
+             :millhouse/spools-workflow]
      :required? true}]
    [:codethread/config-agents
     {:ns 'ct.spools.codethread.agents
@@ -26,10 +33,6 @@
    [:codethread/config-reviewers
     {:ns 'ct.spools.codethread.reviewers
      :after [:codethread/config-agents]
-     :required? true}]
-   [:millhouse/spools-kanban
-    {:ns 'millhouse.spools.kanban
-     :after [:millhouse/spools-workflow]
      :required? true}]
    [:millhouse/spools-land
     {:ns 'millhouse.spools.land.spool

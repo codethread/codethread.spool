@@ -48,7 +48,11 @@
 
       Establish one coordinator and at most one source writer for each worktree.
       Respect existing ownership and never modify another writer's files or
-      state. Set a real goal for every assigned card before driving it. Keep the
+      state. Current owner means the latest explicit claim or handoff, even when
+      that friendly identity is unresolved. Reporter, actor, worker, running
+      session, and historical participants remain distinct; none silently
+      replaces the latest claim, and reporter/history survive handoff. Set a
+      real goal for every assigned card before driving it. Keep the
       goal current until its declared outcome is accepted or a blocker is
       handed off with evidence. A successor must acknowledge exclusive scope,
       actual identity, tracked request/run, native session, real goal state,
@@ -73,8 +77,11 @@
 
       At meaningful transitions update the driven task's latest note with the
       decision/evidence, owner, current run, blocker, and concrete next action
-      or wake condition. Keep parent-card notes to lean handovers. Preserve
-      predecessor runs and workspace/worktree coordinates for cold-start recovery.
+      or wake condition. Attribute mutations with the command's canonical
+      `--by-identity <friendly-identity>` flag; use `--owner` only for an
+      explicit claim/handoff owner. Keep parent-card notes to lean handovers.
+      Preserve predecessor runs and workspace/worktree coordinates for
+      cold-start recovery.
 
       Never stop or restart the global Mill.
       Never restart or replace a running Weaver without explicit user sign-off.
@@ -93,8 +100,10 @@
       implement directly without recursively delegating. Create a new
       coordination layer only with explicit parent authorization. A task
       beneath an already claimed feature is not another claimable feature. Use
-      a targeted run for the task, and use feature assignment only for an
-      assignable open feature.
+      a targeted run for the task and its supported direct/inherited ownership
+      path; never run a feature-claim template against a task. Use feature
+      assignment only for an assignable open feature. Assignment itself never
+      claims or hands off either target.
 
       Repeat the global Mill prohibition in every child launch and resume
       prompt. Give each run one active, dependency-ready target, one bounded

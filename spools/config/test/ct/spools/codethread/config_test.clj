@@ -48,7 +48,7 @@
     (is (.isFile (io/file config-root "deps.edn")))
     (is (.isFile (io/file ralph-root "deps.edn")))
     (is (.isFile (io/file ralph-root "bin/ralph")))
-    (is (= "310368dff9174bd889ad21d4ed8196952684eaf9"
+    (is (= "8e220eab7de2fabe7880c6a4c71de6cd903c34bb"
            (get-in config-deps ['io.millstrand/batteries :git/sha])))
     (is (not (contains? config-deps 'millstrand.spools/batteries)))
     (doseq [[library sha] [['millhouse.spools/workflow
@@ -109,7 +109,11 @@
           (doseq [contract-fragment
                   ["# Bounded sub-coordinator runbook"
                    "canonical coordination workspace"
-                   "Set a real goal for every assigned card"
+                   "real goal for every assigned card"
+                   "Current owner means the latest explicit claim"
+                   "reporter/history survive handoff"
+                   "--by-identity <friendly-identity>"
+                   "`--owner` only"
                    "Never stop or restart the global Mill"
                    "Never restart or replace a running Weaver"
                    "explicit user sign-off"
@@ -125,7 +129,7 @@
                    "implement directly without recursively delegating"
                    "only with explicit parent authorization"
                    "not another claimable feature"
-                   "feature assignment only"
+                   "Use feature"
                    "every child launch and resume"
                    "verify delivery, target lifecycle"
                    "dependency readiness"

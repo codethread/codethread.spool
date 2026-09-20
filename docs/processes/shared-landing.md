@@ -38,11 +38,11 @@ The recommended consumer uses the shared Codethread bootstrap:
 (codethread/register-executor! runtime [:consumer/modules])
 ```
 
-`register!` activates identity, Workflow, Harnesses, shared aliases and
-reviewers, Kanban, and `:millhouse/spools-land`. The bootstrap leaves the sole
-shared `:agent` executor until the explicit final call so restored review gates cannot
-run before consumer policy has reconciled. Consumers must not register the land
-module or agent executor a second time.
+`register!` activates Identity and Workflow, then Kanban, the ownership-aware
+Harnesses surface, shared aliases and reviewers, and `:millhouse/spools-land`.
+The bootstrap leaves the sole shared `:agent` executor until the explicit final
+call so restored review gates cannot run before consumer policy has reconciled.
+Consumers must not register the land module or agent executor a second time.
 
 A consumer that does not want Codethread's agent catalog can depend directly on
 the independent `millhouse.spools/land` root and register

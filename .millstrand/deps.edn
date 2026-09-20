@@ -10,5 +10,5 @@
    :extra-deps
    {io.millstrand/millstrand
     {:git/url "https://github.com/codethread/millstrand.git"
-     :git/sha "310368dff9174bd889ad21d4ed8196952684eaf9"}}
+     :git/sha "8e220eab7de2fabe7880c6a4c71de6cd903c34bb"}}
    :main-opts ["-m" "codethread.auto-run-test"]}}}

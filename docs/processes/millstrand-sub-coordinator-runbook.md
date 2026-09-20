@@ -36,9 +36,13 @@ process CWD throughout Land. Record separately:
 - each source feature, branch/worktree, sole writer/current run and cleanup owner;
 - any retained worker driver CWD, session and Git common-directory dependency.
 
-One coordinator and at most one source writer own each slice/worktree. Adopt
-healthy serving runs rather than duplicating them. Never change another writer's
-files, index, flags, source custody or workflow/queue state.
+One coordinator and at most one source writer own each slice/worktree. Current
+owner is the latest explicit claim/handoff, including an unresolved friendly
+identity. Reporter, mutation actor, worker, running session and historical
+participants are separate roles; none silently steals ownership, and reporter
+plus ordered participation history survive handoff. Adopt healthy serving runs
+rather than duplicating them. Never change another writer's files, index, flags,
+source custody or workflow/queue state.
 
 The successor acknowledges exclusive scope on its coordinator task with actual
 identity, tracked request/run, native session/thread, real goal ID/state (or
@@ -82,8 +86,11 @@ serving runs. Start narrow with a compact projection; `--limit` is a safety cap,
 not pagination. Narrow a cap error or make one intentional bounded larger read.
 
 Delegate only through tracked Strand, never native/built-in helpers. A task under
-an already claimed feature uses `agent run --target TASK`, not a feature claim.
-Use `agent assign` only for an assignable open feature. Give each child an active,
+an already claimed feature uses `agent run --target TASK` and its supported
+direct/inherited ownership path, never a feature-claim template. Use `agent
+assign` only for an assignable open feature. Assignment never claims or hands off
+a target. For mutations, use canonical `--by-identity` actor attribution; reserve
+`--owner` for the explicit owner in a claim/handoff. Give each child an active,
 dependency-ready target, bounded scope, explicit source worktree, sole writer and
 stable request ID. Writers implement directly without recursively delegating;
 another coordination layer requires explicit parent authorization. Repeat the

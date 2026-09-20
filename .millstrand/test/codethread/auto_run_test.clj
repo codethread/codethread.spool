@@ -128,9 +128,9 @@
                    (mapv :title (:ready (workflow/complete! "test-auto-full-land")))))
             (is (= ["sh" "scripts/verify-published-candidate.sh" "auto/fixture-card"]
                    (attr-get quality-gate :shell/argv)))
-            (is (= ["sh" "-c"] (subvec ci-argv 0 2)))
-            (is (= ["pr-checks" "allow-empty" "auto/fixture-card" "120" "5"]
-                   (subvec ci-argv (- (count ci-argv) 5))))
+            (is (= ["sh" "scripts/verify-pr-checks.sh" "allow-empty"
+                    "auto/fixture-card" "120" "5"]
+                   ci-argv))
             (is (contains? gates "shell"))
             (is (contains? gates "code"))
             (is (not (contains? gates "agent"))))

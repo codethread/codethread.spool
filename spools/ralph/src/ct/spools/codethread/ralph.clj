@@ -5,8 +5,8 @@
   state, claims exactly one feature, drives that feature through its validated
   slice and stops at a judgment point that closes the epic only when no feature
   cards remain. The Go binary supplies the polling loop; this workflow owns the
-  work discipline inside one iteration. The doing-task note is the claim
-  record used by the consumer-owned handoff."
+  work discipline inside one iteration. Durable Kanban claims remain the
+  ownership authority; task notes carry consumer-owned handoff evidence."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [millstrand.api.format.alpha :as format-alpha]
@@ -143,13 +143,15 @@
                                (fn [_]
                                  (format-alpha/reflow
                                   "|Choose exactly ONE ready feature card from the epic
-                                   |frontier. Claim it with your owner, branch, and worktree:
-                                   |`strand kanban claim <feature-id> --owner <name> --branch
-                                   |<branch> --worktree <absolute-path>`. Record the chosen
-                                   |feature id, branch, and absolute worktree in the
-                                   |doing-task note, including the claim command result as
-                                   |evidence before completing this step.
-                                   |Do not claim a second feature in this iteration."))})
+                                   |frontier. Claim the feature, not one of its tasks, with
+                                   |the explicit owner and acting friendly identity:
+                                   |`strand kanban claim <feature-id> --owner <owner>
+                                   |--by-identity <actor> --branch <branch> --worktree
+                                   |<absolute-path>`. Record the chosen feature id, owner,
+                                   |actor, branch, absolute worktree, and claim result in the
+                                   |doing-task note before completing this step. Reporter and
+                                   |prior claim/participation history survive any explicit
+                                   |handoff. Do not claim a second feature in this iteration."))})
    (workflow/step :work-tasks
                   (fn [_] "Work the claimed feature's ready tasks")
                   :self
@@ -159,9 +161,11 @@
                                (format-alpha/reflow
                                 "|Drive the claimed feature one ready task at a time. Read the
                                  |doing-task body and latest note before acting; append decisions,
-                                 |findings, and resume points with `strand kanban note` as you go.
-                                 |Use the repo's registered workflow or agent surface for real
-                                 |delegation, keep sibling file scopes disjoint, verify each
+                                 |findings, and resume points with `strand kanban note <task-id>
+                                 |<note> --by-identity <actor>` as you go. Task assignment is not
+                                 |another feature claim. Use the repo's registered workflow or
+                                 |agent surface for real delegation, keep sibling file scopes
+                                 |disjoint, verify each
                                  |implemented task yourself, and close it only after its
                                  |validation is green.")})
    (workflow/step :slice-gates
@@ -183,9 +187,10 @@
                   :attributes {"workflow/action-ref" "ralph.hand-off"
                                "workflow/instruction"
                                (format-alpha/reflow
-                                "|Use the feature id, branch, and worktree recorded in the
-                                 |doing-task body and latest note as the claim evidence. Hand
-                                 |the committed, validated slice and its evidence to the
+                                "|Use the durable current-ownership projection and the feature
+                                 |id, branch, worktree, and latest attributed doing-task note as
+                                 |the claim and handoff evidence. Hand the committed, validated
+                                 |slice and its evidence to the
                                  |consumer-owned landing policy. Do not mark the feature card
                                  |or epic done here, and do not claim it landed without the
                                  |consumer's landing evidence.")})
