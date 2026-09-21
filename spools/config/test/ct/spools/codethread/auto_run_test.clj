@@ -35,6 +35,11 @@
        (workflow/checkpoint :accept \"Human acceptance\"
          :depends-on [:implement] :kind :human
          :choices [{:key :approved :label \"Approved\"}])))
+   (workflow/defworkflow! validate
+     \"A disposable validation gate without an executor.\"
+     {:entrypoints #{:start} :param-spec ::delivery-params}
+     (workflow/workflow \"Validation\"
+       (workflow/gate :quality \"Quality validation\" :shell)))
    (defn prepare! [_rt {:keys [repo card]}]
      (let [cwd (io/file repo (:id card))]
        (.mkdirs cwd)
@@ -424,6 +429,106 @@
            [(:phase human) (:disposition human) (get-in human [:next :role])]))
     (is (= ["validation" "failed" "operator"]
            [(:phase failed) (:disposition failed) (get-in failed [:next :role])]))))
+
+(deftest cause-and-decision-are-independent-read-only-signals
+  (with-world
+    (fn [rt _config]
+      (let [card (card! rt {:auto-run/workflow-run-id "signals"
+                            :auto-run/error "Historical preparation failure"})
+            decision {:kanban.label/needs-decision "true"
+                      :auto-run/decision-question "May this scope change?"
+                      :auto-run/decision-role "operator"}
+            note (weaver/add! rt {:title "Decision raised"
+                                 :attributes {:note/text "May this scope change?"
+                                              :identity/by-identity "question-author"}
+                                 :edges [{:type "annotates" :to (:id card)}]})
+            run (weaver/add! rt {:title "Settled worker" :state "closed"
+                                :attributes {:harness/run "true"
+                                             :harness/published "true"
+                                             :harness/target (:id card)
+                                             :harness/status "stopped"
+                                             :harness/settled "true"}})]
+        (current/with-runtime rt
+          (workflow/start! "signals" :validate {:card (:id card)}))
+        (let [gate (current/with-runtime rt (first (workflow/ready "signals")))
+              snapshot #(vector (weaver/list rt [:not [:missing :id]] {})
+                                (scheduler/pending rt))
+              explain #(let [before (snapshot)
+                             result (auto-run/explain rt (:id card))]
+                         (is (= before (snapshot)) "Explanation never writes or launches")
+                         result)]
+          (testing "healthy wait"
+            (let [result (explain)]
+              (is (= "waiting" (:disposition result)))
+              (is (false? (get-in result [:attention :needs-decision])))
+              (is (empty? (get-in result [:cause :evidence])))))
+          (weaver/update! rt (:id card) {:attributes decision})
+          (testing "decision alone does not falsify settlement or failure"
+            (let [result (explain)]
+              (is (= "waiting" (:disposition result)))
+              (is (= "operator" (get-in result [:next :role])))
+              (is (= "May this scope change?" (get-in result [:attention :question])))
+              (is (false? (get-in result [:cause :auto-run-failure])))
+              (is (= "stopped" (get-in result [:agents :lineages 0 :status])))
+              (is (true? (get-in result [:agents :lineages 0 :settled])))))
+          (weaver/update! rt (:id gate)
+                          {:attributes {:gate/error "Validation exited 1"
+                                        :shell/exit-code 1 :shell/argv ["false"]}})
+          (weaver/update! rt (:id card)
+                          {:attributes {:kanban.label/auto-run-failure "true"}})
+          (testing "failure and decision coexist"
+            (let [result (explain)]
+              (is (= "failed" (:disposition result)))
+              (is (true? (get-in result [:attention :needs-decision])))
+              (is (= "present" (get-in result [:cause :evidence-status])))
+              (is (= (:id gate) (get-in result [:cause :evidence 0 :step])))))
+          (weaver/update! rt (:id card)
+                          {:attributes {:kanban.label/needs-decision nil
+                                        :auto-run/decision-question nil
+                                        :auto-run/decision-role nil}})
+          (testing "resolving attention leaves genuine failure and history"
+            (let [result (explain)]
+              (is (= "failed" (:disposition result)))
+              (is (false? (get-in result [:attention :needs-decision])))
+              (is (= "Historical preparation failure"
+                     (get-in result [:admission :receipt :error])))
+              (is (= note (weaver/show rt (:id note))))
+              (is (= run (weaver/show rt (:id run))))))
+          (weaver/update! rt (:id gate) {:attributes {:gate/error nil}})
+          (weaver/update! rt (:id card)
+                          {:attributes {:auto-run/workflow-run-id nil}})
+          (testing "a label alone cannot establish failure"
+            (let [result (explain)]
+              (is (= "unknown" (:disposition result)))
+              (is (true? (get-in result [:cause :auto-run-failure])))
+              (is (= "unknown" (get-in result [:cause :evidence-status])))))
+          (weaver/update! rt (:id card)
+                          {:attributes (assoc decision
+                                              :auto-run/decision-role "human"
+                                              :kanban.label/auto-run-failure nil)})
+          (testing "resolving failure leaves independent human attention"
+            (let [result (explain)]
+              (is (= "waiting" (:disposition result)))
+              (is (true? (get-in result [:attention :needs-decision])))
+              (is (= "human" (get-in result [:next :role])))
+              (is (false? (get-in result [:cause :auto-run-failure]))))))))))
+
+(deftest malformed-supported-signals-fail-visibly
+  (with-world
+    (fn [rt _config]
+      (doseq [attrs [{:kanban.label/auto-run-failure "false"}
+                    {:kanban.label/needs-decision "yes"}
+                    {:kanban.label/needs-decision "true"}
+                    {:kanban.label/needs-decision "true"
+                     :auto-run/decision-question " " :auto-run/decision-role "human"}
+                    {:kanban.label/needs-decision "true"
+                     :auto-run/decision-question "Question?" :auto-run/decision-role "worker"}
+                    {:auto-run/decision-question "Orphan?"}
+                    {:auto-run/decision-role "human"}]]
+        (let [card (card! rt attrs)]
+          (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                               #"Malformed auto-run cause/decision representation"
+                               (auto-run/explain rt (:id card)))))))))
 
 (deftest wktree-output-is-a-strict-boundary
   (is (= {:cwd "/tmp/feature" :branch "auto/abc" :script nil}

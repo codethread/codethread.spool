@@ -55,7 +55,25 @@
   stop. At a human checkpoint, leave the card and PR open and return the review
   package; never approve that checkpoint yourself. When the workflow explicitly
   authorises landing, drive shared land through completion and card closure.
-  Report failures or unresolved scope questions; do not invent retries or work.")
+
+  Add auto-run-failure only with positive execution or validation failure
+  evidence identifying the operation, attempt and current delivery. Record
+  evidence and retained resources in an attributed note; a label is not proof.
+
+  For a design, scope or authority decision, use needs-decision with the exact
+  nonblank auto-run/decision-question and auto-run/decision-role human or
+  operator. The role is responsibility, not actor identity. Preserve who raised
+  and who answered the question in attributed notes. A question alone is not
+  a failure; never falsify Harnesses settlement or delivery evidence.
+
+  Both signals may coexist. Resolve each independently: an answered decision
+  removes only needs-decision and its two current fields, preserving the answer
+  and actor in notes. Evidence-backed failure resolution removes only that
+  failure signal, preserving history and unrelated attention.
+
+  Healthy waits and ordinary human checkpoints remain waits. Unknown evidence
+  stays unknown. Neither label authorises recovery. Report failures or unresolved
+  questions; do not invent retries, work, gate resets or recovery authority.")
 
 (declare scan! wake!)
 
