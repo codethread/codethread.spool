@@ -84,9 +84,9 @@ The preferred role aliases are `grunt`, `luna`, `oracle`, `reviewer`, and
 back to `luna`; the `seat/allow-china` flag defaults true and makes every
 DeepSeek-powered seat unavailable when set false. The delegated-coordination
 aliases `coordinator`, `sub-coordinator`, and `sub-coordinator-sol` are not
-elected by the catalog
-while they remain under test; register them on demand through the additive
-seams in `ct.spools.codethread.sub-coordinator`. The bounded `sub-coordinator`
+elected by the catalog while they remain under test. Register the two
+sub-coordinator aliases on demand through the additive seams in
+`ct.spools.codethread.sub-coordinator`. The bounded `sub-coordinator`
 carries its complete runbook as supported alias system guidance. See the
 [rollout procedure](docs/processes/sub-coordinator-rollout.md) for its Codex
 handoff, Terra/high fallback, and additive live-registration proof without
