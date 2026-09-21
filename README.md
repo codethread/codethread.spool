@@ -82,9 +82,13 @@ workflow data, and the consumer supplies the `:agent` executor.
 The preferred role aliases are `grunt`, `luna`, `oracle`, `reviewer`, and
 `tui`. `grunt` prefers the `deepseek` (`deepseek-v4-flash`) seat and falls
 back to `luna`; the `seat/allow-china` flag defaults true and makes every
-DeepSeek-powered seat unavailable when set false. The delegated-coordination
-aliases `coordinator`, `sub-coordinator`, and `sub-coordinator-sol` are not
-elected by the catalog while they remain under test. Register the two
+DeepSeek-powered seat unavailable when set false. Shared reviewer lenses select
+`grunt` first while retaining their existing role fallbacks. The delegated-
+coordination aliases `coordinator`, `sub-coordinator`, and
+`sub-coordinator-sol` are not elected by the catalog while they remain under
+test. The bounded `sub-coordinator` intentionally remains Luna-first because it
+is a dedicated coordination role with a provider-neutral runbook and explicit
+Terra fallback, not a mechanical implementation seat. Register the two
 sub-coordinator aliases on demand through the additive seams in
 `ct.spools.codethread.sub-coordinator`. The bounded `sub-coordinator`
 carries its complete runbook as supported alias system guidance. See the
