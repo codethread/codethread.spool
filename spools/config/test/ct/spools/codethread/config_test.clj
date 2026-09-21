@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
+            [ct.spools.codethread.agents :as agents]
             [ct.spools.codethread.auto-run-test]
             [ct.spools.codethread.consumer-provenance-smoke]
             [ct.spools.codethread.bootstrap :as codethread]
@@ -57,6 +58,12 @@
           result (codethread/register! rt)]
       (is (= expected (:registered result)))
       (is (= expected (:registered (codethread/register! rt))))
+      (testing "delegated-coordination seats register on demand"
+        ;; The shared catalog no longer elects these seats, so exercise the
+        ;; additive live-registration seams directly.
+        (is (= "sub-coordinator" (:alias (sub-coordinator/register! rt))))
+        (is (= "sub-coordinator-sol"
+               (:alias (sub-coordinator/register-sol! rt)))))
       (testing "the preferred Pi-backed role seats resolve"
         (is (= {:alias "luna" :harness "pi"}
                (select-keys (harnesses/resolve-harness rt :luna)
@@ -66,12 +73,30 @@
                        [:generated :harness/model])))
         (is (= "openai-codex/gpt-6-astra"
                (get-in (harnesses/resolve-harness rt :oracle)
-                       [:generated :harness/model])))
-        (is (= "low"
-               (get-in (harnesses/resolve-harness rt :luna-low)
-                       [:generated :harness/effort]))))
+                       [:generated :harness/model]))))
+      (testing "the DeepSeek seat is gated on the China flag"
+        (let [grunt-model #(get-in (harnesses/resolve-harness rt :grunt)
+                                   [:generated :harness/model])]
+          (is (true? (harnesses/flag rt agents/allow-china-flag)))
+          (is (true? (:available (harnesses/availability rt :deepseek))))
+          (is (= "deepseek/deepseek-v4-flash" (grunt-model)))
+          (is (= "max"
+                 (get-in (harnesses/resolve-harness rt :grunt)
+                         [:generated :harness/effort])))
+          (harnesses/set-flag! rt agents/allow-china-flag false)
+          (is (false? (:available (harnesses/availability rt :deepseek))))
+          (is (= "openai-codex/gpt-5.6-luna" (grunt-model)))
+          (is (= "xhigh"
+                 (get-in (harnesses/resolve-harness rt :grunt)
+                         [:generated :harness/effort])))
+          (agents/open-shared-catalog! {:runtime rt})
+          (is (false? (harnesses/flag rt agents/allow-china-flag)))
+          (is (false? (:available (harnesses/availability rt :deepseek))))
+          (is (= "openai-codex/gpt-5.6-luna" (grunt-model)))
+          (harnesses/set-flag! rt agents/allow-china-flag true)
+          (is (= "deepseek/deepseek-v4-flash" (grunt-model)))))
       (testing "the bounded sub-coordinator carries its Luna-first runbook"
-        (let [coordinator-before (harnesses/resolve-harness rt :coordinator)
+        (let [sol-before (harnesses/resolve-harness rt :sol)
               luna (harnesses/resolve-harness rt :sub-coordinator)
               luna-guidance (get-in luna
                                     [:generated
@@ -188,11 +213,9 @@
             (is (= "gpt-5.6-luna"
                    (attr-get (harnesses/run rt (:id luna-run))
                              :harness/model))))
-          (is (= coordinator-before
-                 (harnesses/resolve-harness rt :coordinator)))))
+          (is (= sol-before (harnesses/resolve-harness rt :sol)))))
       (testing "the Sol sub-coordinator resolves independently with sustained guidance"
-        (let [coordinator-before (harnesses/resolve-harness rt :coordinator)
-              sol-before (harnesses/resolve-harness rt :sol)
+        (let [sol-before (harnesses/resolve-harness rt :sol)
               bounded-before (harnesses/resolve-harness rt :sub-coordinator)
               sustained (harnesses/resolve-harness rt :sub-coordinator-sol)
               guidance (get-in sustained
@@ -220,8 +243,6 @@
           (is (= "high" (attr-get sustained-run :harness/effort)))
           (is (= guidance
                  (attr-get sustained-run :harness/appended-system-prompts)))
-          (is (= coordinator-before
-                 (harnesses/resolve-harness rt :coordinator)))
           (is (= sol-before (harnesses/resolve-harness rt :sol)))
           (is (= bounded-before
                  (harnesses/resolve-harness rt :sub-coordinator)))))
@@ -248,16 +269,17 @@
                              :deps-edn local-deps-edn}]
     (let [rt (:runtime ctx)]
       (codethread/register! rt)
+      (sub-coordinator/register! rt)
       (is (true? (harnesses/unregister-alias!
                   rt sub-coordinator/alias-name)))
       (let [registry-before (harnesses/harnesses rt)
             flags-before (harnesses/flags rt)
             modules-before (runtime/status rt)
             existing-run (harnesses/create!
-                          rt {:harness :coordinator
+                          rt {:harness :sol
                               :mode :interactive
                               :cwd "/tmp"
-                              :title "Frozen existing coordinator run"})
+                              :title "Frozen existing Sol run"})
             run-before (harnesses/run rt (:id existing-run))
             registration (sub-coordinator/register! rt)
             registry-after (harnesses/harnesses rt)
@@ -275,7 +297,7 @@
         (is (= flags-before (harnesses/flags rt)))
         (is (= modules-before (runtime/status rt)))
         (is (= run-before run-after))
-        (is (= "coordinator" (attr-get run-after :harness/alias)))
+        (is (= "sol" (attr-get run-after :harness/alias)))
         (is (= "openai-codex/gpt-5.6-sol"
                (attr-get run-after :harness/model)))
         (is (= "codex" (:harness resolved)))
@@ -293,6 +315,8 @@
                              :deps-edn local-deps-edn}]
     (let [rt (:runtime ctx)]
       (codethread/register! rt)
+      (sub-coordinator/register! rt)
+      (sub-coordinator/register-sol! rt)
       (is (true? (harnesses/unregister-alias!
                   rt sub-coordinator/sol-alias-name)))
       (let [registry-before (harnesses/harnesses rt)
@@ -302,14 +326,14 @@
             (into {}
                   (map (fn [alias]
                          [alias (harnesses/resolve-harness rt alias)]))
-                  [:sol :coordinator :sub-coordinator])
+                  [:sol :sub-coordinator])
             existing-runs
             (mapv #(harnesses/create!
                     rt {:harness %
                         :mode :interactive
                         :cwd "/tmp"
                         :title (str "Frozen existing " (name %) " run")})
-                  [:coordinator :sub-coordinator])
+                  [:sol :sub-coordinator])
             runs-before (mapv #(harnesses/run rt (:id %)) existing-runs)
             registration (sub-coordinator/register-sol! rt)
             registry-after (harnesses/harnesses rt)
@@ -318,7 +342,7 @@
             (into {}
                   (map (fn [alias]
                          [alias (harnesses/resolve-harness rt alias)]))
-                  [:sol :coordinator :sub-coordinator])
+                  [:sol :sub-coordinator])
             added (some #(when (= "sub-coordinator-sol" (:name %)) %)
                         registry-after)
             resolved (harnesses/resolve-harness rt :sub-coordinator-sol)]
@@ -398,8 +422,8 @@
                      [:last-refresh :modules codethread/executor-module-id
                       :lifecycle/outcomes :agent-engine :status])))
       (is (every? (set (map :name aliases))
-                  ["coordinator" "grunt" "luna" "oracle" "reviewer"
-                   "sub-coordinator" "sub-coordinator-sol"]))
+                  ["deepseek" "grunt" "luna" "oracle" "reviewer" "sol"
+                   "tui"]))
       (is (= ["docs-and-tests" "runtime-correctness" "source-form"]
              (mapv :name (:reviewers reviewer-result))))
       (is (= #{"auto-full-land" "auto-human-review" "intake" "land"

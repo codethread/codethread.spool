@@ -1,37 +1,50 @@
 (ns ct.spools.codethread.agents
   "Register Codethread's shared Harnesses seats and routing policy.
 
-  The base aliases follow the authoritative Harnesses workspace catalog.
-  Compatibility variants retain useful model/effort handles from the previous
-  config without retaining the legacy agent-harness API."
-  (:require [ct.spools.codethread.sub-coordinator :as sub-coordinator]
-            [ct.spools.harnesses :as harnesses]
+  The aliases follow the authoritative Harnesses workspace catalog while
+  retaining Codethread's shared routing policy."
+  (:require [ct.spools.harnesses :as harnesses]
             [millstrand.api.format.alpha :as format-alpha]
             [millstrand.api.lifecycle.alpha :as lifecycle]))
 
+(def allow-china-flag
+  "Runtime flag permitting DeepSeek-powered seats; defaults true.
+
+  Alias conditions read an unset flag as false, so `open-shared-catalog!`
+  writes the true default. The `:deepseek` seat is gated on it, so setting it
+  false makes that seat unavailable and routes `:grunt` to its Luna fallback:
+
+  ```text
+  strand agent config set seat/allow-china false
+  ```
+  "
+  :seat/allow-china)
+
 (def ^:private alias-definitions
-  {:deepseek-flash
+  {:deepseek
    {:doc (format-alpha/prose
           "
-            Scores: complexity X; code-taste X; resilience X; ui-design X;
-            coordination -; cost 9.
+            Scores: complexity 6; code-taste 7; resilience 6; ui-design X; cost 9.
+            deepseek-v4-flash
 
-            Enumeration-shaped recon and quota fallback at very low cost. Good
-            for wide fan-out exploration, but verify citations and keep it away
-            from load-bearing deep dives.
+            Strong coding model that works fast and effectively against well-scoped
+            acceptance criteria. Very fast and cheap; favour it when work is well
+            understood or has clear precedent.
+
+            Unavailable while `seat/allow-china` is false.
             "
           {})
     :parent :pi
     :model "deepseek/deepseek-v4-flash"
-    :effort :high
+    :effort :max
+    :when allow-china-flag
     :allow #{:reviewer :oracle}
-    :attributes {:harness/extra-argv ["--agent" "main"]}}
+    :attributes {}}
 
    :luna
    {:doc (format-alpha/prose
           "
-            Scores: complexity 3; code-taste 4; resilience 1; ui-design 2;
-            coordination -; cost 9.
+            Scores: complexity 3; code-taste 4; resilience 1; ui-design 2; cost 9.
 
             gpt-5.6-luna for implementation details, scouting, and tightly
             scoped delegated tasks. Be explicit about success criteria.
@@ -39,7 +52,7 @@
           {})
     :parent :pi
     :model "openai-codex/gpt-5.6-luna"
-    :effort :high
+    :effort :xhigh
     :allow #{:reviewer :oracle}
     :attributes {}}
 
@@ -88,7 +101,7 @@
    :sol
    {:doc (format-alpha/prose
           "
-            Scores: complexity 6; code-taste 6; resilience 9; ui-design 5;
+            Scores: complexity 7; code-taste 6; resilience 9; ui-design 5;
             coordination 8; cost 5.
 
             gpt-5.6-sol for complex implementation, hostile-environment
@@ -103,16 +116,16 @@
    :terra
    {:doc (format-alpha/prose
           "
-            Scores: complexity 5; code-taste 6; resilience 2; ui-design 4;
+            Scores: complexity 5; code-taste 5; resilience 2; ui-design 4;
             coordination 5; cost 7.
 
-            gpt-5.6-terra medium for well-defined single-concern review and
+            gpt-5.6-terra high for well-defined single-concern review and
             validation on clean checkouts.
             "
           {})
     :parent :pi
     :model "openai-codex/gpt-5.6-terra"
-    :effort :medium
+    :effort :high
     :attributes {}}
 
    :grok
@@ -135,98 +148,51 @@
     :attributes {}}
 
    :grunt
-   {:doc "Default seat for mechanical, tightly scoped implementation tasks."
-    :parent :luna
-    :allow #{:reviewer :oracle}
-    :attributes {}}
-
-   :coordinator
-   {:doc "Default seat for delegated coordination and work decomposition."
-    :parent :sol
-    :attributes {}}
-
-   :sub-coordinator sub-coordinator/alias-descriptor
-
-   :sub-coordinator-sol sub-coordinator/sol-alias-descriptor
+   [{:doc (format-alpha/prose
+           "
+             Preferred seat for mechanical, tightly scoped implementation
+             tasks, exploration work, large file/log searching and other
+             context heavy search tasks
+             "
+           {})
+     :parent :deepseek
+     :allow #{:reviewer :oracle}
+     :attributes {}}
+    {:doc (format-alpha/prose
+           "
+             Preferred seat for mechanical, tightly scoped implementation
+             tasks, exploration work, large file/log searching and other
+             context heavy search tasks
+             "
+           {})
+     :parent :luna
+     :allow #{:reviewer :oracle}
+     :attributes {}}]
 
    :tui
    {:doc "Primary interactive user seat."
     :parent :sol
     :effort :low
-    :attributes {}}
+    :attributes {}}})
 
-   :luna-low
-   {:doc "Low-effort Luna compatibility seat for cheap bounded work."
-    :parent :luna
-    :effort :low
-    :allow #{:reviewer :oracle}
-    :attributes {}}
-
-   :luna-high
-   {:doc "High-effort Luna compatibility seat for bounded feature work."
-    :parent :luna
-    :effort :high
-    :allow #{:reviewer :oracle}
-    :attributes {}}
-
-   :terra-low
-   {:doc "Low-effort Terra compatibility seat for cheap review sweeps."
-    :parent :terra
-    :effort :low
-    :attributes {}}
-
-   :terra-med
-   {:doc "Medium-effort Terra compatibility seat for focused validation."
-    :parent :terra
-    :effort :medium
-    :attributes {}}
-
-   :sol-low
-   {:doc "Low-effort Sol compatibility seat for general implementation."
-    :parent :sol
-    :effort :low
-    :attributes {}}
-
-   :sol-med
-   {:doc "Medium-effort Sol compatibility seat for cross-cutting work."
-    :parent :sol
-    :effort :medium
-    :attributes {}}
-
-   :sol-high
-   {:doc "High-effort Sol compatibility seat for complex implementation."
-    :parent :sol
-    :effort :high
-    :attributes {}}
-
-   :gpt-mini
-   {:doc "Low-cost Codex seat for low-stakes recon and validation."
-    :parent :codex
-    :model "gpt-5.4-mini"
-    :effort :medium
-    :attributes {}}
-
-   :flash
-   {:doc "Compatibility name for the DeepSeek Flash recon seat."
-    :parent :deepseek-flash
-    :allow #{:reviewer :oracle}
-    :attributes {}}
-
-   :deepseek
-   {:doc "DeepSeek Pro quota fallback for bounded reviews."
-    :parent :pi
-    :model "deepseek/deepseek-v4-pro:high"
-    :effort :high
-    :attributes {:harness/extra-argv ["--agent" "main"]}}})
+(defn- apply-flag-default!
+  "Set `flag` to `value` unless this runtime already has an override."
+  [runtime flag value]
+  (when (nil? (harnesses/flag runtime flag))
+    (harnesses/set-flag! runtime flag value)))
 
 (defn open-shared-catalog!
   "Register shared aliases and apply the default provider policy.
 
   Claude and Cursor remain registered but disabled. Consumers may explicitly
-  enable either process-local flag after startup."
+  enable either process-local flag after startup.
+
+  `seat/allow-china` is defaulted rather than forced, so an operator who
+  already overrode it keeps that decision across a catalog reopen."
   [{:keys [runtime]}]
   (doseq [provider-flag [:harness/claude :harness/cursor]]
     (harnesses/set-flag! runtime provider-flag false))
+  (apply-flag-default! runtime allow-china-flag true)
   (let [registrations
         (mapv (fn [[alias descriptor]]
                 (harnesses/register-alias! runtime alias descriptor))

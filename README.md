@@ -79,13 +79,18 @@ the independent `millhouse.spools/land` root and register
 does not depend on Harnesses provider code; its reviewer seat is ordinary
 workflow data, and the consumer supplies the `:agent` executor.
 
-The preferred role aliases are `luna`, `oracle`, `grunt`, `reviewer`,
-`coordinator`, and `sub-coordinator`; useful effort-specific handles such as
-`luna-low`, `terra-med`, and `sol-high` remain available. The bounded
-`sub-coordinator` carries its complete runbook as supported alias system
-guidance. See the [rollout procedure](docs/processes/sub-coordinator-rollout.md)
-for its Codex handoff, Terra/high fallback, and additive live-registration
-proof without runtime mutation.
+The preferred role aliases are `grunt`, `luna`, `oracle`, `reviewer`, and
+`tui`. `grunt` prefers the `deepseek` (`deepseek-v4-flash`) seat and falls
+back to `luna`; the `seat/allow-china` flag defaults true and makes every
+DeepSeek-powered seat unavailable when set false. The delegated-coordination
+aliases `coordinator`, `sub-coordinator`, and `sub-coordinator-sol` are not
+elected by the catalog while they remain under test. Register the two
+sub-coordinator aliases on demand through the additive seams in
+`ct.spools.codethread.sub-coordinator`. The bounded `sub-coordinator`
+carries its complete runbook as supported alias system guidance. See the
+[rollout procedure](docs/processes/sub-coordinator-rollout.md) for its Codex
+handoff, Terra/high fallback, and additive live-registration proof without
+runtime mutation.
 
 Claude and Cursor are registered but disabled by default, matching the
 Harnesses workspace policy. A consumer can explicitly enable them after startup
