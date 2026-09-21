@@ -6,7 +6,7 @@
 (reviewers/defreviewer!
   source-form
   "Check Clojure readability and source prose."
-  {:seat ['reviewer 'luna]
+  {:seat ['grunt 'reviewer 'luna]
    :labels ["PR" "Clojure" "Readability"]
    :glob ["src/**" "spools/*/src/**"]
    :system-prompt
@@ -34,7 +34,7 @@
 (reviewers/defreviewer!
   docs-and-tests
   "Check contract coverage in docs and tests."
-  {:seat ['luna 'reviewer]
+  {:seat ['grunt 'luna 'reviewer]
    :labels ["PR" "Docs" "Tests"]
    :glob ["README.md" "docs/**" "src/**" "test/**"
           "spools/*/README.md" "spools/*/src/**" "spools/*/test/**"]}
@@ -54,7 +54,7 @@
 (reviewers/defreviewer!
   runtime-correctness
   "Check correctness of changed Clojure runtime behavior."
-  {:seat ['luna 'reviewer]
+  {:seat ['grunt 'luna 'reviewer]
    :labels ["PR" "Correctness" "Clojure"]
    :glob ["src/**" "spools/*/src/**"]}
   (format-alpha/prose

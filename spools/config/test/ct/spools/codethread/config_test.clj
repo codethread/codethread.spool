@@ -95,6 +95,25 @@
           (is (= "openai-codex/gpt-5.6-luna" (grunt-model)))
           (harnesses/set-flag! rt agents/allow-china-flag true)
           (is (= "deepseek/deepseek-v4-flash" (grunt-model)))))
+      (testing "shared review lenses prefer grunt and retain its fallback"
+        (let [selected-seats
+              #(into {}
+                     (map (juxt :name :selected-seat)
+                          (reviewers/reviewers rt)))
+              expected {"docs-and-tests" "grunt"
+                        "runtime-correctness" "grunt"
+                        "source-form" "grunt"}]
+          (is (= expected (selected-seats)))
+          (harnesses/set-flag! rt agents/allow-china-flag false)
+          (is (= expected (selected-seats)))
+          (is (= "openai-codex/gpt-5.6-luna"
+                 (get-in (harnesses/resolve-harness rt :grunt)
+                         [:generated :harness/model])))
+          (is (= "xhigh"
+                 (get-in (harnesses/resolve-harness rt :grunt)
+                         [:generated :harness/effort])))
+          (harnesses/set-flag! rt agents/allow-china-flag true)
+          (is (= expected (selected-seats)))))
       (testing "the bounded sub-coordinator carries its Luna-first runbook"
         (let [sol-before (harnesses/resolve-harness rt :sol)
               luna (harnesses/resolve-harness rt :sub-coordinator)
