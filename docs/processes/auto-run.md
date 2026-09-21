@@ -210,7 +210,8 @@ must not treat one stored attribute as a delivery state machine.
 | Stored field | Allowed values | Meaning |
 | --- | --- | --- |
 | `kanban.label/auto-run` | `"true"` or absent | Opts a card into consideration. It does not prove eligibility or trigger a retry. |
-| `kanban.label/auto-run-failure` | `"true"` or absent | Repository delivery-policy marker. It is not a dispatcher status or proof of the current cause. |
+| `kanban.label/auto-run-failure` | `"true"` or absent | Independent cause signal, added only with positive execution/validation failure evidence. Never proof or recovery authority. |
+| `kanban.label/needs-decision` | `"true"` or absent | Independent current attention signal; requires both decision fields below. |
 | top-level `state` | `active`, `closed` | Graph lifecycle. Closed alone does not prove delivery bookkeeping finished. |
 | `kanban/lane` | `refinement`, `pending`, `claimed`, `in_review`, `in_production` | Kanban lifecycle projection. Only `pending` is eligible for first admission. |
 | completion outcome | consumer-defined recorded outcome | Kanban's recorded close outcome; interpret it with linked delivery evidence. |
@@ -220,6 +221,53 @@ readiness, no current ownership claim, no previous request or status receipt,
 available receipt-based capacity, and allowed seat/workflow settings. The latest
 Kanban ownership claim is authoritative; legacy `owner`, reporter, and actor
 attributes are not.
+
+### Cause and current attention
+
+The canonical vocabulary is `auto-run-failure` and `needs-decision`. They are
+independent labels, not delivery dispositions, and may coexist.
+
+| Current decision field | Allowed values | Meaning |
+| --- | --- | --- |
+| `auto-run/decision-question` | nonblank string | The exact question requiring an answer. Preserve its wording. |
+| `auto-run/decision-role` | `human`, `operator` | Responsibility for answering, **not** an actor identity. |
+
+Both fields are required exactly while `needs-decision` is present. Remove both
+when resolving that attention signal. Malformed labels, blank questions, other
+roles, missing required fields and orphaned decision fields fail explanation
+visibly rather than being guessed or silently repaired.
+
+Before adding `auto-run-failure`, positively identify the failed operation,
+concrete attempt and relevant current delivery/workflow. Append an attributed
+note with the delivery/run/step, operation or command, attempt/custody reference,
+evidence, retained resources and any merge reservation. Labels alone never
+establish failure evidence or grant recovery authority.
+
+For a design, scope or authority question, record `needs-decision` and the two
+fields, plus an attributed decision note containing the question and context.
+Preserve who raised it and who answered it through existing note attribution;
+do not use the responsibility role as an identity. Resolving a decision appends
+the answer and actor in a note and removes only that label and its two fields.
+Evidence-backed failure resolution removes only the specifically resolved
+failure signal. Preserve notes, actual Harnesses settlement, Workflow history,
+retained dispatcher errors and unrelated attention in either case.
+
+Consumer examples (not additional types):
+
+| Example | Signals | Diagnostic interpretation |
+| --- | --- | --- |
+| Design decision only | `needs-decision` with question and role | Waiting if no active/failing producer evidence; not a failure. |
+| Genuine execution/validation failure | `auto-run-failure` with attributed evidence | Failed when current producer evidence corroborates it. |
+| Failure plus decision | Both labels and decision fields | Failed delivery and independent decision attention. |
+| Healthy dependency/executor wait or ordinary human checkpoint | Neither required | Ordinary waiting; checkpoint already identifies the human. |
+| Unknown evidence, including an uncorroborated failure label | No inferred failure | Unknown absent other evidence; explicit evidence gap, no recovery permission. |
+
+These source rules apply to future guidance and records after acceptance. They
+do not rewrite frozen assignments/workflows, clean existing labels, activate
+policy, reset gates or launch recovery. Millhouse source alignment is separately
+owned by `/Users/ct/dev/projects/millhouse.spool/.millstrand :: 6kzu7`; recovery
+consumer `hqqrk` and rollout `s7bec` remain blocked until both source slices are
+accepted. This contract neither expands recovery scope nor changes its budgets.
 
 ### Dispatcher attributes
 
@@ -281,7 +329,17 @@ The JSON schema is `codethread.auto-run.explain/v1`. It reports the workspace,
 card, observation time, admission predicates and receipt-based capacity,
 accepted agent lineages, exact Workflow frontier/history, optional Land
 evidence, recorded external references, runtime status, and the next responsible
-role. Historical errors are separate from current accepted-head failures.
+role. `signals` reports the validated canonical board representation. `cause`
+reports the `auto-run-failure` boolean independently of current producer failure
+`evidence` (accepted failed Harnesses heads and ready gates with recorded
+`gate/error`). `evidence-status` is `present` with such evidence, otherwise
+`unknown`; absence is not proof of success. Gate evidence includes the retained
+attributes identifying its request, executor result and attempt when recorded.
+`attention` reports `needs-decision` independently, with the exact `question`,
+responsible `role`, recorded basis and a command to inspect attributed notes.
+An explicit decision selects the next responsible role but never erases failure
+evidence or changes agent settlement. Neither projection grants retry authority.
+Historical errors are separate from current accepted-head failures.
 Recorded PR/head/review/check references are labelled `recorded`; this command
 does not poll GitHub, inspect processes, run recovery, or scan the dispatcher.
 

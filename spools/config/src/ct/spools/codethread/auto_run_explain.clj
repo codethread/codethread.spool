@@ -1,13 +1,14 @@
 (ns ct.spools.codethread.auto-run-explain
   "Collect and classify read-only evidence for one auto-run delivery."
   (:require [clojure.java.io :as io]
+            [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [millhouse.spools.kanban :as kanban]
             [millhouse.spools.workflow :as workflow]
             [millstrand.api.current.alpha :as current]
             [millstrand.api.graph.alpha :as graph]
             [millstrand.api.runtime.alpha :as runtime]
-            [millstrand.api.spool.alpha :refer [attr-get fail!]]
+            [millstrand.api.spool.alpha :refer [attr-get fail! require-valid!]]
             [millstrand.api.weaver.alpha :as weaver])
   (:import [java.math BigInteger]
            [java.security MessageDigest]))
@@ -104,6 +105,13 @@
      :published-continuations (vec (sort continued))
      :ambiguous (> (count heads) 1)}))
 
+(defn- frontier-evidence [rt step]
+  (let [record (weaver/show rt (:id step))]
+    (cond-> (assoc step :phase (phase-for step))
+      (and (:gate step) (attr-get record :gate/error))
+      (assoc :error (attr-get record :gate/error)
+             :recorded-attributes (:attributes record)))))
+
 (defn- workflow-evidence [rt run-id]
   (if-not run-id
     {:availability "absent" :reason "No workflow receipt is recorded."}
@@ -115,7 +123,7 @@
           {:availability "present"
            :run-id run-id
            :done done
-           :frontier (mapv #(assoc % :phase (phase-for %)) ready)
+           :frontier (mapv #(frontier-evidence rt %) ready)
            :history history})
         (catch Exception error
           {:availability "unknown" :run-id run-id
@@ -166,46 +174,92 @@
              :reason (str "No positive merge-boundary evidence; Land is "
                           (:availability land) ".")})))
 
+(s/def ::label (s/nilable #{"true"}))
+(s/def ::auto-run-failure ::label)
+(s/def ::needs-decision ::label)
+(s/def ::decision-question (s/nilable (s/and string? (complement str/blank?))))
+(s/def ::decision-role (s/nilable #{"human" "operator"}))
+(s/def ::signals
+  (s/and (s/keys :req-un [::auto-run-failure ::needs-decision
+                          ::decision-question ::decision-role])
+         #(if (= "true" (:needs-decision %))
+            (and (some? (:decision-question %)) (some? (:decision-role %)))
+            (and (nil? (:decision-question %)) (nil? (:decision-role %))))))
+
+(defn- board-signals [card]
+  (require-valid!
+   ::signals
+   {:auto-run-failure (attr-get card :kanban.label/auto-run-failure)
+    :needs-decision (attr-get card :kanban.label/needs-decision)
+    :decision-question (attr-get card :auto-run/decision-question)
+    :decision-role (attr-get card :auto-run/decision-role)}
+   "Malformed auto-run cause/decision representation"))
+
 (defn classify
   "Classify collected delivery evidence without proposing a mutation."
-  [{:keys [card admission agents workflow land] :as collected}]
+  [{:keys [card admission agents workflow land signals] :as collected}]
   (let [frontier (:frontier workflow)
         active-head? (some #(and (:accepted-head %)
                                  (contains? #{"ready" "running"} (:status %)))
                            (:lineages agents))
-        failed-head? (some #(and (:accepted-head %) (= "failed" (:status %)))
-                           (:lineages agents))
+        failures (vec (concat
+                       (for [run (:lineages agents)
+                             :when (and (:accepted-head run) (= "failed" (:status run)))]
+                         {:kind "harness-run" :run (:id run)
+                          :attempt (:attempt run) :error (:error run)})
+                       (for [step frontier :when (:error step)]
+                         {:kind "workflow-gate" :run (:run-id workflow)
+                          :step (:id step) :error (:error step)
+                          :recorded-attributes (:recorded-attributes step)})))
+        failed? (seq failures)
+        decision? (= "true" (:needs-decision signals))
         human? (some #(= "human-checkpoint" (:phase %)) frontier)
         closed? (= "closed" (:state card))
         complete? (and closed? (:done workflow)
                        (= "post-merge" (get-in collected [:evidence :merge-boundary :value])))
-        disposition (cond complete? "completed" failed-head? "failed"
-                          active-head? "active" (or human? (seq frontier)
-                                                           (seq (:blockers admission))) "waiting"
-                          :else "unknown")
+        disposition (cond
+                      complete? "completed"
+                      failed? "failed"
+                      active-head? "active"
+                      (or human? (seq frontier) (seq (:blockers admission)) decision?) "waiting"
+                      :else "unknown")
         phases (vec (distinct (map :phase frontier)))
         phase (cond complete? "bookkeeping" (seq phases) (first phases)
                     (empty? (:accepted-heads agents)) "publication" :else "implementation")
-        next-role (cond human? "human" failed-head? "operator"
+        next-role (cond decision? (:decision-role signals)
+                        human? "human" failed? "operator"
                         (seq (:blockers admission)) "worker"
                         active-head? "worker"
                         (= "unknown" (:availability workflow)) "operator"
                         :else "unknown")]
-    {:disposition disposition
+    {:cause {:auto-run-failure (= "true" (:auto-run-failure signals))
+             :evidence failures
+             :evidence-status (if failed? "present" "unknown")
+             :reason (when-not failed?
+                       "No current execution or validation failure established; labels are signals only.")}
+     :attention (cond-> {:needs-decision decision?}
+                  decision? (assoc :question (:decision-question signals)
+                                   :role (:decision-role signals)
+                                   :basis "recorded"
+                                   :notes-command (str "strand kanban card " (:id card))))
+     :disposition disposition
      :phase phase
      :frontier (mapv #(select-keys % [:id :title :phase :role :gate
                                       :checkpoint :checkpoint-kind]) frontier)
      :reason (cond complete? "Closed card, finished workflow, and positive post-merge evidence."
-                   failed-head? "The accepted lineage head is currently failed."
+                   failed? "Current producer evidence records an execution or validation failure."
+                   decision? "A recorded decision needs attention; it does not establish failure."
                    human? "The delivery workflow is waiting at a human checkpoint."
                    active-head? "An accepted published lineage head is active."
                    :else "Available evidence does not establish a current delivery state.")
      :next {:role next-role
-            :action (case next-role
-                      "human" "Inspect the recorded review package and choose the workflow checkpoint."
-                      "operator" "Inspect the named failed or unavailable evidence; no retry is authorised."
-                      "worker" "Wait for or inspect the current accepted worker and workflow frontier."
-                      "No responsible role can be established from recorded evidence.")
+            :action (if decision?
+                      "Answer the recorded question in an attributed note; no recovery is authorised."
+                      (case next-role
+                        "human" "Inspect the recorded review package and choose the workflow checkpoint."
+                        "operator" "Inspect the named failed or unavailable evidence; no retry is authorised."
+                        "worker" "Wait for or inspect the current accepted worker and workflow frontier."
+                        "No responsible role can be established from recorded evidence."))
             :unavailable-evidence
             (cond-> []
               (not= "present" (:availability land))
@@ -226,7 +280,8 @@
     (when-not (and (= "true" (attr-get card :kanban/card))
                    (= "feature" (attr-get card :kanban/type)))
       (fail! "Auto-run explanation requires a feature card" {:card card-id}))
-    (let [observed-at (str (runtime/now rt))
+    (let [signals (board-signals card)
+          observed-at (str (runtime/now rt))
           runs (relevant-runs rt card)
           workflow (workflow-evidence rt (attr-get card :auto-run/workflow-run-id))
           blockers (blocking-relations rt card-id)
@@ -266,6 +321,7 @@
                      :workspace (:repo config)
                      :card (select-keys card [:id :title :state :created_at :updated_at])
                      :observed-at observed-at
+                     :signals signals
                      :admission admission :agents runs :workflow workflow :land land
                      :evidence evidence
                      :runtime {:loaded (runtime/status rt)
