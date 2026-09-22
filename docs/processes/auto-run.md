@@ -146,6 +146,14 @@ Start with an ordinary worker-owned implementation step, not a second
 worker-launching agent gate. The worker receives the exact workflow run ID and
 must drive it rather than invent another process.
 
+The shared assignment policy covers following that exact run, evidence-backed
+completion, human checkpoints, and the [card signalling contract](#cause-and-current-attention).
+Agents record those signals through ordinary Strand attributes, labels and
+attributed notes; there is no separate signalling operation. Repository workflow
+instructions own the actions, required outputs, delegation and completion rules.
+The shared instructions require no pull request, landing workflow or particular
+review package.
+
 A review workflow can require implementation, browser evidence, PR creation,
 automated quality/CI checks, a review package, and a human checkpoint. The worker
 returns at that checkpoint, leaving the card and PR open. An autonomous workflow

@@ -50,11 +50,12 @@
 (s/def ::prepared (s/keys :req-un [::cwd ::branch]))
 
 (assignment/def-assign-policy auto-run-workflow
-  "Drive the delivery workflow identified in your assignment guidance.
-  Its instructions are authoritative for this delivery, including where to
-  stop. At a human checkpoint, leave the card and PR open and return the review
-  package; never approve that checkpoint yourself. When the workflow explicitly
-  authorises landing, drive shared land through completion and card closure.
+  "Drive the repository-selected workflow identified in your assignment guidance.
+  Its instructions define the work, required outputs, completion criteria and
+  stop boundaries. At a human checkpoint, leave the card open, retain resources,
+  return the requested evidence and questions, and stop. Never approve that
+  checkpoint yourself. Complete the card only when the selected workflow's
+  declared outcome is satisfied.
 
   Add auto-run-failure only with positive execution or validation failure
   evidence identifying the operation, attempt and current delivery. Record
@@ -242,10 +243,10 @@
 (defn- guidance [workflow-name workflow-run-id]
   (format/prose
    "
-     This is an automatic, bounded card assignment. Do the implementation
-     yourself; do not delegate a coordinator to nurse another worker.
+     This is an automatic, bounded card assignment. Perform the assigned work
+     within the scope and authority of the repository-selected workflow.
 
-     The repository selected delivery workflow `{workflow-name}`, already
+     The repository selected workflow `{workflow-name}`, already
      started as `{workflow-run-id}`. Drive that exact run:
 
      ```text
@@ -253,12 +254,12 @@
      ```
 
      Read and follow each ready step. Await executor-owned gates. Record step
-     completion only with actual evidence. The selected delivery workflow
-     overrides generic instructions to land on the card or in repository
-     guidance: a human-review workflow must stop without merging, closing the
-     feature, or choosing its human checkpoint. Return a useful review package
-     and preserve the branch/worktree. An explicitly autonomous workflow may
-     drive shared land. Never treat a failed gate or process exit as success.
+     completion only with actual evidence. The selected workflow defines the
+     actions, outputs and stop boundaries for this assignment; generic card or
+     repository guidance cannot expand its authority. At a human checkpoint,
+     leave the card open, retain resources, return the requested evidence and
+     questions, and stop without choosing the checkpoint yourself. Never treat
+     a failed gate or process exit as proof that the work succeeded.
    " {:workflow-name workflow-name :workflow-run-id workflow-run-id}))
 
 (defn- dispatch! [rt config initial by-identity]
