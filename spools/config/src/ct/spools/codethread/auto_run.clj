@@ -52,15 +52,17 @@
 (assignment/def-assign-policy auto-run-workflow
   "Follow the repository-selected workflow supplied with your assignment.
 
-  Record these card signals through ordinary Strand attributes and notes:
+  When you cannot continue, record the evidence or decision context in an
+  attributed note first. Set the appropriate signals below as your final card
+  updates, then return a brief handoff and end your run.
 
   - Execution or validation failure: set kanban.label/auto-run-failure to the
-    string true. Add an attributed note identifying the failed operation,
-    attempt, current workflow and evidence.
+    string true. The note identifies the failed operation, attempt, current
+    workflow and evidence.
   - Decision needed: set kanban.label/needs-decision to the string true,
     auto-run/decision-question to the exact nonblank question, and
-    auto-run/decision-role to human or operator. Add an attributed note with
-    the question and context; the role names responsibility, not actor identity.
+    auto-run/decision-role to human or operator. The note records the question
+    and context; the role names responsibility, not actor identity.
 
   Both signals may coexist. Resolve each independently with an attributed note
   of the answer or resolution evidence. Remove the resolved label attribute;

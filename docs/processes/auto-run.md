@@ -148,10 +148,12 @@ must drive it rather than invent another process.
 
 The shared assignment policy points to that run and defines only the
 [card signalling contract](#cause-and-current-attention): literal attributes,
-values, evidence, attribution and resolution. Agents use ordinary Strand
-attributes, labels and notes; there is no separate signalling operation.
-Repository workflow instructions own how work proceeds, including outputs,
-delegation, completion, checkpoints, resource handling and recovery.
+values, evidence, attribution and resolution. When an agent cannot continue,
+the shared handoff rule is evidence first, signals last, then end the run.
+Agents use ordinary Strand attributes, labels and notes; there is no separate
+signalling operation. Repository workflow instructions otherwise own how work
+proceeds, including outputs, delegation, completion, checkpoints, resource
+handling and recovery.
 
 A review workflow can require implementation, browser evidence, PR creation,
 automated quality/CI checks, a review package, and a human checkpoint. The worker
@@ -233,6 +235,12 @@ attributes are not.
 
 The canonical vocabulary is `auto-run-failure` and `needs-decision`. They are
 independent labels, not delivery dispositions, and may coexist.
+
+When an agent cannot continue, it records the evidence or decision context in
+an attributed note first, sets the appropriate signals as its final card
+updates, then returns a brief handoff and ends its run. The labels do not prove
+that the process has exited: a consumer starting follow-up work must still
+verify the prior worker's settlement through Harnesses.
 
 | Current decision field | Allowed values | Meaning |
 | --- | --- | --- |
