@@ -8,6 +8,7 @@
             [millstrand.api.millstrand.alpha :as millstrand]))
 
 (millstrand/use-op! auto-run/auto-run)
+(millstrand/use-hook! auto-run/derive-labels)
 
 (defn desired-config
   "Return the checked-in automatic delivery configuration."

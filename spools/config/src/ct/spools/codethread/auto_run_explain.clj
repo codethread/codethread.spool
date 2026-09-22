@@ -174,9 +174,9 @@
              :reason (str "No positive merge-boundary evidence; Land is "
                           (:availability land) ".")})))
 
-(s/def ::label (s/nilable #{"true"}))
-(s/def ::auto-run-failure ::label)
-(s/def ::needs-decision ::label)
+(s/def ::signal (s/nilable #{"true"}))
+(s/def ::auto-run-failure ::signal)
+(s/def ::needs-decision ::signal)
 (s/def ::decision-question (s/nilable (s/and string? (complement str/blank?))))
 (s/def ::decision-role (s/nilable #{"human" "operator"}))
 (s/def ::signals
@@ -189,8 +189,8 @@
 (defn- board-signals [card]
   (require-valid!
    ::signals
-   {:auto-run-failure (attr-get card :kanban.label/auto-run-failure)
-    :needs-decision (attr-get card :kanban.label/needs-decision)
+   {:auto-run-failure (attr-get card :auto-run/failure)
+    :needs-decision (attr-get card :auto-run/needs-decision)
     :decision-question (attr-get card :auto-run/decision-question)
     :decision-role (attr-get card :auto-run/decision-role)}
    "Malformed auto-run cause/decision representation"))
@@ -236,7 +236,7 @@
              :evidence failures
              :evidence-status (if failed? "present" "unknown")
              :reason (when-not failed?
-                       "No current execution or validation failure established; labels are signals only.")}
+                       "No current execution or validation failure established; recorded signals are not evidence.")}
      :attention (cond-> {:needs-decision decision?}
                   decision? (assoc :question (:decision-question signals)
                                    :role (:decision-role signals)

@@ -150,7 +150,7 @@ The shared assignment policy points to that run and defines only the
 [card signalling contract](#cause-and-current-attention): literal attributes,
 values, evidence, attribution and resolution. When an agent cannot continue,
 the shared handoff rule is evidence first, signals last, then end the run.
-Agents use ordinary Strand attributes, labels and notes; there is no separate
+Agents use ordinary Strand attributes and notes; there is no separate
 signalling operation. Repository workflow instructions otherwise own how work
 proceeds, including outputs, delegation, completion, checkpoints, resource
 handling and recovery.
@@ -219,8 +219,6 @@ must not treat one stored attribute as a delivery state machine.
 | Stored field | Allowed values | Meaning |
 | --- | --- | --- |
 | `kanban.label/auto-run` | `"true"` or absent | Opts a card into consideration. It does not prove eligibility or trigger a retry. |
-| `kanban.label/auto-run-failure` | `"true"` or absent | Independent cause signal, added only with positive execution/validation failure evidence. Never proof or recovery authority. |
-| `kanban.label/needs-decision` | `"true"` or absent | Independent current attention signal; requires both decision fields below. |
 | top-level `state` | `active`, `closed` | Graph lifecycle. Closed alone does not prove delivery bookkeeping finished. |
 | `kanban/lane` | `refinement`, `pending`, `claimed`, `in_review`, `in_production` | Kanban lifecycle projection. Only `pending` is eligible for first admission. |
 | completion outcome | consumer-defined recorded outcome | Kanban's recorded close outcome; interpret it with linked delivery evidence. |
@@ -233,59 +231,59 @@ attributes are not.
 
 ### Cause and current attention
 
-The canonical vocabulary is `auto-run-failure` and `needs-decision`. They are
-independent labels, not delivery dispositions, and may coexist.
+Agents report through these independent source attributes:
 
-When an agent cannot continue, it records the evidence or decision context in
-an attributed note first and saves any decision attributes. If reporting a
-failure, it sets `kanban.label/auto-run-failure` to the string `true` in a
-separate final card update, after all other attributes and notes are saved.
-This ordering lets future consumers observe the complete handoff when the
-failure label appears. The agent then returns a brief handoff and ends its run.
-The labels do not prove that the process has exited: a consumer starting
-follow-up work must still verify the prior worker's settlement through Harnesses.
-
-| Current decision field | Allowed values | Meaning |
+| Attribute | Allowed values | Meaning |
 | --- | --- | --- |
-| `auto-run/decision-question` | nonblank string | The exact question requiring an answer. Preserve its wording. |
-| `auto-run/decision-role` | `human`, `operator` | Responsibility for answering, **not** an actor identity. |
+| `auto-run/failure` | `"true"` or absent | Execution or validation failure, supported by an attributed evidence note. |
+| `auto-run/needs-decision` | `"true"` or absent | A decision is needed; requires the question and role below. |
+| `auto-run/decision-question` | nonblank string | The exact question requiring an answer. |
+| `auto-run/decision-role` | `human`, `operator` | Responsibility for answering, not actor identity. |
 
-Both fields are required exactly while `needs-decision` is present. Remove both
-when resolving that attention signal. Malformed labels, blank questions, other
-roles, missing required fields and orphaned decision fields fail explanation
-visibly rather than being guessed or silently repaired.
+When an agent cannot continue, it records evidence or decision context in an
+attributed note first. Failure evidence identifies the failed operation,
+concrete attempt and current workflow. Any decision attributes are saved next.
+**`auto-run/failure` is a separate final card update**, after all other notes and
+attributes. The agent then returns a brief handoff and ends its run.
 
-Before adding `auto-run-failure`, positively identify the failed operation,
-concrete attempt and relevant current delivery/workflow. Append an attributed
-note identifying that operation, attempt, workflow and evidence. Repository
-policy determines any additional context required. Labels alone never establish
-failure evidence or grant recovery authority.
+Both signals may coexist. Resolve each independently with an attributed answer
+or resolution note, then remove that signal. Resolving a decision also removes
+its question and role. Preserve notes and execution history. Neither an
+unanswered question nor an ordinary checkpoint establishes a failure or grants
+recovery authority. A signal alone is not proof that the worker has settled.
 
-For a decision needed to proceed, record `needs-decision` and the two
-fields, plus an attributed decision note containing the question and context.
-Preserve who raised it and who answered it through existing note attribution;
-do not use the responsibility role as an identity. Resolving a decision appends
-the answer and actor in a note and removes only that label and its two fields.
-Evidence-backed failure resolution removes only the specifically resolved
-failure signal. Preserve notes, actual Harnesses settlement, Workflow history,
-retained dispatcher errors and unrelated attention in either case.
+Explanation reads these source attributes, not display labels. It rejects
+malformed signals, missing/blank decision fields and orphaned decision fields.
+Recorded failure still requires corroborating producer evidence to classify
+execution as failed.
 
-Consumer examples (not additional types):
+### Derived board labels
 
-| Example | Signals | Diagnostic interpretation |
-| --- | --- | --- |
-| Design decision only | `needs-decision` with question and role | Waiting if no active/failing producer evidence; not a failure. |
-| Genuine execution/validation failure | `auto-run-failure` with attributed evidence | Failed when current producer evidence corroborates it. |
-| Failure plus decision | Both labels and decision fields | Failed delivery and independent decision attention. |
-| Healthy dependency/executor wait or ordinary human checkpoint | Neither required | Ordinary waiting; checkpoint already identifies the human. |
-| Unknown evidence, including an uncorroborated failure label | No inferred failure | Unknown absent other evidence; explicit evidence gap, no recovery permission. |
+Each repository's autorun module explicitly selects the shared hook:
 
-These source rules apply to future guidance and records after acceptance. They
-do not rewrite frozen assignments/workflows, clean existing labels, activate
-policy, reset gates or launch recovery. Millhouse source alignment is separately
-owned by `/Users/ct/dev/projects/millhouse.spool/.millstrand :: 6kzu7`; recovery
-consumer `hqqrk` and rollout `s7bec` remain blocked until both source slices are
-accepted. This contract neither expands recovery scope nor changes its budgets.
+```clojure
+(millstrand/use-hook! auto-run/derive-labels)
+```
+
+Here `auto-run` aliases `ct.spools.codethread.auto-run` and `millstrand` aliases
+`millstrand.api.millstrand.alpha`. The definition is inert until selected;
+requiring Codethread or using Land does not activate it.
+
+The `:attributes/normalize` hook maps changed `auto-run/failure` and
+`auto-run/needs-decision` attributes to `kanban.label/auto-run-failure` and
+`kanban.label/needs-decision`. Source and label are saved atomically; removing a
+source attribute removes its label. Omitted signals and unrelated labels are
+unchanged. Agents do not maintain these display labels.
+
+The final failure write therefore publishes the label only after the handoff
+context is saved. A consumer starting follow-up work must still verify worker
+settlement through Harnesses. Admission's `kanban.label/auto-run` opt-in and the
+dispatcher's pickup/scheduling behavior are unchanged.
+
+These source rules apply to newly activated guidance. Existing label-only cards
+and frozen assignments need a separate planned cutover before activating this
+contract. Source changes do not rewrite them, refresh/restart Weavers or launch
+recovery. The bounded recovery work remains separately authorized.
 
 ### Dispatcher attributes
 

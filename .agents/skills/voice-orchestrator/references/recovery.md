@@ -5,11 +5,10 @@ First inspect the card's latest notes, receipt, exact `agent show`, workflow
 merge failures; report the actual owner (seat + effort or special executor).
 Absence of active runs proves neither success nor settlement.
 
-For this repository's autonomous delivery failure: add `auto-run-failure`, note
-run/step, failing command/evidence, retained resources and held merge reservation,
-then stop for manual intervention. Do not clear errors, retry gates, spawn a
-replacement, withdraw the merge turn, or re-merge already-landed work. Best-effort
-label failure must be reported too. This policy overrides generic repair advice.
+Use the shared [autorun signalling contract](../../../../docs/processes/auto-run.md#cause-and-current-attention).
+This repository's full-land failures require explicit recovery. Retain owned
+resources and any held merge reservation; do not clear errors, retry gates,
+spawn replacements, withdraw the merge turn or re-merge already-landed work.
 Normal queue waits and bounded-await timeouts are not delivery failures.
 
 For **authorized** ordinary worker interruption outside that stop policy:

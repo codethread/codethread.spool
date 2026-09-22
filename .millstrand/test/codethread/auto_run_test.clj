@@ -172,12 +172,14 @@
             (is (str/includes? (:instruction finisher)
                                "turn, validation, merge, main update and cleanup"))
             (is (str/includes? (:instruction finisher)
-                               "card is closed with outcome done")))
+                               "card is closed with outcome done"))
+            (is (str/includes? (:instruction finisher)
+                               (:text auto-run/auto-run-workflow))
+                "The independently launched finisher receives the canonical policy"))
           (testing "autonomous failures stop without invented recovery"
             (doseq [view (concat [handoff finisher] (filter :gate views))]
-              (is (str/includes? (:instruction view) "`auto-run-failure`"))
               (is (str/includes? (:instruction view)
-                                 "Stop and leave the card open")))))))))
+                                 "failures require explicit recovery")))))))))
 
 (deftest source-refresh-reconciles-the-running-dispatcher
   (t/with-weaver-world

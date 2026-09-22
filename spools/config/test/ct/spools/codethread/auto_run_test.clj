@@ -7,7 +7,9 @@
             [ct.spools.harnesses :as harnesses]
             [millhouse.spools.kanban :as kanban]
             [millhouse.spools.workflow :as workflow]
+            [millstrand.api.batch.alpha :as batch]
             [millstrand.api.current.alpha :as current]
+            [millstrand.api.runtime.alpha :as runtime]
             [millstrand.api.scheduler.alpha :as scheduler]
             [millstrand.api.spool.alpha :refer [attr-get]]
             [millstrand.api.weaver.alpha :as weaver]
@@ -98,7 +100,12 @@
              {:ns 'millhouse.spools.workflow :required? true})
            (runtime/module! (current/runtime) :fixture
              {:file \"fixture.clj\" :after [:identity :workflow] :required? true})"
-          :files {"fixture.clj" fixture}}]
+          :files {"fixture.clj" fixture
+                  "signal_labels.clj"
+                  "(ns auto-run.signal-labels
+                     (:require [ct.spools.codethread.auto-run :as auto-run]
+                               [millstrand.api.millstrand.alpha :as millstrand]))
+                   (millstrand/use-hook! auto-run/derive-labels)"}}]
     (let [rt (:runtime ctx)
           config {:repo (:config-dir ctx) :seat "fake" :effort "high"
                   :workflow "deliver" :workflows #{"deliver"}
@@ -430,12 +437,54 @@
     (is (= ["validation" "failed" "operator"]
            [(:phase failed) (:disposition failed) (get-in failed [:next :role])]))))
 
+(deftest signal-labels-are-an-explicit-atomic-projection
+  (with-world
+    (fn [rt _config]
+      (let [card (card! rt {:auto-run/failure "true"})]
+        (is (nil? (show rt card :kanban.label/auto-run-failure))
+            "Using autorun alone does not select the label hook")
+        (runtime/module! rt :signal-labels {:file "signal_labels.clj" :required? true})
+        (let [updated (weaver/update! rt (:id card)
+                                      {:attributes
+                                       {"auto-run/failure" "true"
+                                        "auto-run/needs-decision" "true"
+                                        "auto-run/decision-question" "Which scope?"
+                                        "auto-run/decision-role" "human"
+                                        "kanban.label/custom" "true"}})]
+          (is (= ["true" "true" "Which scope?"]
+                 (mapv #(attr-get updated %)
+                       [:kanban.label/auto-run-failure :kanban.label/needs-decision
+                        :auto-run/decision-question]))
+              "The committed result includes both signals' labels and decision context"))
+        (weaver/update! rt (:id card) {:attributes {:acme/unrelated "changed"}})
+        (is (= "true" (show rt card :kanban.label/auto-run-failure)))
+        (weaver/update! rt (:id card) {:attributes {:auto-run/failure nil}})
+        (is (nil? (show rt card :kanban.label/auto-run-failure)))
+        (is (= "true" (show rt card :kanban.label/needs-decision)))
+        (is (= "true" (show rt card :kanban.label/custom)))
+        (let [created (card! rt {:auto-run/failure "true"})]
+          (is (= "true" (attr-get created :kanban.label/auto-run-failure))))
+        (batch/apply! rt {:refs {:card (:id card)}
+                          :strands [{:ref :card
+                                     :attributes {:auto-run/failure "true"
+                                                  :auto-run/needs-decision nil
+                                                  :auto-run/decision-question nil
+                                                  :auto-run/decision-role nil}}]})
+        (is (= "true" (show rt card :kanban.label/auto-run-failure)))
+        (is (nil? (show rt card :kanban.label/needs-decision)))
+        (let [before (weaver/show rt (:id card))]
+          (is (thrown? clojure.lang.ExceptionInfo
+                       (weaver/update! rt (:id card)
+                                       {:attributes {:auto-run/failure "false"}})))
+          (is (= before (weaver/show rt (:id card)))
+              "A malformed source signal cannot leave a partial projection"))))))
+
 (deftest cause-and-decision-are-independent-read-only-signals
   (with-world
     (fn [rt _config]
       (let [card (card! rt {:auto-run/workflow-run-id "signals"
                             :auto-run/error "Historical preparation failure"})
-            decision {:kanban.label/needs-decision "true"
+            decision {:auto-run/needs-decision "true"
                       :auto-run/decision-question "May this scope change?"
                       :auto-run/decision-role "operator"}
             note (weaver/add! rt {:title "Decision raised"
@@ -475,7 +524,7 @@
                           {:attributes {:gate/error "Validation exited 1"
                                         :shell/exit-code 1 :shell/argv ["false"]}})
           (weaver/update! rt (:id card)
-                          {:attributes {:kanban.label/auto-run-failure "true"}})
+                          {:attributes {:auto-run/failure "true"}})
           (testing "failure and decision coexist"
             (let [result (explain)]
               (is (= "failed" (:disposition result)))
@@ -483,7 +532,7 @@
               (is (= "present" (get-in result [:cause :evidence-status])))
               (is (= (:id gate) (get-in result [:cause :evidence 0 :step])))))
           (weaver/update! rt (:id card)
-                          {:attributes {:kanban.label/needs-decision nil
+                          {:attributes {:auto-run/needs-decision nil
                                         :auto-run/decision-question nil
                                         :auto-run/decision-role nil}})
           (testing "resolving attention leaves genuine failure and history"
@@ -497,7 +546,7 @@
           (weaver/update! rt (:id gate) {:attributes {:gate/error nil}})
           (weaver/update! rt (:id card)
                           {:attributes {:auto-run/workflow-run-id nil}})
-          (testing "a label alone cannot establish failure"
+          (testing "a signal alone cannot establish failure"
             (let [result (explain)]
               (is (= "unknown" (:disposition result)))
               (is (true? (get-in result [:cause :auto-run-failure])))
@@ -505,7 +554,7 @@
           (weaver/update! rt (:id card)
                           {:attributes (assoc decision
                                               :auto-run/decision-role "human"
-                                              :kanban.label/auto-run-failure nil)})
+                                              :auto-run/failure nil)})
           (testing "resolving failure leaves independent human attention"
             (let [result (explain)]
               (is (= "waiting" (:disposition result)))
@@ -516,12 +565,12 @@
 (deftest malformed-supported-signals-fail-visibly
   (with-world
     (fn [rt _config]
-      (doseq [attrs [{:kanban.label/auto-run-failure "false"}
-                    {:kanban.label/needs-decision "yes"}
-                    {:kanban.label/needs-decision "true"}
-                    {:kanban.label/needs-decision "true"
+      (doseq [attrs [{:auto-run/failure "false"}
+                    {:auto-run/needs-decision "yes"}
+                    {:auto-run/needs-decision "true"}
+                    {:auto-run/needs-decision "true"
                      :auto-run/decision-question " " :auto-run/decision-role "human"}
-                    {:kanban.label/needs-decision "true"
+                    {:auto-run/needs-decision "true"
                      :auto-run/decision-question "Question?" :auto-run/decision-role "worker"}
                     {:auto-run/decision-question "Orphan?"}
                     {:auto-run/decision-role "human"}]]

@@ -22,7 +22,7 @@ The workflow owns these stages:
    must not modify the worktree after publication.
 4. The worker creates or updates the ready PR, and a shell gate waits for CI.
 5. A code gate moves the verified card into review.
-6. `auto-full-land` runs mandatory shared autonomous land. The worker stops
+6. `auto-full-land` uses Codethread’s optional `auto-run-land` handoff around shared Land. The worker stops
    before sign-off and accepts a distinct canonical-root `grunt` against the
    dependent finisher step. That finisher owns sign-off, FIFO merge, cleanup,
    and final card closure.
@@ -47,9 +47,9 @@ strand workflow show auto-human-review
 ```
 
 `assigned` is a durable admission receipt, not worker liveness. Inspect the
-recorded Harnesses run and workflow run for current state. An autonomous failure
-adds `auto-run-failure`, preserves resources for inspection, and requires an
-explicit recovery decision.
+recorded Harnesses run and workflow run for current state. The repository selects
+Codethread's shared [signalling contract and label hook](auto-run.md#cause-and-current-attention).
+Full-land failures retain resources and merge custody for explicit recovery.
 
 Startup is covered by a disposable in-memory Weaver world:
 

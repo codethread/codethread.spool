@@ -2,7 +2,7 @@
   "Repository delivery contract for automatically assigned Codethread features."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
-            [millhouse.spools.land.autonomous :as autonomous]
+            [ct.spools.codethread.auto-run-land :as autonomous]
             [millhouse.spools.workflow :as workflow]
             [millstrand.api.format.alpha :as format]))
 
