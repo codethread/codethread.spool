@@ -1,6 +1,6 @@
 # Automatic card pickup
 
-The opt-in dispatcher in `ct.spools.codethread.auto-run` starts one Harnesses
+The opt-in dispatcher in `millhouse.spools.auto-run` starts one Harnesses
 assignment per ready feature. The worker drives a repository-owned Millhouse
 workflow. There is no coordinator agent, per-lane trigger language, or automatic
 worker retry. Repository policy decides where delivery stops.
@@ -38,14 +38,16 @@ its lifecycle, the workflow for its frontier, and Kanban for delivery state.
 
 ## Repository activation
 
-Depend on `codethread/config` and activate the shared bootstrap as usual. Publish
-your workflows first. A repo-owned module then selects the CLI and owns a
-lifecycle resource:
+The implementation is published by `millhouse.spools/auto-run`, independent of
+Codethread. `codethread/config` includes that dependency for its consumers and
+continues to supply the shared agent bootstrap. Activate the shared bootstrap
+as usual, then publish your workflows. A repo-owned module then selects the CLI
+and owns a lifecycle resource:
 
 ```clojure
 (ns acme.auto-run
-  (:require [ct.spools.codethread.auto-run :as auto-run]
-            [ct.spools.codethread.auto-run-worktree]
+  (:require [millhouse.spools.auto-run :as auto-run]
+            [millhouse.spools.auto-run-worktree]
             [millstrand.api.lifecycle.alpha :as lifecycle]
             [millstrand.api.millstrand.alpha :as millstrand]))
 
@@ -59,7 +61,7 @@ lifecycle resource:
     :effort "high"
     :workflow "prepare-for-review"
     :workflows #{"prepare-for-review" "deliver-autonomously"}
-    :prepare 'ct.spools.codethread.auto-run-worktree/prepare!
+    :prepare 'millhouse.spools.auto-run-worktree/prepare!
     :start-params 'acme.auto-run/start-params!
     :enabled? true
     :max-running 2
@@ -94,16 +96,10 @@ Register this file with `runtime/module!`, after the repo workflow module and
 Harnesses. Definitions must be available before configuration validation. No
 bootstrap activates dispatch automatically.
 
-The compatible producer set is Millstrand
-`8e220eab7de2fabe7880c6a4c71de6cd903c34bb`, Millhouse
-`bd96f5357a335bd17cd22042da1be5bd2200f807`, and Harnesses
-`6b5ad39d8711a033dc7f33fd52c78901393ea44e`. The accepted Millhouse identity
-feature landed at `f17ad387b2825887b736cab597b33af84cff13cb`; the pinned
-`bd96f5357a335bd17cd22042da1be5bd2200f807` is its reviewed descendant and
-matches Harnesses' direct Workflow/Kanban coordinates. Keep independently
-published tools.deps roots on the compatible commits. Activate Identity and
-Workflow, then Kanban, then the ownership-aware Harnesses surface; register the
-agent executor only after consumer aliases, workflows, and policy modules.
+Keep the independently published tools.deps roots on compatible immutable pins.
+Activate Identity and Workflow, then Kanban, then the Harnesses surface;
+register the agent executor only after consumer aliases, workflows, and policy
+modules.
 
 Source acceptance or a checked-in pin does not change a running Weaver.
 Source-only module edits use normal refresh; changing a dependency pin requires
@@ -270,7 +266,7 @@ Each repository explicitly selects the shared reporting patterns and label hook
 in its autorun module. Pattern definitions and the hook are inert until selected:
 
 ```clojure
-;; reporting aliases ct.spools.codethread.auto-run-reporting
+;; reporting aliases millhouse.spools.auto-run-reporting
 (millstrand/use-pattern! reporting/auto-run-needs-decision
                          reporting/auto-run-unknown-failure
                          reporting/auto-run-unblock)
@@ -391,7 +387,7 @@ strand workflow history WORKFLOW_RUN_ID
 ```
 
 Consult `strand help auto-run`, the schema/version in the explanation, and
-`ct.spools.codethread.auto-run` for the executable contract.
+`millhouse.spools.auto-run` for the executable contract.
 
 Tests use disposable in-memory Weaver worlds and non-executing fake providers.
 They cover admission, dependency readiness, seat/effort propagation, optional

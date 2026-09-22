@@ -138,7 +138,8 @@ and closes the gate only after it delivers a successful non-blank result.
 Waiting is done through `strand await` queries, not an `agent await` command.
 
 Opt-in [automatic card pickup](docs/processes/auto-run.md) is also available
-from the config root. Repositories supply delivery workflows, worker defaults,
+through the config root's `millhouse.spools/auto-run` dependency. Repositories
+supply delivery workflows, worker defaults,
 worktree preparation, and a concurrency limit; the dispatcher assigns labelled,
 ready features once without a coordinator agent. It is not activated by the
 shared bootstrap.

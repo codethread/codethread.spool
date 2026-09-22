@@ -9,9 +9,9 @@ Use live help's source provenance to locate the installed implementation.
 | Owner         | Local checkout                          | Workspace candidate                                 | Investigate here                                                  |
 | ------------- | --------------------------------------- | --------------------------------------------------- | ----------------------------------------------------------------- |
 | Millstrand    | /Users/ct/dev/projects/skein-src        | /Users/ct/dev/projects/skein-src/.millstrand        | CLI, Weaver, storage, activation; docs/reference.md               |
-| Millhouse     | /Users/ct/dev/projects/millhouse.spool  | /Users/ct/dev/projects/millhouse.spool/.millstrand  | Kanban, identity, workflow, land, merge queue; spools/*/README.md |
+| Millhouse     | /Users/ct/dev/projects/millhouse.spool  | /Users/ct/dev/projects/millhouse.spool/.millstrand  | Kanban, identity, workflow, land, merge queue, auto-run; spools/*/README.md |
 | Harnesses     | /Users/ct/dev/projects/harnesses.spool  | /Users/ct/dev/projects/harnesses.spool/.millstrand  | Agents, seats, assignments, run lifecycle, providers; README.md   |
-| Codethread    | /Users/ct/dev/projects/codethread.spool | /Users/ct/dev/projects/codethread.spool/.millstrand | Shared config and auto-run dispatcher                             |
+| Codethread    | /Users/ct/dev/projects/codethread.spool | /Users/ct/dev/projects/codethread.spool/.millstrand | Shared config and auto-run consumer policy                             |
 | wktree        | /Users/ct/dev/projects/wktree           | None confirmed                                      | Worktree CLI; README.md and wktree -h                             |
 | Millstrand UI | /Users/ct/dev/projects/millstrand-ui    | /Users/ct/dev/projects/millstrand-ui/.millstrand    | Dashboard and repository delivery policy; docs/auto-run.md        |
 

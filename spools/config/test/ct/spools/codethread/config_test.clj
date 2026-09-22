@@ -4,7 +4,6 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [ct.spools.codethread.agents :as agents]
-            [ct.spools.codethread.auto-run-test]
             [ct.spools.codethread.consumer-provenance-smoke]
             [ct.spools.codethread.bootstrap :as codethread]
             [ct.spools.codethread.sub-coordinator :as sub-coordinator]
@@ -487,6 +486,5 @@
 (defn -main [& _]
   (let [summary (clojure.test/run-tests
                  'ct.spools.codethread.config-test
-                 'ct.spools.codethread.auto-run-test
                  'ct.spools.codethread.consumer-provenance-smoke)]
     (System/exit (if (pos? (+ (:fail summary) (:error summary))) 1 0))))
