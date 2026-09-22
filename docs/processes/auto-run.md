@@ -146,13 +146,12 @@ Start with an ordinary worker-owned implementation step, not a second
 worker-launching agent gate. The worker receives the exact workflow run ID and
 must drive it rather than invent another process.
 
-The shared assignment policy covers following that exact run, evidence-backed
-completion, human checkpoints, and the [card signalling contract](#cause-and-current-attention).
-Agents record those signals through ordinary Strand attributes, labels and
-attributed notes; there is no separate signalling operation. Repository workflow
-instructions own the actions, required outputs, delegation and completion rules.
-The shared instructions require no pull request, landing workflow or particular
-review package.
+The shared assignment policy points to that run and defines only the
+[card signalling contract](#cause-and-current-attention): literal attributes,
+values, evidence, attribution and resolution. Agents use ordinary Strand
+attributes, labels and notes; there is no separate signalling operation.
+Repository workflow instructions own how work proceeds, including outputs,
+delegation, completion, checkpoints, resource handling and recovery.
 
 A review workflow can require implementation, browser evidence, PR creation,
 automated quality/CI checks, a review package, and a human checkpoint. The worker
@@ -247,11 +246,11 @@ visibly rather than being guessed or silently repaired.
 
 Before adding `auto-run-failure`, positively identify the failed operation,
 concrete attempt and relevant current delivery/workflow. Append an attributed
-note with the delivery/run/step, operation or command, attempt/custody reference,
-evidence, retained resources and any merge reservation. Labels alone never
-establish failure evidence or grant recovery authority.
+note identifying that operation, attempt, workflow and evidence. Repository
+policy determines any additional context required. Labels alone never establish
+failure evidence or grant recovery authority.
 
-For a design, scope or authority question, record `needs-decision` and the two
+For a decision needed to proceed, record `needs-decision` and the two
 fields, plus an attributed decision note containing the question and context.
 Preserve who raised it and who answered it through existing note attribution;
 do not use the responsibility role as an identity. Resolving a decision appends

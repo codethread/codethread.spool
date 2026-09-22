@@ -50,31 +50,22 @@
 (s/def ::prepared (s/keys :req-un [::cwd ::branch]))
 
 (assignment/def-assign-policy auto-run-workflow
-  "Drive the repository-selected workflow identified in your assignment guidance.
-  Its instructions define the work, required outputs, completion criteria and
-  stop boundaries. At a human checkpoint, leave the card open, retain resources,
-  return the requested evidence and questions, and stop. Never approve that
-  checkpoint yourself. Complete the card only when the selected workflow's
-  declared outcome is satisfied.
+  "Follow the repository-selected workflow supplied with your assignment.
 
-  Add auto-run-failure only with positive execution or validation failure
-  evidence identifying the operation, attempt and current delivery. Record
-  evidence and retained resources in an attributed note; a label is not proof.
+  Record these card signals through ordinary Strand attributes and notes:
 
-  For a design, scope or authority decision, use needs-decision with the exact
-  nonblank auto-run/decision-question and auto-run/decision-role human or
-  operator. The role is responsibility, not actor identity. Preserve who raised
-  and who answered the question in attributed notes. A question alone is not
-  a failure; never falsify Harnesses settlement or delivery evidence.
+  - Execution or validation failure: set kanban.label/auto-run-failure to the
+    string true. Add an attributed note identifying the failed operation,
+    attempt, current workflow and evidence.
+  - Decision needed: set kanban.label/needs-decision to the string true,
+    auto-run/decision-question to the exact nonblank question, and
+    auto-run/decision-role to human or operator. Add an attributed note with
+    the question and context; the role names responsibility, not actor identity.
 
-  Both signals may coexist. Resolve each independently: an answered decision
-  removes only needs-decision and its two current fields, preserving the answer
-  and actor in notes. Evidence-backed failure resolution removes only that
-  failure signal, preserving history and unrelated attention.
-
-  Healthy waits and ordinary human checkpoints remain waits. Unknown evidence
-  stays unknown. Neither label authorises recovery. Report failures or unresolved
-  questions; do not invent retries, work, gate resets or recovery authority.")
+  Both signals may coexist. Resolve each independently with an attributed note
+  of the answer or resolution evidence. Remove the resolved label attribute;
+  resolving needs-decision also removes its question and role attributes.
+  Preserve the notes as history.")
 
 (declare scan! wake!)
 
@@ -243,23 +234,13 @@
 (defn- guidance [workflow-name workflow-run-id]
   (format/prose
    "
-     This is an automatic, bounded card assignment. Perform the assigned work
-     within the scope and authority of the repository-selected workflow.
-
-     The repository selected workflow `{workflow-name}`, already
-     started as `{workflow-run-id}`. Drive that exact run:
+     Your repository-selected workflow is `{workflow-name}`, already started
+     as `{workflow-run-id}`. Follow its instructions:
 
      ```text
      strand workflow ready {workflow-run-id}
      ```
 
-     Read and follow each ready step. Await executor-owned gates. Record step
-     completion only with actual evidence. The selected workflow defines the
-     actions, outputs and stop boundaries for this assignment; generic card or
-     repository guidance cannot expand its authority. At a human checkpoint,
-     leave the card open, retain resources, return the requested evidence and
-     questions, and stop without choosing the checkpoint yourself. Never treat
-     a failed gate or process exit as proof that the work succeeded.
    " {:workflow-name workflow-name :workflow-run-id workflow-run-id}))
 
 (defn- dispatch! [rt config initial by-identity]
