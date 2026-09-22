@@ -1,6 +1,6 @@
 {:deps {millhouse.spools/identity
         {:git/url "https://github.com/codethread/millhouse.spool.git"
-         :git/sha "bd96f5357a335bd17cd22042da1be5bd2200f807"
+         :git/sha "373238a56fbed90852e9fe8d90635d848c3faeea"
          :deps/root "spools/identity"}
         codethread/config {:local/root "../spools/config"}
         codethread/ralph {:local/root "../spools/ralph"}}

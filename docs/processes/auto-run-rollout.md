@@ -4,20 +4,19 @@ The canonical [discriminated union and patterns](auto-run.md#agent-blocker-contr
 replace the earlier independent failure and decision flags. Dispatcher admission,
 receipts, capacity and scheduling remain unchanged.
 
-## Delivery order
+## Approved rollout
 
-1. Publish the Millstrand weave update support and Codethread reporting changes.
-2. Rework the preserved Millhouse pilot against that basis. Present its diff for
-   user review before rolling out any other consumer.
-3. After pilot approval, update Millstrand, Harnesses and Millstrand UI using the
-   source maps saved on their feature cards.
+The Millstrand weave update and Codethread reporting contract are published.
+The Millhouse pilot was reviewed and approved on 2026-09-22. Apply that approach
+to the remaining consumers using the source maps on their feature cards.
 
-| Repository | Remaining source work |
+| Repository | Scope |
 | --- | --- |
-| Millhouse | Update the preserved pilot's pins and reporting import; select the three patterns and label hook; replace its old test expectations. Keep core Land independent. |
+| Millhouse | Approved pilot: shared reporting patterns, label hook and optional landing wrapper; core Land remains independent. |
 | Millstrand | Update consumer pins and autorun module activation. The weave API extension alone does not migrate its autorun policy. |
 | Harnesses | Update consumer pins and module activation; remove copied reporting prose. |
 | Millstrand UI | Update pins and module activation; include `agent-blocked` and `needs-decision` in autorun attention filtering. Preserve unrelated inspection findings and human-attention uses. |
+| Devflow, Agents, Notes | Align existing dependency pins and restart; keep autorun inactive where it is not configured. Agents and Notes share one Weaver pool. |
 
 Each consumer selects `ct.spools.codethread.auto-run-reporting` patterns and its
 `derive-labels` hook. Repositories using the optional autonomous landing helper
@@ -29,7 +28,8 @@ requirement. Use the published revisions recorded on the epic and feature cards.
 Source publication does not update running Weavers or frozen assignments.
 The coordinator is authorized to update dependency pins and restart Weavers,
 including aligning sibling dependencies together when needed to clear blockers.
-This does not expand the policy rollout beyond the Millhouse review checkpoint.
+The approved rollout includes all discovered Weavers. Track commits, checks and
+runtime generations on each repository's feature under the coordination epic.
 
 At cutover, inspect active runs and existing reporting attributes. Where a
 current blocker must be retained, save or identify
