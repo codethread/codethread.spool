@@ -5,7 +5,7 @@ First inspect the card's latest notes, receipt, exact `agent show`, workflow
 merge failures; report the actual owner (seat + effort or special executor).
 Absence of active runs proves neither success nor settlement.
 
-Use the shared [autorun signalling contract](../../../../docs/processes/auto-run.md#cause-and-current-attention).
+Use the shared [autorun agent blocker contract](../../../../docs/processes/auto-run.md#agent-blocker-contract).
 This repository's full-land failures require explicit recovery. Retain owned
 resources and any held merge reservation; do not clear errors, retry gates,
 spawn replacements, withdraw the merge turn or re-merge already-landed work.

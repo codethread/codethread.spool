@@ -3,11 +3,12 @@
   (:require [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [ct.spools.codethread.auto-run :as auto-run]
+            [ct.spools.codethread.auto-run-reporting :as reporting]
             [ct.spools.codethread.auto-run-worktree :as worktree]
             [ct.spools.harnesses :as harnesses]
             [millhouse.spools.kanban :as kanban]
             [millhouse.spools.workflow :as workflow]
-            [millstrand.api.batch.alpha :as batch]
+            [millstrand.api.patterns.alpha :as patterns]
             [millstrand.api.current.alpha :as current]
             [millstrand.api.runtime.alpha :as runtime]
             [millstrand.api.scheduler.alpha :as scheduler]
@@ -37,11 +38,6 @@
        (workflow/checkpoint :accept \"Human acceptance\"
          :depends-on [:implement] :kind :human
          :choices [{:key :approved :label \"Approved\"}])))
-   (workflow/defworkflow! validate
-     \"A disposable validation gate without an executor.\"
-     {:entrypoints #{:start} :param-spec ::delivery-params}
-     (workflow/workflow \"Validation\"
-       (workflow/gate :quality \"Quality validation\" :shell)))
    (defn prepare! [_rt {:keys [repo card]}]
      (let [cwd (io/file repo (:id card))]
        (.mkdirs cwd)
@@ -103,9 +99,12 @@
           :files {"fixture.clj" fixture
                   "signal_labels.clj"
                   "(ns auto-run.signal-labels
-                     (:require [ct.spools.codethread.auto-run :as auto-run]
+                     (:require [ct.spools.codethread.auto-run-reporting :as reporting]
                                [millstrand.api.millstrand.alpha :as millstrand]))
-                   (millstrand/use-hook! auto-run/derive-labels)"}}]
+                   (millstrand/use-hook! reporting/derive-labels)
+                   (millstrand/use-pattern! reporting/auto-run-needs-decision
+                                            reporting/auto-run-unknown-failure
+                                            reporting/auto-run-unblock)"}}]
     (let [rt (:runtime ctx)
           config {:repo (:config-dir ctx) :seat "fake" :effort "high"
                   :workflow "deliver" :workflows #{"deliver"}
@@ -437,147 +436,109 @@
     (is (= ["validation" "failed" "operator"]
            [(:phase failed) (:disposition failed) (get-in failed [:next :role])]))))
 
-(deftest signal-labels-are-an-explicit-atomic-projection
+(deftest blocker-patterns-publish-complete-state-and-labels-atomically
   (with-world
     (fn [rt _config]
-      (let [card (card! rt {:auto-run/failure "true"})]
-        (is (nil? (show rt card :kanban.label/auto-run-failure))
-            "Using autorun alone does not select the label hook")
+      (let [card (card! rt {:kanban.label/custom "true"})
+            evidence (weaver/add! rt {:title "Which scope?"})
+            input {:strand (:id card) :evidence (:id evidence)}]
+        (is (thrown? clojure.lang.ExceptionInfo
+                     (patterns/weave! rt :auto-run-needs-decision input))
+            "Autorun does not implicitly activate reporting patterns")
         (runtime/module! rt :signal-labels {:file "signal_labels.clj" :required? true})
-        (let [updated (weaver/update! rt (:id card)
-                                      {:attributes
-                                       {"auto-run/failure" "true"
-                                        "auto-run/needs-decision" "true"
-                                        "auto-run/decision-question" "Which scope?"
-                                        "auto-run/decision-role" "human"
-                                        "kanban.label/custom" "true"}})]
-          (is (= ["true" "true" "Which scope?"]
-                 (mapv #(attr-get updated %)
-                       [:kanban.label/auto-run-failure :kanban.label/needs-decision
-                        :auto-run/decision-question]))
-              "The committed result includes both signals' labels and decision context"))
-        (weaver/update! rt (:id card) {:attributes {:acme/unrelated "changed"}})
-        (is (= "true" (show rt card :kanban.label/auto-run-failure)))
-        (weaver/update! rt (:id card) {:attributes {:auto-run/failure nil}})
-        (is (nil? (show rt card :kanban.label/auto-run-failure)))
-        (is (= "true" (show rt card :kanban.label/needs-decision)))
-        (is (= "true" (show rt card :kanban.label/custom)))
-        (let [created (card! rt {:auto-run/failure "true"})]
-          (is (= "true" (attr-get created :kanban.label/auto-run-failure))))
-        (batch/apply! rt {:refs {:card (:id card)}
-                          :strands [{:ref :card
-                                     :attributes {:auto-run/failure "true"
-                                                  :auto-run/needs-decision nil
-                                                  :auto-run/decision-question nil
-                                                  :auto-run/decision-role nil}}]})
-        (is (= "true" (show rt card :kanban.label/auto-run-failure)))
+        (patterns/weave! rt :auto-run-needs-decision input)
+        (is (= ["true" "needs-decision" (:id evidence) "true" "true"]
+               (mapv #(show rt card %)
+                     [:auto-run/agent-blocked :auto-run/agent-blocked-status
+                      :auto-run/agent-evidence :kanban.label/agent-blocked
+                      :kanban.label/needs-decision])))
+        (patterns/weave! rt :auto-run-unknown-failure input)
+        (is (= "unknown-failure" (show rt card :auto-run/agent-blocked-status)))
         (is (nil? (show rt card :kanban.label/needs-decision)))
+        (is (= "true" (show rt card :kanban.label/agent-blocked)))
+        (weaver/update! rt (:id card) {:attributes {:unrelated "changed"}})
+        (is (= "true" (show rt card :kanban.label/agent-blocked)))
         (let [before (weaver/show rt (:id card))]
+          (doseq [bad-input [(dissoc input :evidence)
+                             (assoc input :evidence "missing")
+                             (assoc input :strand "missing")]]
+            (is (thrown? clojure.lang.ExceptionInfo
+                         (patterns/weave! rt :auto-run-needs-decision bad-input)))
+            (is (= before (weaver/show rt (:id card)))))
           (is (thrown? clojure.lang.ExceptionInfo
                        (weaver/update! rt (:id card)
-                                       {:attributes {:auto-run/failure "false"}})))
-          (is (= before (weaver/show rt (:id card)))
-              "A malformed source signal cannot leave a partial projection"))))))
+                                       {:attributes {:auto-run/agent-blocked nil}})))
+          (is (= before (weaver/show rt (:id card)))))
+        (patterns/weave! rt :auto-run-unblock {:strand (:id card)})
+        (is (every? nil? (map #(show rt card %)
+                             [:auto-run/agent-blocked :auto-run/agent-blocked-status
+                              :auto-run/agent-evidence :kanban.label/agent-blocked
+                              :kanban.label/needs-decision])))
+        (is (= "true" (show rt card :kanban.label/custom)))
+        (is (= evidence (weaver/show rt (:id evidence))))))))
 
-(deftest cause-and-decision-are-independent-read-only-signals
+(deftest blocker-evidence-is-a-strand-reference-independent-of-run-status
   (with-world
     (fn [rt _config]
-      (let [card (card! rt {:auto-run/workflow-run-id "signals"
-                            :auto-run/error "Historical preparation failure"})
-            decision {:auto-run/needs-decision "true"
-                      :auto-run/decision-question "May this scope change?"
-                      :auto-run/decision-role "operator"}
-            note (weaver/add! rt {:title "Decision raised"
-                                 :attributes {:note/text "May this scope change?"
-                                              :identity/by-identity "question-author"}
-                                 :edges [{:type "annotates" :to (:id card)}]})
-            run (weaver/add! rt {:title "Settled worker" :state "closed"
+      (runtime/module! rt :signal-labels {:file "signal_labels.clj" :required? true})
+      (let [card (card! rt {:auto-run/error "Historical preparation failure"})
+            evidence (weaver/add! rt {:title "Investigate tool timeout"
+                                     :state "closed"
+                                     :attributes {:note/text "The tool stopped responding."
+                                                  :identity/by-identity "author"}})
+            run (weaver/add! rt {:title "Worker" :state "closed"
                                 :attributes {:harness/run "true"
                                              :harness/published "true"
                                              :harness/target (:id card)
                                              :harness/status "stopped"
-                                             :harness/settled "true"}})]
-        (current/with-runtime rt
-          (workflow/start! "signals" :validate {:card (:id card)}))
-        (let [gate (current/with-runtime rt (first (workflow/ready "signals")))
-              snapshot #(vector (weaver/list rt [:not [:missing :id]] {})
-                                (scheduler/pending rt))
-              explain #(let [before (snapshot)
-                             result (auto-run/explain rt (:id card))]
-                         (is (= before (snapshot)) "Explanation never writes or launches")
-                         result)]
-          (testing "healthy wait"
-            (let [result (explain)]
-              (is (= "waiting" (:disposition result)))
-              (is (false? (get-in result [:attention :needs-decision])))
-              (is (empty? (get-in result [:cause :evidence])))))
-          (weaver/update! rt (:id card) {:attributes decision})
-          (testing "decision alone does not falsify settlement or failure"
-            (let [result (explain)]
-              (is (= "waiting" (:disposition result)))
-              (is (= "operator" (get-in result [:next :role])))
-              (is (= "May this scope change?" (get-in result [:attention :question])))
-              (is (false? (get-in result [:cause :auto-run-failure])))
-              (is (= "stopped" (get-in result [:agents :lineages 0 :status])))
-              (is (true? (get-in result [:agents :lineages 0 :settled])))))
-          (weaver/update! rt (:id gate)
-                          {:attributes {:gate/error "Validation exited 1"
-                                        :shell/exit-code 1 :shell/argv ["false"]}})
-          (weaver/update! rt (:id card)
-                          {:attributes {:auto-run/failure "true"}})
-          (testing "failure and decision coexist"
-            (let [result (explain)]
-              (is (= "failed" (:disposition result)))
-              (is (true? (get-in result [:attention :needs-decision])))
-              (is (= "present" (get-in result [:cause :evidence-status])))
-              (is (= (:id gate) (get-in result [:cause :evidence 0 :step])))))
-          (weaver/update! rt (:id card)
-                          {:attributes {:auto-run/needs-decision nil
-                                        :auto-run/decision-question nil
-                                        :auto-run/decision-role nil}})
-          (testing "resolving attention leaves genuine failure and history"
-            (let [result (explain)]
-              (is (= "failed" (:disposition result)))
-              (is (false? (get-in result [:attention :needs-decision])))
-              (is (= "Historical preparation failure"
-                     (get-in result [:admission :receipt :error])))
-              (is (= note (weaver/show rt (:id note))))
-              (is (= run (weaver/show rt (:id run))))))
-          (weaver/update! rt (:id gate) {:attributes {:gate/error nil}})
-          (weaver/update! rt (:id card)
-                          {:attributes {:auto-run/workflow-run-id nil}})
-          (testing "a signal alone cannot establish failure"
-            (let [result (explain)]
-              (is (= "unknown" (:disposition result)))
-              (is (true? (get-in result [:cause :auto-run-failure])))
-              (is (= "unknown" (get-in result [:cause :evidence-status])))))
-          (weaver/update! rt (:id card)
-                          {:attributes (assoc decision
-                                              :auto-run/decision-role "human"
-                                              :auto-run/failure nil)})
-          (testing "resolving failure leaves independent human attention"
-            (let [result (explain)]
-              (is (= "waiting" (:disposition result)))
-              (is (true? (get-in result [:attention :needs-decision])))
-              (is (= "human" (get-in result [:next :role])))
-              (is (false? (get-in result [:cause :auto-run-failure]))))))))))
+                                             :harness/settled "true"}})
+            snapshot #(vector (weaver/list rt [:not [:missing :id]] {})
+                              (scheduler/pending rt))
+            explain #(let [before (snapshot)
+                           result (auto-run/explain rt (:id card))]
+                       (is (= before (snapshot)))
+                       result)]
+        (patterns/weave! rt :auto-run-unknown-failure
+                         {:strand (:id card) :evidence (:id evidence)})
+        (let [result (explain)]
+          (is (= {:blocked true :status "unknown-failure"
+                  :evidence (select-keys evidence [:id :title])}
+                 (:agent-blocker result)))
+          (is (= "waiting" (:disposition result)))
+          (is (empty? (get-in result [:cause :evidence])))
+          (is (true? (get-in result [:agents :lineages 0 :settled]))))
+        (weaver/update! rt (:id run) {:attributes {:harness/status "failed"
+                                                  :harness/error "Provider crashed"}})
+        (patterns/weave! rt :auto-run-needs-decision
+                         {:strand (:id card) :evidence (:id evidence)})
+        (let [result (explain)]
+          (is (= "failed" (:disposition result)))
+          (is (= "needs-decision" (get-in result [:agent-blocker :status])))
+          (is (= (:id run) (get-in result [:cause :evidence 0 :run])))
+          (is (= "Historical preparation failure" (get-in result [:admission :receipt :error]))))
+        (patterns/weave! rt :auto-run-unblock {:strand (:id card)})
+        (let [result (explain)]
+          (is (= {:blocked false} (:agent-blocker result)))
+          (is (= "failed" (:disposition result)))
+          (is (= evidence (weaver/show rt (:id evidence)))))))))
 
-(deftest malformed-supported-signals-fail-visibly
+(deftest incomplete-blockers-and-missing-evidence-fail-visibly
   (with-world
     (fn [rt _config]
-      (doseq [attrs [{:auto-run/failure "false"}
-                    {:auto-run/needs-decision "yes"}
-                    {:auto-run/needs-decision "true"}
-                    {:auto-run/needs-decision "true"
-                     :auto-run/decision-question " " :auto-run/decision-role "human"}
-                    {:auto-run/needs-decision "true"
-                     :auto-run/decision-question "Question?" :auto-run/decision-role "worker"}
-                    {:auto-run/decision-question "Orphan?"}
-                    {:auto-run/decision-role "human"}]]
+      (doseq [attrs [{:auto-run/agent-blocked "false"}
+                    {:auto-run/agent-blocked "true"}
+                    {:auto-run/agent-blocked "true" :auto-run/agent-blocked-status "other"
+                     :auto-run/agent-evidence "missing"}
+                    {:auto-run/agent-blocked-status "needs-decision"}
+                    {:auto-run/agent-evidence "orphan"}]]
         (let [card (card! rt attrs)]
-          (is (thrown-with-msg? clojure.lang.ExceptionInfo
-                               #"Malformed auto-run cause/decision representation"
-                               (auto-run/explain rt (:id card)))))))))
+          (is (thrown-with-msg? clojure.lang.ExceptionInfo #"Invalid agent blocker"
+                               (reporting/read-blocker rt card)))))
+      (let [card (card! rt {:auto-run/agent-blocked "true"
+                            :auto-run/agent-blocked-status "needs-decision"
+                            :auto-run/agent-evidence "missing"})]
+        (is (thrown-with-msg? clojure.lang.ExceptionInfo #"Agent evidence strand not found"
+                             (reporting/read-blocker rt card)))))))
 
 (deftest wktree-output-is-a-strict-boundary
   (is (= {:cwd "/tmp/feature" :branch "auto/abc" :script nil}

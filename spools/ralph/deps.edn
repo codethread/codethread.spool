@@ -1,6 +1,6 @@
 {:paths ["src"]
  :deps {io.millstrand/millstrand {:git/url "https://github.com/codethread/millstrand.git"
-                                  :git/sha "8e220eab7de2fabe7880c6a4c71de6cd903c34bb"}
+                                  :git/sha "4e514da409c4c687298617031687b9c2fb15ad7b"}
         millhouse.spools/workflow {:git/url "https://github.com/codethread/millhouse.spool.git"
                                    :git/sha "bd96f5357a335bd17cd22042da1be5bd2200f807"
                                    :deps/root "spools/workflow"}}

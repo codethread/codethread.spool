@@ -17,7 +17,7 @@
             [millstrand.api.millstrand.alpha :as millstrand]
             [millstrand.api.runtime.alpha :as runtime]
             [millstrand.api.scheduler.alpha :as scheduler]
-            [millstrand.api.spool.alpha :refer [attr-get attr-key->str fail! require-valid!]]
+            [millstrand.api.spool.alpha :refer [attr-get fail! require-valid!]]
             [millstrand.api.weaver.alpha :as weaver])
   (:import [java.time Instant]
            [java.util UUID]))
@@ -48,48 +48,16 @@
 (s/def ::cwd ::text)
 (s/def ::branch ::text)
 (s/def ::prepared (s/keys :req-un [::cwd ::branch]))
-(s/def ::signal (s/nilable #{"true"}))
-
-(millstrand/defhook derive-labels
-  "Derive board labels from changed autorun signals in the same mutation.
-
-  Consumers explicitly select this hook. Omitted signals leave labels alone;
-  removing a signal removes its label. Other attributes pass through."
-  {:types #{:attributes/normalize}}
-  [{:keys [hook/value]}]
-  {:hook/value
-   (reduce-kv
-    (fn [attrs key signal]
-      (if-let [label (case (attr-key->str key)
-                      "auto-run/failure" "kanban.label/auto-run-failure"
-                      "auto-run/needs-decision" "kanban.label/needs-decision"
-                      nil)]
-        (assoc (dissoc attrs label (keyword label)) label
-               (require-valid! ::signal signal "Invalid autorun signal"))
-        attrs))
-    value value)})
-
 (assignment/def-assign-policy auto-run-workflow
   "Follow the repository-selected workflow supplied with your assignment.
 
-  When you cannot continue, record the evidence or decision context in an
-  attributed note first, then set the appropriate signals:
+  If blocked, save the context on an evidence strand, then use
+  `strand weave` with `auto-run-needs-decision` or `auto-run-unknown-failure`.
+  Both take `strand` (the work strand ID) and `evidence` (the evidence strand ID).
+  Use `strand pattern explain <name>` for the input contract. Publish the blocker
+  as your final work-card mutation, return a brief handoff, and end your run.
 
-  - Decision needed: set auto-run/needs-decision to the string true,
-    auto-run/decision-question to the exact nonblank question, and
-    auto-run/decision-role to human or operator. The note records the question
-    and context; the role names responsibility, not actor identity.
-  - Execution or validation failure: set auto-run/failure to the
-    string true in a separate final card update, after all other attributes and
-    notes are saved. The note identifies the failed operation, attempt, current
-    workflow and evidence.
-
-  Return a brief handoff and end your run.
-
-  Both signals may coexist. Resolve each independently with an attributed note
-  of the answer or resolution evidence. Remove the resolved signal attribute;
-  resolving needs-decision also removes its question and role attributes.
-  Preserve the notes as history.")
+  Use `auto-run-unblock` to clear a resolved blocker; it preserves the evidence.")
 
 (declare scan! wake!)
 

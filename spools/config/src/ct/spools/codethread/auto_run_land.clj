@@ -125,9 +125,9 @@
      for card {card}, the recorded PR/head,
      branch {branch} and worktree {worktree}, with accepted immutable-range basic
      review evidence. A mismatch requires explicit recovery; retain the existing
-     receipts and run. Keep signoff pending while auto-run/failure or
-     auto-run/needs-decision is set. A finisher is not the delivery worker: do not
-     replace the card's auto-run/run-id with your own run.
+     receipts and run. Keep signoff pending while auto-run/agent-blocked is set.
+     A finisher is not the delivery worker: do not replace the card's
+     auto-run/run-id with your own run.
 
      Use the existing authorization: read workflow choices and approve signoff
      with the exact PR and squash message. Drive THAT land run through its FIFO

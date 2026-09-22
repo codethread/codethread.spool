@@ -2,13 +2,17 @@
   "Activate bounded automatic delivery for this repository."
   (:require [clojure.java.io :as io]
             [ct.spools.codethread.auto-run :as auto-run]
+            [ct.spools.codethread.auto-run-reporting :as reporting]
             [ct.spools.codethread.auto-run-worktree]
             [millhouse.spools.workflow :as workflow]
             [millstrand.api.lifecycle.alpha :as lifecycle]
             [millstrand.api.millstrand.alpha :as millstrand]))
 
 (millstrand/use-op! auto-run/auto-run)
-(millstrand/use-hook! auto-run/derive-labels)
+(millstrand/use-hook! reporting/derive-labels)
+(millstrand/use-pattern! reporting/auto-run-needs-decision
+                         reporting/auto-run-unknown-failure
+                         reporting/auto-run-unblock)
 
 (defn desired-config
   "Return the checked-in automatic delivery configuration."

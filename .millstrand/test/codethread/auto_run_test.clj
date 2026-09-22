@@ -1,6 +1,7 @@
 (ns codethread.auto-run-test
   "Exercise repository auto-run startup in a disposable Weaver world."
-  (:require [clojure.edn :as edn]
+  (:require [clojure.data.json :as json]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.string :as str]
@@ -120,6 +121,16 @@
                (get-in status [:config :workflows])))
         (is (empty? (:cards status)))
         (is (empty? (:dispatched (auto-run/scan! rt)))))
+      (testing "repository activation exposes the complete reporting pattern"
+        (let [card (weaver/add! rt {:title "Work"})
+              evidence (weaver/add! rt {:title "Decision context"})]
+          (weaver/op! rt 'weave
+                      ["--pattern" "auto-run-needs-decision" "--input"
+                       (json/write-str {:strand (:id card) :evidence (:id evidence)})])
+          (let [reported (weaver/show rt (:id card))]
+            (is (= "needs-decision" (attr-get reported :auto-run/agent-blocked-status)))
+            (is (= (:id evidence) (attr-get reported :auto-run/agent-evidence)))
+            (is (= "true" (attr-get reported :kanban.label/agent-blocked))))))
       (current/with-runtime rt
         (let [result (workflow/start!
                       "test-auto-full-land" :auto-full-land

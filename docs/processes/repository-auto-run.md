@@ -48,7 +48,7 @@ strand workflow show auto-human-review
 
 `assigned` is a durable admission receipt, not worker liveness. Inspect the
 recorded Harnesses run and workflow run for current state. The repository selects
-Codethread's shared [signalling contract and label hook](auto-run.md#cause-and-current-attention).
+Codethread's shared [agent blocker patterns and label hook](auto-run.md#agent-blocker-contract).
 Full-land failures retain resources and merge custody for explicit recovery.
 
 Startup is covered by a disposable in-memory Weaver world:

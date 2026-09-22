@@ -146,12 +146,10 @@ Start with an ordinary worker-owned implementation step, not a second
 worker-launching agent gate. The worker receives the exact workflow run ID and
 must drive it rather than invent another process.
 
-The shared assignment policy points to that run and defines only the
-[card signalling contract](#cause-and-current-attention): literal attributes,
-values, evidence, attribution and resolution. When an agent cannot continue,
-the shared handoff rule is evidence first, signals last, then end the run.
-Agents use ordinary Strand attributes and notes; there is no separate
-signalling operation. Repository workflow instructions otherwise own how work
+The shared assignment policy points to that run and the
+[agent blocker patterns](#agent-blocker-contract). Save evidence, publish the
+complete blocker through a pattern as the final mutation, then end the run.
+Repository workflow instructions otherwise own how work
 proceeds, including outputs, delegation, completion, checkpoints, resource
 handling and recovery.
 
@@ -229,61 +227,68 @@ available receipt-based capacity, and allowed seat/workflow settings. The latest
 Kanban ownership claim is authoritative; legacy `owner`, reporter, and actor
 attributes are not.
 
-### Cause and current attention
+### Agent blocker contract
 
-Agents report through these independent source attributes:
+Agent reporting is a discriminated union, separate from dispatcher status and
+Harnesses run status. The discriminator is `auto-run/agent-blocked-status` when
+`auto-run/agent-blocked` is set.
 
-| Attribute | Allowed values | Meaning |
+| Variant | `auto-run/agent-blocked` | `auto-run/agent-blocked-status` | `auto-run/agent-evidence` |
+| --- | --- | --- | --- |
+| Unblocked | absent | absent | absent |
+| Needs a decision | `"true"` | `"needs-decision"` | Existing evidence strand ID, required |
+| Unknown failure | `"true"` | `"unknown-failure"` | Existing evidence strand ID, required |
+
+A blocked agent cannot continue. `needs-decision` asks for a decision;
+`unknown-failure` reports a problem the agent cannot resolve. Neither value
+asserts that the dispatcher or harness failed. The variants are mutually
+exclusive. Partial states, `"false"`, and unknown status values are invalid.
+
+Evidence may live on a note, a Kanban card, or any other strand in the workspace.
+The attribute contains only that strand's ID. Its title gives tooling a useful
+summary; its contents carry the question, context, or investigation evidence.
+There are no separate question or responsible-role attributes.
+
+Save the evidence first, then publish the blocker as the final work-card mutation
+using a registered pattern. The pattern sets all three attributes together;
+then the agent returns a brief handoff and ends its run.
+
+| Pattern | Input | Result |
 | --- | --- | --- |
-| `auto-run/failure` | `"true"` or absent | Execution or validation failure, supported by an attributed evidence note. |
-| `auto-run/needs-decision` | `"true"` or absent | A decision is needed; requires the question and role below. |
-| `auto-run/decision-question` | nonblank string | The exact question requiring an answer. |
-| `auto-run/decision-role` | `human`, `operator` | Responsibility for answering, not actor identity. |
+| `auto-run-needs-decision` | `strand`, `evidence` | Publish the decision variant |
+| `auto-run-unknown-failure` | `strand`, `evidence` | Publish the unknown-failure variant |
+| `auto-run-unblock` | `strand` | Remove all three blocker attributes |
 
-When an agent cannot continue, it records evidence or decision context in an
-attributed note first. Failure evidence identifies the failed operation,
-concrete attempt and current workflow. Any decision attributes are saved next.
-**`auto-run/failure` is a separate final card update**, after all other notes and
-attributes. The agent then returns a brief handoff and ends its run.
-
-Both signals may coexist. Resolve each independently with an attributed answer
-or resolution note, then remove that signal. Resolving a decision also removes
-its question and role. Preserve notes and execution history. Neither an
-unanswered question nor an ordinary checkpoint establishes a failure or grants
-recovery authority. A signal alone is not proof that the worker has settled.
-
-Explanation reads these source attributes, not display labels. It rejects
-malformed signals, missing/blank decision fields and orphaned decision fields.
-Recorded failure still requires corroborating producer evidence to classify
-execution as failed.
+Use `strand pattern explain <name>` for the checked input contract and
+`strand weave --pattern <name> --input <json>` to apply it. Reporting patterns
+require existing target and evidence strands. Unblocking preserves the evidence
+strand. None of these patterns starts or resumes an agent.
 
 ### Derived board labels
 
-Each repository's autorun module explicitly selects the shared hook:
+Each repository explicitly selects the shared reporting patterns and label hook
+in its autorun module. Pattern definitions and the hook are inert until selected:
 
 ```clojure
-(millstrand/use-hook! auto-run/derive-labels)
+;; reporting aliases ct.spools.codethread.auto-run-reporting
+(millstrand/use-pattern! reporting/auto-run-needs-decision
+                         reporting/auto-run-unknown-failure
+                         reporting/auto-run-unblock)
+(millstrand/use-hook! reporting/derive-labels)
 ```
 
-Here `auto-run` aliases `ct.spools.codethread.auto-run` and `millstrand` aliases
-`millstrand.api.millstrand.alpha`. The definition is inert until selected;
-requiring Codethread or using Land does not activate it.
+The hook derives `kanban.label/agent-blocked` for either blocked variant and
+`kanban.label/needs-decision` only for `needs-decision`. Unblocking removes both
+labels. Source attributes and labels commit atomically, after evidence exists;
+agents do not maintain labels themselves. Unrelated labels are unchanged.
 
-The `:attributes/normalize` hook maps changed `auto-run/failure` and
-`auto-run/needs-decision` attributes to `kanban.label/auto-run-failure` and
-`kanban.label/needs-decision`. Source and label are saved atomically; removing a
-source attribute removes its label. Omitted signals and unrelated labels are
-unchanged. Agents do not maintain these display labels.
+A blocker signal does not prove that the worker has settled. A consumer starting
+follow-up work must verify settlement through Harnesses. Admission's
+`kanban.label/auto-run` opt-in and pickup/scheduling behavior are unchanged.
 
-The final failure write therefore publishes the label only after the handoff
-context is saved. A consumer starting follow-up work must still verify worker
-settlement through Harnesses. Admission's `kanban.label/auto-run` opt-in and the
-dispatcher's pickup/scheduling behavior are unchanged.
-
-These source rules apply to newly activated guidance. Existing label-only cards
-and frozen assignments need a separate planned cutover before activating this
-contract. Source changes do not rewrite them, refresh/restart Weavers or launch
-recovery. The bounded recovery work remains separately authorized.
+The contract applies to newly activated guidance. Existing cards and frozen
+assignments are outside this source change; runtime activation and the sibling
+rollout are separate steps.
 
 ### Dispatcher attributes
 
@@ -345,17 +350,13 @@ The JSON schema is `codethread.auto-run.explain/v1`. It reports the workspace,
 card, observation time, admission predicates and receipt-based capacity,
 accepted agent lineages, exact Workflow frontier/history, optional Land
 evidence, recorded external references, runtime status, and the next responsible
-role. `signals` reports the validated canonical board representation. `cause`
-reports the `auto-run-failure` boolean independently of current producer failure
-`evidence` (accepted failed Harnesses heads and ready gates with recorded
-`gate/error`). `evidence-status` is `present` with such evidence, otherwise
-`unknown`; absence is not proof of success. Gate evidence includes the retained
-attributes identifying its request, executor result and attempt when recorded.
-`attention` reports `needs-decision` independently, with the exact `question`,
-responsible `role`, recorded basis and a command to inspect attributed notes.
-An explicit decision selects the next responsible role but never erases failure
-evidence or changes agent settlement. Neither projection grants retry authority.
-Historical errors are separate from current accepted-head failures.
+role. `agent-blocker` reports the validated agent union and resolves its evidence
+strand to an ID and title. `cause.evidence` contains only current failed
+Harnesses heads; `evidence-status` is `present` when such failures exist and
+`unknown` otherwise. Workflow gates remain owned by Workflow and are not
+interpreted as autorun failures. An agent blocker does not change Harnesses
+status or settlement. Historical run errors remain separate from current
+accepted-head failures.
 Recorded PR/head/review/check references are labelled `recorded`; this command
 does not poll GitHub, inspect processes, run recovery, or scan the dispatcher.
 
