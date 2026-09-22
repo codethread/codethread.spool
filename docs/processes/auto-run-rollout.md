@@ -7,8 +7,10 @@ receipts, capacity and scheduling remain unchanged.
 ## Approved rollout
 
 The Millstrand weave update and Codethread reporting contract are published.
-The Millhouse pilot was reviewed and approved on 2026-09-22. Apply that approach
-to the remaining consumers using the source maps on their feature cards.
+The Millhouse pilot was reviewed and approved on 2026-09-22. The approved
+approach is now rolled out across the consumers below. All eight discovered
+Weavers were restarted and verified; commits, checks and runtime generations
+are recorded on the repository features under coordination epic `s92hn`.
 
 | Repository | Scope |
 | --- | --- |
@@ -42,5 +44,5 @@ Verify pattern discovery and reporting in a disposable world first. Existing
 running assignments retain their frozen guidance until an
 explicitly planned handoff or completion.
 
-The prior Millhouse documentation PR overlaps this cleanup; record its
-supersession on the Millhouse feature before deciding its disposition.
+Millhouse PR 47 and its superseded tracking card are closed. Their history is
+retained; the accepted pilot and rollout are recorded on the Millhouse feature.
