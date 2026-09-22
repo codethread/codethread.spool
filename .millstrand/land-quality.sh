@@ -8,4 +8,4 @@ echo "==> git diff --check"
 git diff --check
 
 echo "==> make quality"
-make quality
+flock -w 180 /tmp/millstrand-test.lock make quality
