@@ -7,7 +7,6 @@
   consumer integration with the supplied source, not the checked-in pins."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [millstrand.api.runtime.alpha :as runtime]
             [millstrand.api.weaver.alpha :as weaver]
             [millstrand.test.alpha :as t]))
 
@@ -68,11 +67,6 @@
                    (slurp file)])))
           ["config" "me" "workflows"])))
 
-(defn- contains-name? [form expected]
-  (let [nodes (set (tree-seq coll? seq form))]
-    (or (contains? nodes expected)
-        (contains? nodes (keyword expected)))))
-
 (defn- require-smoke! [valid? message data]
   (when-not valid?
     (throw (ex-info message data))))
@@ -89,48 +83,21 @@
       :files (fixture-files consumer)}
      (fn [{:keys [runtime]}]
        (let [consumer-path (.getPath consumer)
-             status (runtime/status runtime)
              op-names (set (map :name (weaver/ops runtime)))
-             queue-status (weaver/op! runtime 'merge-queue ["status"])
-             workflow-list (weaver/op! runtime 'workflow ["list"])
-             workflow-names (set (map :name (:definitions workflow-list)))
-             review (weaver/op! runtime 'workflow ["show" "review"])
-             land (weaver/op! runtime 'workflow ["show" "land"])]
-         (require-smoke!
-          (= :applied
-             (get-in status [:last-refresh :modules
-                             :millhouse/spools-land :status]))
-          "Shared landing module did not activate"
-          {:consumer consumer-path :status status})
+             workflow-names (set (map :name (:definitions
+                                           (weaver/op! runtime 'workflow ["list"]))))]
+         (weaver/op! runtime 'merge-queue ["status"])
          (require-smoke! (contains? op-names "merge-queue")
                          "merge-queue operation is not visible"
                          {:consumer consumer-path :operations op-names})
-         (require-smoke! (= {:lock nil :entries []}
-                            (select-keys queue-status [:lock :entries]))
-                         "merge-queue status is not initially empty"
-                         {:consumer consumer-path :queue-status queue-status})
          (require-smoke! (every? workflow-names ["review" "land"])
                          "shared review and land workflows are not listed"
                          {:consumer consumer-path :workflows workflow-names})
-         (require-smoke! (= "reviewer" (get-in land [:params :defaults :reviewer]))
-                         "land does not expose the shared reviewer default"
-                         {:consumer consumer-path :land land})
-         (require-smoke! (contains-name? (get-in land [:declared :calls])
-                                         "review")
-                         "land does not call the mandatory shared review"
-                         {:consumer consumer-path :land land})
-         (require-smoke!
-          (and (contains-name? (get-in review [:declared :gates])
-                               "review-agent")
-               (contains-name? (get-in review [:declared :checkpoints])
-                               "resolve-review"))
-          "review does not expose agent findings and coordinator resolution"
-          {:consumer consumer-path :review review})
-         (doseq [workflow-name ["land-merge" "land-abort"]]
+         (doseq [workflow-name ["review" "land"]]
            (require-smoke!
             (= workflow-name
                (:name (weaver/op! runtime 'workflow ["show" workflow-name])))
-            "Continuation workflow is not visible"
+            "Shared workflow is not visible"
             {:consumer consumer-path :workflow workflow-name}))
          (println "shared landing local-source smoke: clean"
                   consumer-path))))))

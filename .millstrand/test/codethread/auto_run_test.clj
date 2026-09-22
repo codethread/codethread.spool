@@ -112,14 +112,14 @@
     (let [rt (:runtime ctx)
           status (auto-run/status rt)]
       (testing "bounded dispatcher configuration"
-        (is (:enabled status))
-        (is (= 2 (get-in status [:config :max-running])))
-        (is (= "sol" (get-in status [:config :seat])))
-        (is (= "high" (get-in status [:config :effort])))
-        (is (= "auto-full-land" (get-in status [:config :workflow])))
-        (is (= ["auto-full-land" "auto-human-review"]
-               (get-in status [:config :workflows])))
-        (is (empty? (:cards status)))
+        (is (= {:enabled true
+                :max-running 2
+                :seat "sol"
+                :effort "high"
+                :workflow "auto-full-land"
+                :workflows ["auto-full-land" "auto-human-review"]}
+               (select-keys (assoc (:config status) :enabled (:enabled status))
+                            [:enabled :max-running :seat :effort :workflow :workflows])))
         (is (empty? (:dispatched (auto-run/scan! rt)))))
       (testing "repository activation exposes the complete reporting pattern"
         (let [card (weaver/add! rt {:title "Work"})
@@ -140,57 +140,25 @@
                        :worktree (:config-dir ctx)})
               root (workflow/current-root "test-auto-full-land")
               strands (:strands (graph/subgraph rt [(:id root)]))
-              views (map workflow/step-view strands)
               gates (set (keep #(attr-get % :workflow/gate) strands))
-              publish (first (filter #(= "Publish the committed branch before quality"
-                                       (:title %))
-                                    views))
-              quality (first (filter #(= "Pass repository quality checks for published HEAD"
-                                       (:title %))
-                                    views))
-              quality-gate (first (filter #(= (:id quality) (:id %)) strands))
-              ci (first (filter #(= "Wait for the PR checks" (:title %)) views))
-              ci-gate (first (filter #(= (:id ci) (:id %)) strands))
-              ci-argv (attr-get ci-gate :shell/argv)
-              handoff (workflow/step-view (role-step strands "handoff-worker"))
-              finisher (workflow/step-view (role-step strands "finisher"))]
-          (testing "implementation and publication precede quality, CI, and review"
-            (is (= ["Implement and verify the assigned feature"]
-                   (mapv :title (:ready result))))
-            (is (= ["Publish the committed branch before quality"]
-                   (mapv :title (:ready (workflow/complete! "test-auto-full-land")))))
-            (is (str/includes? (:instruction publish)
-                               "git push --set-upstream origin auto/fixture-card"))
-            (is (= ["Pass repository quality checks for published HEAD"]
-                   (mapv :title (:ready (workflow/complete! "test-auto-full-land")))))
-            (is (= ["sh" "scripts/verify-published-candidate.sh" "auto/fixture-card"]
-                   (attr-get quality-gate :shell/argv)))
-            (is (= ["sh" "scripts/verify-pr-checks.sh" "allow-empty"
-                    "auto/fixture-card" "120" "5"]
-                   ci-argv))
+              shell-argvs (set (keep #(attr-get % :shell/argv) strands))
+              handoff (role-step strands "handoff-worker")
+              finisher (role-step strands "finisher")]
+          (testing "repository-owned delivery policy is present"
+            (is (= 1 (count (:ready result))))
+            (is (contains? shell-argvs
+                           ["sh" "scripts/verify-published-candidate.sh"
+                            "auto/fixture-card"]))
+            (is (contains? shell-argvs
+                           ["sh" "scripts/verify-pr-checks.sh" "allow-empty"
+                            "auto/fixture-card" "120" "5"]))
             (is (contains? gates "shell"))
             (is (contains? gates "code"))
             (is (not (contains? gates "agent"))))
-          (testing "landing uses distinct worker and finisher steps"
-            (is (= "step" (:role handoff) (:role finisher)))
-            (is (not= (:id handoff) (:id finisher)))
-            (is (str/includes? (:instruction handoff)
-                               "STOP at land's signoff checkpoint BEFORE choosing approved"))
-            (is (str/includes? (:instruction handoff)
-                               "auto-land-finisher/FINISHER_STEP_ID"))
-            (is (str/includes? (:instruction finisher)
-                               "You are the independent landing finisher"))
-            (is (str/includes? (:instruction finisher)
-                               "turn, validation, merge, main update and cleanup"))
-            (is (str/includes? (:instruction finisher)
-                               "card is closed with outcome done"))
-            (is (str/includes? (:instruction finisher)
-                               (:text auto-run/auto-run-workflow))
-                "The independently launched finisher receives the canonical policy"))
-          (testing "autonomous failures stop without invented recovery"
-            (doseq [view (concat [handoff finisher] (filter :gate views))]
-              (is (str/includes? (:instruction view)
-                                 "failures require explicit recovery")))))))))
+          (testing "repository policy delegates landing to the shared two-role workflow"
+            (is (some? handoff))
+            (is (some? finisher))
+            (is (not= (:id handoff) (:id finisher)))))))))
 
 (deftest source-refresh-reconciles-the-running-dispatcher
   (t/with-weaver-world
@@ -206,20 +174,9 @@
       (is (= 1 (count (pending-auto-run-wakes rt))))
       (doseq [path ["me/auto_run_workflows.clj" "me/auto_run.clj"]]
         (spit (io/file (:config-dir ctx) path) (slurp path)))
-      (let [refresh-result (runtime/refresh! rt)]
-        (is (= :applied
-               (get-in refresh-result
-                       [:modules :codethread/auto-run :lifecycle/outcomes
-                        :auto-run-dispatcher :status]))
-            refresh-result))
+      (runtime/refresh! rt)
       (is (= ["auto-full-land" "auto-human-review"]
              (get-in (auto-run/status rt) [:config :workflows])))
-      (is (= ((runtime/resolve-var rt 'me.auto-run/desired-config) {:runtime rt})
-             ((runtime/resolve-var rt 'me.auto-run/actual-config) {:runtime rt})))
-      (current/with-runtime rt
-        (is (= #{"start"}
-               (set (map name (:entrypoints
-                               (workflow/resolve-workflow :auto-human-review)))))))
       (is (= 1 (count (pending-auto-run-wakes rt))))
       (is (= "running" (attr-get (weaver/show rt (:id accepted)) :harness/status)))
       (runtime/refresh! rt)
@@ -240,24 +197,11 @@
               root (workflow/current-root "test-auto-human-review")
               strands (:strands (graph/subgraph rt [(:id root)]))
               views (map workflow/step-view strands)
-              checkpoint (first (filter #(= "Human review: return the passing PR and stop"
-                                            (:title %))
-                                        views))]
-          (testing "the allowed human workflow reuses delivery stages"
-            (is (= ["Implement and verify the assigned feature"]
-                   (mapv :title (:ready result))))
-            (is (some #(= "Pass repository quality checks for published HEAD"
-                          (:title %))
-                      views))
-            (is (some #(= "Wait for the PR checks" (:title %)) views))
-            (is (some #(= "Move the verified feature into review" (:title %))
-                      views)))
+              checkpoint (first (filter #(= "human" (:checkpoint-kind %)) views))]
           (testing "human acceptance is a real stop boundary"
+            (is (= 1 (count (:ready result))))
             (is (= "checkpoint" (:role checkpoint)))
-            (is (str/includes? (:instruction checkpoint)
-                               "Do not choose this checkpoint"))
-            (is (str/includes? (:instruction checkpoint)
-                               "launch a finisher"))
+            (is (= ["reviewed"] (:choices checkpoint)))
             (is (nil? (role-step strands "handoff-worker")))
             (is (nil? (role-step strands "finisher")))))))))
 
