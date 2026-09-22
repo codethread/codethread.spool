@@ -53,16 +53,18 @@
   "Follow the repository-selected workflow supplied with your assignment.
 
   When you cannot continue, record the evidence or decision context in an
-  attributed note first. Set the appropriate signals below as your final card
-  updates, then return a brief handoff and end your run.
+  attributed note first, then set the appropriate signals:
 
-  - Execution or validation failure: set kanban.label/auto-run-failure to the
-    string true. The note identifies the failed operation, attempt, current
-    workflow and evidence.
   - Decision needed: set kanban.label/needs-decision to the string true,
     auto-run/decision-question to the exact nonblank question, and
     auto-run/decision-role to human or operator. The note records the question
     and context; the role names responsibility, not actor identity.
+  - Execution or validation failure: set kanban.label/auto-run-failure to the
+    string true in a separate final card update, after all other attributes and
+    notes are saved. The note identifies the failed operation, attempt, current
+    workflow and evidence.
+
+  Return a brief handoff and end your run.
 
   Both signals may coexist. Resolve each independently with an attributed note
   of the answer or resolution evidence. Remove the resolved label attribute;

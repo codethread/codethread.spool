@@ -237,10 +237,13 @@ The canonical vocabulary is `auto-run-failure` and `needs-decision`. They are
 independent labels, not delivery dispositions, and may coexist.
 
 When an agent cannot continue, it records the evidence or decision context in
-an attributed note first, sets the appropriate signals as its final card
-updates, then returns a brief handoff and ends its run. The labels do not prove
-that the process has exited: a consumer starting follow-up work must still
-verify the prior worker's settlement through Harnesses.
+an attributed note first and saves any decision attributes. If reporting a
+failure, it sets `kanban.label/auto-run-failure` to the string `true` in a
+separate final card update, after all other attributes and notes are saved.
+This ordering lets future consumers observe the complete handoff when the
+failure label appears. The agent then returns a brief handoff and ends its run.
+The labels do not prove that the process has exited: a consumer starting
+follow-up work must still verify the prior worker's settlement through Harnesses.
 
 | Current decision field | Allowed values | Meaning |
 | --- | --- | --- |
