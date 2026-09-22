@@ -24,19 +24,22 @@ Each consumer selects `ct.spools.codethread.auto-run-reporting` patterns and its
 import `ct.spools.codethread.auto-run-land`. Standalone Land has no reporting
 requirement. Use the published revisions recorded on the epic and feature cards.
 
-## Before runtime activation
+## Runtime activation
 
 Source publication does not update running Weavers or frozen assignments.
-Before an explicitly authorized cutover, inspect active runs and existing
-reporting attributes. Where a current blocker must be retained, save or identify
+The coordinator is authorized to update dependency pins and restart Weavers,
+including aligning sibling dependencies together when needed to clear blockers.
+This does not expand the policy rollout beyond the Millhouse review checkpoint.
+
+At cutover, inspect active runs and existing reporting attributes. Where a
+current blocker must be retained, save or identify
 its evidence strand and publish exactly one new variant; remove the obsolete
 flags, question/role attributes and failure display label as part of that
 reviewed conversion. Retain the evidence itself. Do not infer a failure from
 an ordinary checkpoint or an unrelated UI inspection result.
 
-Activate the new dependency basis and module configuration only with the user's
-runtime approval. Verify pattern discovery and reporting in a disposable world
-first. Existing running assignments retain their frozen guidance until an
+Verify pattern discovery and reporting in a disposable world first. Existing
+running assignments retain their frozen guidance until an
 explicitly planned handoff or completion.
 
 The prior Millhouse documentation PR overlaps this cleanup; record its
