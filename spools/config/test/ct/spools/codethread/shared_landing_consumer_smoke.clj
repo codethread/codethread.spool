@@ -33,7 +33,8 @@
                   coordinates))))
 
 (defn- local-overrides [{:keys [codethread devflow harnesses millhouse]}]
-  {'millhouse.spools/workflow (local-root millhouse "spools/workflow")
+  {'millhouse.spools/auto-run (local-root millhouse "spools/auto-run")
+   'millhouse.spools/workflow (local-root millhouse "spools/workflow")
    'millhouse.spools/identity (local-root millhouse "spools/identity")
    'millhouse.spools/kanban (local-root millhouse "spools/kanban")
    'millhouse.spools/land (local-root millhouse "spools/land")
