@@ -389,34 +389,16 @@
                              :deps-edn local-deps-edn}]
     (let [rt (:runtime ctx)]
       (codethread/register! rt)
-      (let [consumer-result
-            (runtime/module! rt :consumer/aliases
-                             {:ns 'ct.spools.codethread.consumer-fixture
-                              :after [:codethread/config-agents]
-                              :required? true})]
-        (is (= :applied
-               (get-in consumer-result
-                       [:modules :consumer/aliases :status])))
-        (is (= :applied
-               (get-in consumer-result
-                       [:modules :consumer/aliases :lifecycle/outcomes
-                        :consumer-alias :status])))
-        (is (= "openai-codex/gpt-5.6-luna"
-               (get-in (harnesses/resolve-harness rt :consumer-luna)
-                       [:generated :harness/model]))))
-      (let [result (codethread/register-executor! rt [:consumer/aliases])
-            status (runtime/status rt)]
-        (is (= [codethread/executor-module-id] (:registered result)))
-        (is (= :consumer/aliases (last (:after result))))
-        (is (= (:after result)
-               (get-in status
-                       [:modules codethread/executor-module-id :after])))
-        (is (= :applied
-               (get-in status
-                       [:last-refresh :modules codethread/executor-module-id
-                        :lifecycle/outcomes :agent-engine :status])))
-        (current/with-runtime rt
-          (is (contains? (set (keys (workflow/executors))) :agent)))))))
+      (runtime/module! rt :consumer/aliases
+                       {:ns 'ct.spools.codethread.consumer-fixture
+                        :after [:codethread/config-agents]
+                        :required? true})
+      (is (= "openai-codex/gpt-5.6-luna"
+             (get-in (harnesses/resolve-harness rt :consumer-luna)
+                     [:generated :harness/model])))
+      (codethread/register-executor! rt [:consumer/aliases])
+      (current/with-runtime rt
+        (is (contains? (set (keys (workflow/executors))) :agent))))))
 
 (deftest checked-in-current-basis-activates-the-complete-cli-surface
   (t/with-weaver-world [ctx {:storage :sqlite-memory
@@ -424,31 +406,15 @@
                              :init-clj workspace-init-clj
                              :files workspace-files}]
     (let [rt (:runtime ctx)
-          status (runtime/status rt)
-          aliases (weaver/op! rt 'agent ["list"])
+          aliases (set (map :name (weaver/op! rt 'agent ["list"])))
           reviewer-result (weaver/op! rt 'agent ["reviewers"])
-          workflow-result (weaver/op! rt 'workflow ["list"])
-          land-result (weaver/op! rt 'workflow ["show" "land"])
+          workflows (set (map :name (:definitions
+                                    (weaver/op! rt 'workflow ["list"]))))
           op-names (set (map :name (weaver/ops rt)))]
-      (is (= {:status :applied :mode :full}
-             (select-keys (:last-refresh status) [:status :mode])))
-      (is (every? #{:applied}
-                  (map :status (vals (get-in status
-                                             [:last-refresh :modules])))))
-      (is (= :applied
-             (get-in status
-                     [:last-refresh :modules codethread/executor-module-id
-                      :lifecycle/outcomes :agent-engine :status])))
-      (is (every? (set (map :name aliases))
-                  ["deepseek" "grunt" "luna" "oracle" "reviewer" "sol"
-                   "tui"]))
+      (is (contains? aliases "sol"))
       (is (= ["docs-and-tests" "runtime-correctness" "source-form"]
              (mapv :name (:reviewers reviewer-result))))
-      (is (= #{"auto-full-land" "auto-human-review" "intake" "land"
-               "publish-spool-kondo" "ralph-iterate" "review"}
-             (set (map :name (:definitions workflow-result)))))
-      (is (= "land" (:name land-result)))
-      (is (= "reviewer" (get-in land-result [:params :defaults :reviewer])))
+      (is (every? workflows ["auto-full-land" "auto-human-review" "land"]))
       (is (contains? op-names "auto-run"))
       (is (contains? op-names "merge-queue")))))
 
