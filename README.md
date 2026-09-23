@@ -144,7 +144,8 @@ worktree preparation, and a concurrency limit; the dispatcher assigns labelled,
 ready features once without a coordinator agent. It is not activated by the
 shared bootstrap.
 
-Activate `codethread/ralph` separately after Millhouse Workflow.
+Activate `codethread/ralph` separately after Millhouse Workflow, with its code
+executor enabled for the checked epic-completion gate.
 
 Ralph validates and hands a committed slice to consumer-owned landing policy.
 It does not own landing or landing evidence. See

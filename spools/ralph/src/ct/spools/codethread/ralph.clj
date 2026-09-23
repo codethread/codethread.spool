@@ -3,8 +3,8 @@
 
   Ralph is the coordinator of its epic: each run orients from live kanban
   state, claims exactly one feature, drives that feature through its validated
-  slice and stops at a judgment point that closes the epic only when no feature
-  cards remain. The Go binary supplies the polling loop; this workflow owns the
+  slice and stops at a judgment point that closes the epic only when every
+  feature has a recorded done outcome. The Go binary supplies the polling loop; this workflow owns the
   work discipline inside one iteration. Durable Kanban claims remain the
   ownership authority; task notes carry consumer-owned handoff evidence."
   (:require [clojure.spec.alpha :as s]
@@ -37,8 +37,8 @@
      slice to the consumer's landing policy.
 
      Ralph does not own landing. The consumer decides how review, merge, and
-     card completion work. The epic closes only after its feature frontier is
-     empty. Keep decisions and handover context on the epic, feature, and
+     card completion work. The epic closes only after every direct feature is closed with outcome done.
+     An empty runnable frontier is not completion evidence. Keep decisions and handover context on the epic, feature, and
      doing-task notes because each iteration starts with a fresh agent.
 
      Run `strand prime ralph` before preparing the epic. Build and start the
@@ -100,16 +100,148 @@
   (and (string? value) (not (str/blank? value))))
 
 (s/def ::epic non-blank-string?)
+(s/def ::feature non-blank-string?)
 (s/def ::ralph-iterate-params (s/keys :req-un [::epic]))
-(workflow/defworkflow! ralph-iterate
-  "Run one Ralph iteration for an epic (family \"ralph\").
+(s/def ::selected-feature (s/keys :req-un [::feature]))
+(s/def ::feature-params (s/keys :req-un [::epic ::feature]))
 
-  The iteration is deliberately one-card wide: orient from the epic's live
-  frontier, claim exactly one feature, work its tasks with the repo's note and
-  cold-gate discipline, and hand the validated slice to the consumer's own
-  landing policy. The final judgment closes the epic only when its feature
-  frontier is empty.
-  Params: `epic` (required epic strand id)."
+(workflow/defworkflow! ralph-finish-epic
+  "Verify all feature outcomes and record Ralph epic completion."
+  {:entrypoints #{:continue} :param-spec ::ralph-iterate-params}
+  (workflow/workflow
+   "Check epic completion"
+   (workflow/gate
+    :finish-epic "Check every feature before closing the epic" :code
+    :attributes
+    {"code/fn" "ct.spools.codethread.ralph.completion/finish-epic!"
+     "code/params" (fn [{:keys [epic]}] {:epic epic})}
+    (format-alpha/prose
+     "
+       Await this checked completion gate. It reads all direct feature children,
+       requires each to be closed with outcome done, and records the child
+       snapshot as ralph/completion on the epic. It never closes children.
+
+       If it fails, leave the epic open and report the unfinished or unaccepted
+       children. Do not bypass it with kanban finish or manual gate completion.
+       Reconcile with the landing owner before explicitly retrying the gate.
+     " {}))))
+
+(defn- epic-judgment [dependencies]
+  (workflow/checkpoint
+   :epic-judgment "Close the epic only after accepted feature outcomes"
+   :depends-on dependencies
+   :kind :agent
+   :choices
+   [{:key :close-epic :label "Check and close the epic"
+     :next :ralph-finish-epic
+     :description "All direct features are closed with outcome done; run the checked close boundary."}
+    {:key :next-iteration :label "Leave the epic open"
+     :description "More runnable work exists, or unfinished work needs landing, waiting, or blocker resolution."}]
+   :attributes
+   {"workflow/decision-point" "ralph-epic-judgment"
+    "workflow/instruction"
+    (fn [{:keys [epic]}]
+      (format-alpha/prose
+       "
+         Read `strand kanban card {epic}` and its direct feature children,
+         including closed children and their kanban/outcome. Separately read
+         `strand ready --query kanban-epic-pending --param epic={epic}`.
+         The ready query selects new work; it does not prove completion.
+
+         Choose close-epic only when every feature is closed with outcome done.
+         The choice starts a checked continuation, not a terminal assertion.
+         Claimed, in-review, in-production, blocked, or other unfinished children
+         prevent completion. Abandoned or unactioned outcomes need coordinator
+         reconciliation rather than automatic acceptance.
+
+         Otherwise record child states, the selected feature's landing handoff,
+         and the next owner/action on the epic, then choose next-iteration. If
+         runnable work exists, the Go loop can select it next. If none exists,
+         leave the epic open and end the reply with `RALPH-STOP: <reason>` naming
+         the landing wait or blocker. Relaunch after that owner resolves it;
+         do not busy-loop or reclaim a feature already handed off.
+       " {:epic epic}))}))
+
+(workflow/defworkflow! ralph-judge-epic
+  "Judge an epic with no runnable pending feature, without claiming new work."
+  {:entrypoints #{:continue} :param-spec ::ralph-iterate-params}
+  (workflow/workflow "Judge the epic's remaining work" (epic-judgment [])))
+
+(workflow/defworkflow! ralph-work-feature
+  "Claim one selected feature, validate its slice, and record a landing handoff."
+  {:entrypoints #{:continue} :param-spec ::feature-params}
+  (workflow/workflow
+   (fn [{:keys [feature]}] (str "Ralph feature: " feature))
+   (workflow/step
+    :claim-feature "Claim exactly the selected feature" :self
+    (fn [{:keys [epic feature]}]
+      (format-alpha/prose
+       "
+         Re-read feature {feature} under epic {epic} and its current ownership.
+         It must still be a ready pending feature. Claim it with your explicit
+         owner/actor, branch, and absolute worktree; assignment is not ownership:
+
+         ```text
+         strand kanban claim {feature} --owner <owner> --by-identity <actor> --branch <branch> --worktree <absolute-path>
+         ```
+
+         Record the claim result on the feature before completing this step.
+         If another owner claimed it, stop and report the conflict; do not reclaim
+         it. Reporter and prior ownership history survive an explicit handoff.
+         Do not claim a second feature in this iteration.
+       " {:epic epic :feature feature})))
+   (workflow/step
+    :work-tasks "Work the claimed feature's ready tasks" :self
+    :depends-on [:claim-feature]
+    (fn [{:keys [feature]}]
+      (format-alpha/prose
+       "
+         Read `strand kanban card {feature}` and its durable current-ownership
+         projection, then `strand ready --query kanban-feature-work --param
+         feature={feature}`. Drive one ready task at a time from its body and
+         latest note. Task assignment is not another feature claim.
+
+         Keep decisions, findings, and resume points in attributed task notes.
+         Use the repository's supported delegation surface, keep sibling scopes
+         disjoint, verify each implemented task, and close it only after its
+         validation is green.
+       " {:feature feature})))
+   (workflow/step
+    :slice-gates "Validate and commit the claimed feature slice" :self
+    :depends-on [:work-tasks]
+    (format-alpha/prose
+     "
+       Run focused cold tests for touched namespaces, then relevant blocking
+       quality gates. Full suites use `flock -w 180 /tmp/millstrand-test.lock`
+       with exactly one lock owner; do not wrap scripts that already own it.
+       Fix failures in the claimed worktree and commit the validated slice.
+       Record commands, results, and the exact commit on the feature.
+     " {}))
+   (workflow/step
+    :finish-feature "Record the selected feature's landing handoff" :self
+    :depends-on [:slice-gates]
+    (fn [{:keys [epic feature]}]
+      (format-alpha/prose
+       "
+         Read feature {feature}'s current ownership and latest notes before
+         launching anything. Reuse an already accepted landing handoff rather
+         than launching another one. Hand the committed, validated slice to the
+         consumer-owned landing policy; Ralph does not own review or merge.
+
+         Before completing, record an attributed note on feature {feature} and
+         epic {epic}: selected feature, owner, branch, worktree, exact commit,
+         validation evidence, landing run/PR or other durable consumer receipt,
+         receiving owner, and next action. Record whether the handoff is accepted
+         or still blocked. If blocked, leave this step open and report the cause.
+
+         Do not mark the feature or epic done here, and do not claim it landed
+         without the consumer's landing evidence. The next judgment must read
+         these notes and live child states, not assume this handoff finished it.
+       " {:epic epic :feature feature})))
+   (epic-judgment [:finish-feature])))
+
+(workflow/defworkflow! ralph-iterate
+  "Orient on live epic state, then work one feature or judge an empty frontier."
   {:entrypoints #{:start}
    :param-spec ::ralph-iterate-params
    :defaults {}
@@ -119,100 +251,33 @@
    (fn [{:keys [epic]}] (str "Ralph iteration: " epic))
    {:attributes {"workflow/family" "ralph"
                  "ralph/epic" (fn [{:keys [epic]}] epic)}}
-   (workflow/step :orient
-                  (fn [{:keys [epic]}] (str "Orient Ralph on epic " epic))
-                  :self
-                  :attributes {"workflow/action-ref" "ralph.orient"
-                               "workflow/instruction"
-                               (fn [{:keys [epic]}]
-                                 (format-alpha/reflow
-                                  (format
-                                   "|Read `strand kanban card %s`, then run `strand ready --query
-                                    |kanban-epic-pending --param epic=%s`. This live frontier is
-                                    |the source of truth for the next feature card; do not choose
-                                    |from memory or from a stale prompt. After choosing a feature,
-                                    |run `strand ready --query kanban-feature-work --param
-                                   |feature=<feature-id>` to see its direct task frontier."
-                                   epic epic)))})
-   (workflow/step :claim-feature
-                  (fn [{:keys [epic]}] (str "Claim exactly one feature under " epic))
-                  :self
-                  :depends-on [:orient]
-                  :attributes {"workflow/action-ref" "ralph.claim-feature"
-                               "workflow/instruction"
-                               (fn [_]
-                                 (format-alpha/reflow
-                                  "|Choose exactly ONE ready feature card from the epic
-                                   |frontier. Claim the feature, not one of its tasks, with
-                                   |the explicit owner and acting friendly identity:
-                                   |`strand kanban claim <feature-id> --owner <owner>
-                                   |--by-identity <actor> --branch <branch> --worktree
-                                   |<absolute-path>`. Record the chosen feature id, owner,
-                                   |actor, branch, absolute worktree, and claim result in the
-                                   |doing-task note before completing this step. Reporter and
-                                   |prior claim/participation history survive any explicit
-                                   |handoff. Do not claim a second feature in this iteration."))})
-   (workflow/step :work-tasks
-                  (fn [_] "Work the claimed feature's ready tasks")
-                  :self
-                  :depends-on [:claim-feature]
-                  :attributes {"workflow/action-ref" "ralph.work-tasks"
-                               "workflow/instruction"
-                               (format-alpha/reflow
-                                "|Drive the claimed feature one ready task at a time. Read the
-                                 |doing-task body and latest note before acting; append decisions,
-                                 |findings, and resume points with `strand kanban note <task-id>
-                                 |<note> --by-identity <actor>` as you go. Task assignment is not
-                                 |another feature claim. Use the repo's registered workflow or
-                                 |agent surface for real delegation, keep sibling file scopes
-                                 |disjoint, verify each
-                                 |implemented task yourself, and close it only after its
-                                 |validation is green.")})
-   (workflow/step :slice-gates
-                  (fn [_] "Run cold validation for the claimed feature slice")
-                  :self
-                  :depends-on [:work-tasks]
-                  :attributes {"workflow/action-ref" "ralph.slice-gates"
-                               "workflow/instruction"
-                               (format-alpha/reflow
-                                "|Run the focused cold test command for every namespace touched
-                                 |by the slice (`clojure -M:test <ns...>`), then the relevant
-                                 |blocking quality gates. Warm output is not a Done-when gate.
-                                 |Fix failures in the claimed worktree, commit the validated
-                                 |slice, and re-run the checks before completing this step.")})
-   (workflow/step :finish-feature
-                  (fn [_] "Hand off the validated feature slice")
-                  :self
-                  :depends-on [:slice-gates]
-                  :attributes {"workflow/action-ref" "ralph.hand-off"
-                               "workflow/instruction"
-                               (format-alpha/reflow
-                                "|Use the durable current-ownership projection and the feature
-                                 |id, branch, worktree, and latest attributed doing-task note as
-                                 |the claim and handoff evidence. Hand the committed, validated
-                                 |slice and its evidence to the
-                                 |consumer-owned landing policy. Do not mark the feature card
-                                 |or epic done here, and do not claim it landed without the
-                                 |consumer's landing evidence.")})
-   (workflow/checkpoint :epic-judgment
-                        (fn [{:keys [epic]}]
-                          (str "Close " epic " only if no feature cards remain"))
-                        :depends-on [:finish-feature]
-                        :kind :agent
-                        :choices [{:key :close-epic
-                                   :label "Close the epic"
-                                   :description
-                                   (format-alpha/reflow
-                                    "|Re-run `strand ready --query kanban-epic-pending --param
-                                     |epic=<epic-id>`. Choose this only when the frontier is
-                                     |empty: then `strand kanban finish <epic-id> --outcome done`
-                                     |and record the evidence in the epic note.")}
-                                  {:key :next-iteration
-                                   :label "Leave the epic open"
-                                   :description
-                                   (format-alpha/reflow
-                                    "|The epic still has active feature cards. Record the live
-                                     |frontier and resume point on the epic, leave it open, and
-                                     |end this one-card iteration so the Go loop can start the
-                                    |next `ralph-iterate` run.")}]
-                        :attributes {"workflow/decision-point" "ralph-epic-judgment"})))
+   (workflow/step
+    :orient "Read the epic and runnable pending frontier" :self
+    (fn [{:keys [epic]}]
+      (format-alpha/prose
+       "
+         Read `strand kanban card {epic}`, its handoff notes and direct features,
+         then `strand ready --query kanban-epic-pending --param epic={epic}`.
+         Select at most one ready pending feature from that live frontier.
+         Claimed, review, and blocked children may be absent from this query;
+         an empty result does not mean the epic is complete.
+       " {:epic epic})))
+   (workflow/checkpoint
+    :frontier "Work one runnable feature or judge the remaining children"
+    :depends-on [:orient]
+    :kind :agent
+    :choices
+    [{:key :work-feature :label "Work one ready pending feature"
+      :next :ralph-work-feature
+      :input {:spec ::selected-feature
+              :doc "The selected live ready pending feature id."}}
+     {:key :no-runnable :label "No runnable pending feature"
+      :next :ralph-judge-epic}]
+    :attributes
+    {"workflow/instruction"
+     (format-alpha/prose
+      "
+        Choose work-feature with the selected feature id, or no-runnable to judge
+        all children without claiming. Never infer completion from an empty
+        ready frontier.
+      " {})})))

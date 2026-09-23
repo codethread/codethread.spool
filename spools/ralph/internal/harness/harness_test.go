@@ -58,7 +58,7 @@ func TestBrake(t *testing.T) {
 func TestPromptCarriesWorkflowAndLoopMechanics(t *testing.T) {
 	got := Prompt("e1", "Epic one", 4, false)
 
-	if strings.Contains(got, "Work every feature.") {
+	if strings.Contains(got, "Work every feature.") || strings.Contains(got, "strand kanban finish") {
 		t.Errorf("generated prompt must not carry ad-hoc user text:\n%s", got)
 	}
 	// These are the workflow pointer and the Go-owned loop contract.
@@ -68,7 +68,7 @@ func TestPromptCarriesWorkflowAndLoopMechanics(t *testing.T) {
 		`epic e1 ("Epic one")`,
 		"strand workflow start <run-id> --workflow ralph-iterate",
 		`{"epic":"e1"}`,
-		"strand kanban finish e1 --outcome done",
+		"workflow’s checked completion gate",
 		"RALPH-STOP: <one-line reason>",
 	} {
 		if !strings.Contains(got, want) {

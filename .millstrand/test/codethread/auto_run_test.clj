@@ -73,10 +73,27 @@
     out))
 
 (defn- candidate-gate! [dir]
-  (shell/sh "sh"
-            (.getCanonicalPath (io/file ".." "scripts" "verify-published-candidate.sh"))
-            "auto/fixture-card"
-            :dir dir))
+  ;; The outer full suite owns the shared lock. Substitute only its path inside
+  ;; this subprocess fixture so the production script cannot deadlock the suite.
+  (let [bin (temp-dir)
+        real-flock (str/trim (:out (shell/sh "which" "flock")))
+        wrapper (io/file bin "flock")
+        lock-path (str (io/file bin "suite.lock"))]
+    (try
+      (spit wrapper
+            (str "#!/bin/sh\nset -eu\n"
+                 "test \"$1\" = -w\ntest \"$2\" = 180\n"
+                 "test \"$3\" = /tmp/millstrand-test.lock\nshift 3\n"
+                 "exec \"$TEST_REAL_FLOCK\" -w 180 \"$TEST_LOCK\" \"$@\"\n"))
+      (.setExecutable wrapper true)
+      (shell/sh "sh"
+                (.getCanonicalPath (io/file ".." "scripts" "verify-published-candidate.sh"))
+                "auto/fixture-card"
+                :env (assoc (into {} (System/getenv))
+                            "PATH" (str (.getPath bin) ":" (System/getenv "PATH"))
+                            "TEST_REAL_FLOCK" real-flock "TEST_LOCK" lock-path)
+                :dir dir)
+      (finally (delete-tree! bin)))))
 
 (defn- published-candidate! [remote candidate]
   (git! candidate "init" "-b" "auto/fixture-card")
@@ -84,7 +101,9 @@
   (git! candidate "config" "user.name" "Test User")
   (spit (io/file candidate "candidate.txt") "candidate\n")
   (spit (io/file candidate "Makefile")
-        ".PHONY: quality\n\nquality:\n\t@printf '%s\\n' \"$(CURDIR)\" > quality-ran-from.txt\n")
+        (str ".PHONY: quality\n\nquality:\n"
+             "\t@if \"$$TEST_REAL_FLOCK\" -n \"$$TEST_LOCK\" true; then echo missing-suite-lock; exit 1; fi\n"
+             "\t@printf '%s\\n' \"$(CURDIR)\" > quality-ran-from.txt\n"))
   (git! candidate "add" "candidate.txt" "Makefile")
   (git! candidate "commit" "-m" "initial candidate")
   (git! candidate "remote" "add" "origin" (.getPath remote))
@@ -153,7 +172,8 @@
                            ["sh" "scripts/verify-pr-checks.sh" "allow-empty"
                             "auto/fixture-card" "120" "5"]))
             (is (contains? gates "shell"))
-            (is (contains? gates "code"))
+            (is (not-any? #(= "millhouse.spools.land.card-actions/review-card!"
+                              (attr-get % :code/fn)) strands))
             (is (not (contains? gates "agent"))))
           (testing "repository policy delegates landing to the shared two-role workflow"
             (is (some? handoff))
@@ -202,6 +222,8 @@
             (is (= 1 (count (:ready result))))
             (is (= "checkpoint" (:role checkpoint)))
             (is (= ["reviewed"] (:choices checkpoint)))
+            (is (= 1 (count (filter #(= "millhouse.spools.land.card-actions/review-card!"
+                                        (attr-get % :code/fn)) strands))))
             (is (nil? (role-step strands "handoff-worker")))
             (is (nil? (role-step strands "finisher")))))))))
 
