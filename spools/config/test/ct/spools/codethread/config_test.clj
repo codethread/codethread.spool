@@ -23,7 +23,9 @@
 (def ^:private local-deps-edn
   (pr-str
    {:deps
-    (assoc (select-keys (:deps workspace-deps) ['millhouse.spools/identity])
+    (assoc (select-keys (:deps workspace-deps) ['millhouse.spools/identity
+                                              'millhouse.spools/workflow
+                                              'millhouse.spools/kanban])
            'codethread/config {:local/root (str project-root "/spools/config")}
            'codethread/ralph {:local/root (str project-root "/spools/ralph")})}))
 

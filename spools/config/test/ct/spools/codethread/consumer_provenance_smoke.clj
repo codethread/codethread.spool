@@ -1,6 +1,7 @@
 (ns ct.spools.codethread.consumer-provenance-smoke
   "Exercise durable cross-spool attribution in a disposable consumer world."
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [ct.spools.harnesses :as harnesses]
             [ct.spools.harnesses.assignment :as assignment]
@@ -18,11 +19,11 @@
 (def ^:private consumer-deps-edn
   (pr-str
    {:deps
-    {'millhouse.spools/identity
-     {:git/url "https://github.com/codethread/millhouse.spool.git"
-      :git/sha "bd96f5357a335bd17cd22042da1be5bd2200f807"
-      :deps/root "spools/identity"}
-     'codethread/config {:local/root (str project-root "/spools/config")}}}))
+    (assoc (select-keys
+            (:deps (edn/read-string
+                    (slurp (io/file project-root ".millstrand/deps.edn"))))
+            ['millhouse.spools/identity 'millhouse.spools/workflow 'millhouse.spools/kanban])
+           'codethread/config {:local/root (str project-root "/spools/config")})}))
 
 (def ^:private consumer-init
   "(require '[millstrand.api.current.alpha :as current]
