@@ -10,4 +10,5 @@ test "$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}')" = "origi
 git fetch --no-tags origin "+refs/heads/$expected_branch:refs/remotes/origin/$expected_branch"
 test "$(git rev-parse HEAD)" = "$(git rev-parse "refs/remotes/origin/$expected_branch")"
 
-exec make quality
+# This entrypoint owns the suite lock; make quality and its children do not.
+exec flock -w 180 /tmp/millstrand-test.lock make quality

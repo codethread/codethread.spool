@@ -55,7 +55,27 @@ from live state, claims one feature with explicit `--owner` and canonical
 `--by-identity` actor attribution, works its tasks without treating task
 assignment as another feature claim, validates the slice, and hands it to the
 consumer's landing policy. Reporter and ordered ownership/participation history
-survive handoff. The epic closes only when no feature cards remain.
+survive handoff. Record the selected feature, exact commit, validation, receiving
+owner, and durable landing run/PR receipt on both feature and epic before
+completing the handoff step. Resume from that receipt; do not launch a duplicate.
+
+The final choice is preserved, but choosing close starts an executor-owned check.
+Every direct feature must be closed with `kanban/outcome=done`; claimed, review,
+in-production, blocked, abandoned, and unactioned children prevent automatic
+completion. The check closes only the epic and stores the checked child snapshot
+as `ralph/completion` in the same update. A Ralph-owned pre-commit hook checks
+that snapshot again while the update holds SQLite's write transaction; changed
+children roll back the closure and receipt, without automatic retry. It never
+invokes Kanban's child cascade. Consumer-owned feature completion remains the
+acceptance authority.
+
+An empty runnable pending frontier skips feature claiming and goes to judgment.
+When unfinished work remains, record its landing owner or blocker, leave the epic
+open, and return `RALPH-STOP: <reason>`. Relaunch after the recorded wait is
+resolved. An empty ready query is never proof that all features are done.
+
+Consumers must activate Workflow's code executor (the convenience
+`millhouse.spools.workflow.spool` includes it) for the checked close gate.
 
 Only the final non-empty agent-output line can trigger `RALPH-STOP:`. A marker without a reason is malformed and does not silently stop the loop.
 

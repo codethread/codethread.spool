@@ -27,6 +27,12 @@ strand --workspace ~/dev/projects/harnesses.spool/.millstrand help
   shared `land` for quality, one basic review, FIFO merge, card completion, and
   branch/worktree cleanup.
 
+## Workflow authoring
+
+Follow the upstream [Workflow authoring guide](https://github.com/codethread/millhouse.spool/blob/main/spools/workflow/README.md#author-workflow-data)
+and its linked composition documentation rather than copying a local runbook.
+Verify the actual ready-step experience in a disposable world.
+
 ## Rules
 
 - Never stop the mill; only the user may stop it.
