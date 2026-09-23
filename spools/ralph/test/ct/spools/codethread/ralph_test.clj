@@ -6,6 +6,7 @@
             [ct.spools.codethread.ralph.completion :as completion]
             [millstrand.api.batch.alpha :as batch]
             [millstrand.api.current.alpha :as current]
+            [millstrand.api.graph.alpha :as graph]
             [millstrand.api.runtime.alpha :as runtime]
             [millstrand.api.spool.alpha :refer [attr-get]]
             [millstrand.api.weaver.alpha :as weaver]
@@ -141,6 +142,64 @@
             (is (= "closed" (:state closed-epic)))
             (is (= [{:id feature :state "closed" :outcome "done"}] (:features receipt)))
             (is (= receipt (attr-get (weaver/show rt (:id gate)) :code/result)))))))))
+
+(deftest completion-rejects-a-child-change-between-check-and-update
+  (t/with-weaver-world [ctx {:storage :sqlite-file :deps-edn deps-edn}]
+    (let [rt (:runtime ctx)]
+      (activate! rt)
+      (doseq [change [:add-child :reopen-child :add-done-child]]
+        (testing (name change)
+          (let [{:keys [epic feature]} (fixture! rt {:kanban/outcome "done"})
+                checked (promise)
+                resume (promise)
+                update! weaver/update!]
+            (weaver/update! rt feature {:state "closed"})
+            ;; Pause only the scheduling of the real public update. Both actors
+            ;; still persist through the production graph APIs, without stubs.
+            (with-redefs [weaver/update!
+                          (fn [runtime id patch & context]
+                            (when (= epic id)
+                              (deliver checked true)
+                              (when (= ::timeout (deref resume 10000 ::timeout))
+                                (throw (ex-info "Interleaving was not released" {}))))
+                            (apply update! runtime id patch context))]
+              (let [closing (future
+                              (current/with-runtime rt
+                                (try
+                                  (completion/finish-epic! {:epic epic})
+                                  (catch Exception error error))))]
+                (try
+                  (is (= true (deref checked 10000 ::timeout)))
+                  (case change
+                    (:add-child :add-done-child)
+                    (batch/apply! rt
+                                  {:refs {:epic epic}
+                                   :strands [{:ref :new :title "New child"
+                                              :state (if (= :add-done-child change) "closed" "active")
+                                              :attributes {:kanban/card "true"
+                                                           :kanban/type "feature"
+                                                           :kanban/lane "pending"
+                                                           :kanban/outcome (when (= :add-done-child change) "done")}}]
+                                   :edges [{:op :upsert :from :epic :to :new
+                                            :type "parent-of"}]})
+                    :reopen-child
+                    (weaver/update! rt feature {:state "active"
+                                                :attributes {:kanban/lane "claimed"
+                                                             :kanban/outcome nil}}))
+                  (finally (deliver resume true)))
+                (let [result (deref closing 10000 ::timeout)]
+                  (is (instance? clojure.lang.ExceptionInfo result))
+                  (is (= :strand/update-before-commit (:hook/type (ex-data result))))
+                  (is (= (if (= :add-done-child change)
+                           "Ralph completion snapshot changed before epic closure"
+                           "Ralph epic still has unfinished or unaccepted features")
+                         (some-> result ex-cause ex-message))))
+                (is (= "active" (:state (weaver/show rt epic))))
+                (is (nil? (attr-get (weaver/show rt epic) :ralph/completion)))
+                (is (= (if (= :reopen-child change) 1 2)
+                       (count (graph/outgoing-edges rt [epic] "parent-of"))))
+                (is (= (if (= :reopen-child change) "active" "closed")
+                       (:state (weaver/show rt feature))))))))))))
 
 (defn -main
   "Run Ralph workflow regression tests."

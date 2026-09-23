@@ -63,8 +63,11 @@ The final choice is preserved, but choosing close starts an executor-owned check
 Every direct feature must be closed with `kanban/outcome=done`; claimed, review,
 in-production, blocked, abandoned, and unactioned children prevent automatic
 completion. The check closes only the epic and stores the checked child snapshot
-as `ralph/completion` in the same update. It never invokes Kanban's child cascade.
-Consumer-owned feature completion remains the acceptance authority.
+as `ralph/completion` in the same update. A Ralph-owned pre-commit hook checks
+that snapshot again while the update holds SQLite's write transaction; changed
+children roll back the closure and receipt, without automatic retry. It never
+invokes Kanban's child cascade. Consumer-owned feature completion remains the
+acceptance authority.
 
 An empty runnable pending frontier skips feature claiming and goes to judgment.
 When unfinished work remains, record its landing owner or blocker, leave the epic

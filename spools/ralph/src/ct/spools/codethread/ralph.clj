@@ -4,14 +4,22 @@
   Ralph is the coordinator of its epic: each run orients from live kanban
   state, claims exactly one feature, drives that feature through its validated
   slice and stops at a judgment point that closes the epic only when every
-  feature has a recorded done outcome. The Go binary supplies the polling loop; this workflow owns the
-  work discipline inside one iteration. Durable Kanban claims remain the
-  ownership authority; task notes carry consumer-owned handoff evidence."
+  feature has a recorded done outcome. The Go binary supplies the polling loop;
+  this workflow owns the work discipline inside one iteration. Durable Kanban
+  claims remain the ownership authority; task notes carry consumer-owned handoff
+  evidence."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [millstrand.api.format.alpha :as format-alpha]
+            [millstrand.api.lifecycle.alpha :as lifecycle]
             [millstrand.api.millstrand.alpha :as millstrand]
             [millhouse.spools.workflow :as workflow]))
+
+(lifecycle/defresource completion-guard
+  "Keep Ralph's checked receipt and epic closure on one transaction boundary."
+  {:open 'ct.spools.codethread.ralph.completion/open-completion-guard!
+   :close 'ct.spools.codethread.ralph.completion/close-completion-guard!})
+(lifecycle/use-resource! completion-guard)
 
 (millstrand/defbin! ralph
   "Drive a Kanban epic through repeated headless agent runs."
@@ -37,9 +45,11 @@
      slice to the consumer's landing policy.
 
      Ralph does not own landing. The consumer decides how review, merge, and
-     card completion work. The epic closes only after every direct feature is closed with outcome done.
-     An empty runnable frontier is not completion evidence. Keep decisions and handover context on the epic, feature, and
-     doing-task notes because each iteration starts with a fresh agent.
+     card completion work. The epic closes only after every direct feature is
+     closed with outcome done.
+     An empty runnable frontier is not completion evidence. Keep decisions and
+     handover context on the epic, feature, and doing-task notes because each
+     iteration starts with a fresh agent.
 
      Run `strand prime ralph` before preparing the epic. Build and start the
      loop through `mill bin build ralph` and `mill bin run ralph <epic-id>`.
