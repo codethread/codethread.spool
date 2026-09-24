@@ -23,11 +23,11 @@ Inspect and explain
                          +-- authorized auto-run --> selected delivery workflow
 ```
 
-Read [Kanban planning](references/kanban.md) before creating or reshaping work; [agents and worktrees](references/agents.md) before delegation; [auto-run and delivery](references/delivery.md) before opting in or advancing runs; [diagnosis and recovery](references/recovery.md) when execution stops.
+Before creating or reshaping work, run `strand prime kanban` and `strand about kanban` in the owning workspace. Read [agents and worktrees](references/agents.md) before delegation; [auto-run and delivery](references/delivery.md) before opting in or advancing runs; [diagnosis and recovery](references/recovery.md) when execution stops.
 
 ## Speak in human terms
 
-Report epic title, then child feature title. Keep Strand IDs internal to commands. Mention tasks only when they materially change readiness, risk, evidence, or a human decision. For active, queued, and newly planted work, say seat **and** reasoning effort (for example, “Astra low”); if unresolved, say so rather than inventing a setting. Name special executor roles such as the landing grunt. Generated identities stay internal unless needed to distinguish or recover a run.
+Walk epic → features; inspect each relevant card's notes, tasks and dependency edges before explaining readiness. Report epic title, then child feature title. Keep Strand IDs internal to commands. Mention tasks only when they materially change readiness, risk, evidence, or a human decision. For active, queued, and newly planted work, say seat **and** reasoning effort (for example, “Astra low”); if unresolved, say so rather than inventing a setting. Name special executor roles such as the landing grunt. Generated identities stay internal unless needed to distinguish or recover a run.
 
 Local conversation subagents are an ephemeral, read-only scratch team for board walks, status, source lookups, audits, comparisons and second opinions while the user keeps talking. Use tracked Strand agents for implementation, durable investigation, browser testing and delivery: work that must remain card-linked, attributable, resumable and visible after this chat. Promote substantive findings to cards instead of continuing invisible work.
 
