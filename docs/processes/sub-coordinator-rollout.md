@@ -1,58 +1,23 @@
 # Sub-coordinator alias rollout
 
-The shared `sub-coordinator` seat is a bounded coordination role, not another
-writer. Its alias-provided system guidance is the complete operational runbook.
-It initially resolves through Codex to the unqualified native model ID
-`gpt-5.6-luna` at explicit `max` effort. Existing `coordinator`, worker, and
-reviewer aliases are not changed.
+The shared `sub-coordinator` seat is a bounded coordination role, not another writer. Its alias-provided system guidance is the complete operational runbook. It initially resolves through Codex to the unqualified native model ID `gpt-5.6-luna` at explicit `max` effort. Existing `coordinator`, worker, and reviewer aliases are not changed.
 
-A process-local `seat/sub-coordinator-terra` flag selects the authorized
-fallback: Codex with the unqualified native model ID `gpt-5.6-terra` at explicit
-`high` effort and the same runbook. The additive `sub-coordinator-sol` seat
-resolves through Codex to the unqualified native model ID `gpt-5.6-sol` at
-explicit `high` effort. It shares the common coordination contract with
-sustained-role framing and does not change the Luna default, Terra switch,
-ordinary `coordinator`, or `sol` aliases.
+A process-local `seat/sub-coordinator-terra` flag selects the authorized fallback: Codex with the unqualified native model ID `gpt-5.6-terra` at explicit `high` effort and the same runbook. The additive `sub-coordinator-sol` seat resolves through Codex to the unqualified native model ID `gpt-5.6-sol` at explicit `high` effort. It shares the common coordination contract with sustained-role framing and does not change the Luna default, Terra switch, ordinary `coordinator`, or `sol` aliases.
 
-Both alias prompt values are provider-neutral Strand coordination guidance.
-Use the [planner/coordinator briefs](coordinator-handoff.md) for prepared intake,
-acknowledged ownership and canonical-root headed launches. Append the separate
-[Codex](coordinator-launch-codex.md) or explicitly selected
-[Pi](coordinator-launch-pi.md) launch policy; harness timing is not embedded in
-the common system prompt. The supported launch examples apply these policies
-explicitly, rather than claiming old sessions inherit new defaults. They make
-the global Mill user-controlled, prohibit replacing a running Weaver without
-explicit user sign-off, require payload-safe dispatch, and preserve unrelated
-owner and run state. Deprecated `agent-harness.spool` workspaces, source, and
-APIs must never be used; maintained harness work belongs in `harnesses.spool`.
-Historical selection and trial evidence belongs in
-[coordinator-field-notes.md](coordinator-field-notes.md), not in the shared
-runbook.
+Both alias prompt values are provider-neutral Strand coordination guidance. Use the [planner/coordinator briefs](coordinator-handoff.md) for prepared intake, acknowledged ownership and canonical-root headed launches. Append the separate [Codex](coordinator-launch-codex.md) or explicitly selected [Pi](coordinator-launch-pi.md) launch policy; harness timing is not embedded in the common system prompt. The supported launch examples apply these policies explicitly, rather than claiming old sessions inherit new defaults. They make the global Mill user-controlled, prohibit replacing a running Weaver without explicit user sign-off, require payload-safe dispatch, and preserve unrelated owner and run state. Deprecated `agent-harness.spool` workspaces, source, and APIs must never be used; maintained harness work belongs in `harnesses.spool`. Historical selection and trial evidence belongs in [coordinator-field-notes.md](coordinator-field-notes.md), not in the shared runbook.
 
 ## Additive registration in a running world
 
-`ct.spools.harnesses/register-alias!` changes one runtime-local registry entry
-immediately. It does not refresh modules, alter flags, mutate existing runs, or
-restart the Weaver. The checked-in startup module registers the alias durably on
-a later ordinary activation. Until consumers update their Codethread pin, the
-candidate namespace can be loaded from a reviewed checkout and one narrow
-registration function called through the supported live Weaver nREPL:
+`ct.spools.harnesses/register-alias!` changes one runtime-local registry entry immediately. It does not refresh modules, alter flags, mutate existing runs, or restart the Weaver. The checked-in startup module registers the alias durably on a later ordinary activation. Until consumers update their Codethread pin, the candidate namespace can be loaded from a reviewed checkout and one narrow registration function called through the supported live Weaver nREPL:
 
-| Alias | Function |
-| --- | --- |
-| `sub-coordinator` | `ct.spools.codethread.sub-coordinator/register!` |
+| Alias                 | Function                                             |
+| --------------------- | ---------------------------------------------------- |
+| `sub-coordinator`     | `ct.spools.codethread.sub-coordinator/register!`     |
 | `sub-coordinator-sol` | `ct.spools.codethread.sub-coordinator/register-sol!` |
 
-Register `sub-coordinator-sol` only after its exact source commit passes required
-quality and review. The parent owns any staged runtime adoption; source workers
-must not perform registration, refresh a runtime, restart a process, change a
-flag, update a source pin, or start a pilot.
+Register `sub-coordinator-sol` only after its exact source commit passes required quality and review. The parent owns any staged runtime adoption; source workers must not perform registration, refresh a runtime, restart a process, change a flag, update a source pin, or start a pilot.
 
-The original pilot used parent `x4y0z` / task `irfb7`; that historical approval
-is not standing permission for new adoption. A currently authorized runtime
-owner must select the handoff boundary. Source workers must not mutate shared
-running worlds. Existing alias replacement or Weaver pickup requires its own
-explicit scoped authorization; the create-only recipe below is not that path.
+The original pilot used parent `x4y0z` / task `irfb7`; that historical approval is not standing permission for new adoption. A currently authorized runtime owner must select the handoff boundary. Source workers must not mutate shared running worlds. Existing alias replacement or Weaver pickup requires its own explicit scoped authorization; the create-only recipe below is not that path.
 
 ```nu
 let coord_ws = "/absolute/path/to/canonical/.millstrand"
@@ -162,61 +127,30 @@ if $frozen_before != $frozen_after {
 ^strand --workspace $coord_ws agent list --full
 ```
 
-The top-level `strand show RUN_ID` calls are intentional. Batteries `show`
-returns the full raw strand with the `attributes` map consumed by the frozen
-settings proof. `strand agent show RUN_ID` returns a lifecycle summary and omits
-that map; substituting it would break the proof.
+The top-level `strand show RUN_ID` calls are intentional. Batteries `show` returns the full raw strand with the `attributes` map consumed by the frozen settings proof. `strand agent show RUN_ID` returns a lifecycle summary and omits that map; substituting it would break the proof.
 
-The pre-registration guard fails before `register!` when `sub-coordinator`
-already exists. Run it only at a safe handoff where the parent owns alias
-registration and has excluded concurrent registrants. The catalog API replaces
-by name and does not offer an atomic create-only operation, so this procedure
-must not invent one or claim safety while another owner can race the guard.
-Compare an existing descriptor to the reviewed candidate and escalate instead
-of replacing it. Lifecycle fields can change naturally while runs execute, so
-the proof compares their frozen launch settings rather than whole run records.
+The pre-registration guard fails before `register!` when `sub-coordinator` already exists. Run it only at a safe handoff where the parent owns alias registration and has excluded concurrent registrants. The catalog API replaces by name and does not offer an atomic create-only operation, so this procedure must not invent one or claim safety while another owner can race the guard. Compare an existing descriptor to the reviewed candidate and escalate instead of replacing it. Lifecycle fields can change naturally while runs execute, so the proof compares their frozen launch settings rather than whole run records.
 
-For reviewed `sub-coordinator-sol` adoption, use the same guarded proof with
-exactly these substitutions:
+For reviewed `sub-coordinator-sol` adoption, use the same guarded proof with exactly these substitutions:
 
 - guard and postcheck the alias name `sub-coordinator-sol`;
-- resolve and call
-  `ct.spools.codethread.sub-coordinator/register-sol!`;
-- require every pre-existing alias, flag, module status, and captured run's
-  frozen launch settings to remain unchanged; and
+- resolve and call `ct.spools.codethread.sub-coordinator/register-sol!`;
+- require every pre-existing alias, flag, module status, and captured run's frozen launch settings to remain unchanged; and
 - verify the new alias resolves to Codex, `gpt-5.6-sol`, and `high`.
 
-Do not call both registration functions, change
-`seat/sub-coordinator-terra`, or replace an existing descriptor as part of that
-additive registration.
+Do not call both registration functions, change `seat/sub-coordinator-terra`, or replace an existing descriptor as part of that additive registration.
 
 ## Activation handoff and fallback
 
-After review and disposable-world proof, the runtime owner may assign one
-bounded coordination slice at an ownership boundary. Launch from the assigned
-repository's canonical root, not a feature worktree or disposable coordinator
-checkout. Record the canonical CWD/workspace separately from source worktree and
-cleanup custody; retain target, stable request ID, run ID, native session, real
-goal and discoverable terminal, initial registry, and frozen settings for existing
-runs. Require successor acknowledgement before planner release. Verify ownership,
-task-versus-feature dispatch, payload-safe prompts, bounded waits, progress
-checks, rework, required review, and accepted handoff.
+After review and disposable-world proof, the runtime owner may assign one bounded coordination slice at an ownership boundary. Launch from the assigned repository's canonical root, not a feature worktree or disposable coordinator checkout. Record the canonical CWD/workspace separately from source worktree and cleanup custody; retain target, stable request ID, run ID, native session, real goal and discoverable terminal, initial registry, and frozen settings for existing runs. Require successor acknowledgement before planner release. Verify ownership, task-versus-feature dispatch, payload-safe prompts, bounded waits, progress checks, rework, required review, and accepted handoff.
 
-Do not switch candidates for ordinary latency or infrastructure failure. The
-runtime owner may enable the fallback only after recording the evidence,
-settling the exact run, and accepting custody at an explicit handoff:
+Do not switch candidates for ordinary latency or infrastructure failure. The runtime owner may enable the fallback only after recording the evidence, settling the exact run, and accepting custody at an explicit handoff:
 
 ```nu
 ^strand --workspace $coord_ws agent config set seat/sub-coordinator-terra true
 ^strand --workspace $coord_ws agent list --full
 ```
 
-Start a fresh `sub-coordinator` assignment or targeted run with a new stable
-request ID after the prior run settles. The Terra candidate receives the same
-provider-neutral alias runbook.
+Start a fresh `sub-coordinator` assignment or targeted run with a new stable request ID after the prior run settles. The Terra candidate receives the same provider-neutral alias runbook.
 
-Roll out to another running world only at its own explicit runtime-owner
-handoff. Preserve existing owners, run pointers, settings, dirty files, workflow
-gates, and FIFO position. Durable availability still requires a reviewed
-Codethread pin and the repository's normal coordinated activation; live
-registration is additive staging, not a substitute for pin rollout.
+Roll out to another running world only at its own explicit runtime-owner handoff. Preserve existing owners, run pointers, settings, dirty files, workflow gates, and FIFO position. Durable availability still requires a reviewed Codethread pin and the repository's normal coordinated activation; live registration is additive staging, not a substitute for pin rollout.

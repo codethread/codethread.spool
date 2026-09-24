@@ -2,12 +2,7 @@
 
 Central config and coordination spool for millstrand and its siblings:
 
-`../skein-src`: millstrand (under previous name, repo needs renaming but its millstrand source code)
-`../millhouse.spool`: experimental spools not ready for millstrand repo
-`../agent-harness.spool`: entirely deprecated and read-only; direct all updates and usage to `../harnesses.spool`
-`../harnesses.spool`: replacement for agent-harness; the api is a breaking migration
-`../devflow.spool`: custom spec driven workflow
-`../millstrand-ui/`: not a spool, a web app for viewing kanban cards within the millstrand ecosystem
+`../skein-src`: millstrand (under previous name, repo needs renaming but its millstrand source code) `../millhouse.spool`: experimental spools not ready for millstrand repo `../agent-harness.spool`: entirely deprecated and read-only; direct all updates and usage to `../harnesses.spool` `../harnesses.spool`: replacement for agent-harness; the api is a breaking migration `../devflow.spool`: custom spec driven workflow `../millstrand-ui/`: not a spool, a web app for viewing kanban cards within the millstrand ecosystem
 
 ## Millstrand / strand
 
@@ -23,15 +18,11 @@ strand --workspace ~/dev/projects/harnesses.spool/.millstrand help
 
 - Run `strand prime kanban`, claim a feature card, and use its recorded worktree.
 - Never edit `main` or push directly to `main`; feature-branch pushes are expected.
-- Inspect `strand workflow show land` and `strand prime merge-queue`, then drive
-  shared `land` for quality, one basic review, FIFO merge, card completion, and
-  branch/worktree cleanup.
+- Inspect `strand workflow show land` and `strand prime merge-queue`, then drive shared `land` for quality, one basic review, FIFO merge, card completion, and branch/worktree cleanup.
 
 ## Workflow authoring
 
-Follow the upstream [Workflow authoring guide](https://github.com/codethread/millhouse.spool/blob/main/spools/workflow/README.md#author-workflow-data)
-and its linked composition documentation rather than copying a local runbook.
-Verify the actual ready-step experience in a disposable world.
+Follow the upstream [Workflow authoring guide](https://github.com/codethread/millhouse.spool/blob/main/spools/workflow/README.md#author-workflow-data) and its linked composition documentation rather than copying a local runbook. Verify the actual ready-step experience in a disposable world.
 
 ## Rules
 

@@ -2,6 +2,7 @@
 .nrepl-port
 .test-repl-port
 .test-repl.pid
+node_modules
 
 /bin/
 spools/ralph/bin/ralph.bin
