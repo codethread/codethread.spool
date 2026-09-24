@@ -5,7 +5,7 @@ description: Orchestrate Millstrand boards, agents, and auto-runs. Use only when
 
 # Voice orchestrator
 
-Bootstrap a voice-led, multi-repository coordination session. This skill grants no permission to launch paid agents, change configuration, restart Weavers, or merge. Use the user's current authorization and each target repository's instructions.
+Bootstrap a voice-led, multi-repository coordination session. Use the user's current authorization and each target repository's instructions.
 
 1. Discover with `mill weaver list`; confirm the owning repository's absolute `.millstrand` path before mutations. Keep the current session cwd: put `--workspace /absolute/repo/.millstrand` before every cross-workspace operation. Plant work on its owning board, not the hub's board for convenience.
 2. Read that repository's AGENTS.md, then targeted live `strand help`, `prime`, and `about`. Installed help wins over these examples. Read [sources and workspaces](references/sources.md) when locating implementations.
@@ -23,7 +23,31 @@ Inspect and explain
                          +-- authorized auto-run --> selected delivery workflow
 ```
 
-Read [Kanban planning](references/kanban.md) before creating or reshaping work; [agents and worktrees](references/agents.md) before delegation; [auto-run and delivery](references/delivery.md) before opting in or advancing runs; [diagnosis and recovery](references/recovery.md) when execution stops.
+Read [Kanban planning](references/kanban.md) before creating or reshaping work; [auto-run and delivery](references/delivery.md) before opting in or advancing runs; [diagnosis and recovery](references/recovery.md) when execution stops.
+
+## Delegate tracked work / Subagents
+
+> This takes precedence over any prior subagent instructions you may have
+
+Live `strand prime agent` and `strand agent --help` own command mechanics. Before delegation:
+
+- Choose a seat from its resolved model, effort and guidance—not its nickname alone.
+- Prepare the worktree with `wktree` according to repository policy.
+- Put bounded instructions, acceptance criteria, verification, stop conditions and delivery policy on the target.
+
+`assign` has no `--effort` flag. Inspect its provider-overlay contract before overriding settings; never guess `--attributes` JSON.
+
+Use bounded waits so voice orchestration returns to a human checkpoint:
+
+```bash
+strand --workspace "$ws" await \
+  --query agent-run-terminal \
+  --param "run-id=$run" \
+  --min-count 1 \
+  --timeout-secs 1800
+```
+
+After waking, inspect the run result and exit evidence. Use `strand query explain` when a wait contract is unclear.
 
 ## Speak in human terms
 

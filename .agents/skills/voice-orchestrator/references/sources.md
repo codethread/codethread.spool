@@ -8,7 +8,6 @@ This is a **machine-local discovery map**, not universal paths or permission to 
 | Millhouse | /Users/ct/dev/projects/millhouse.spool | /Users/ct/dev/projects/millhouse.spool/.millstrand | Kanban, identity, workflow, land, merge queue, auto-run; spools/*/README.md |
 | Harnesses | /Users/ct/dev/projects/harnesses.spool | /Users/ct/dev/projects/harnesses.spool/.millstrand | Agents, seats, assignments, run lifecycle, providers; README.md |
 | Codethread | /Users/ct/dev/projects/codethread.spool | /Users/ct/dev/projects/codethread.spool/.millstrand | Shared config and auto-run consumer policy |
-| wktree | /Users/ct/dev/projects/wktree | None confirmed | Worktree CLI; README.md and wktree -h |
 | Millstrand UI | /Users/ct/dev/projects/millstrand-ui | /Users/ct/dev/projects/millstrand-ui/.millstrand | Dashboard and repository delivery policy; docs/auto-run.md |
 
 Harnesses is the current sole agent-operation owner. Do not route investigations to an obsolete agent spool. If a checkout is missing, use the upstream links in repository AGENTS.md for discovery, then resolve the active pin before relying on behavior. Do not create a workspace just because a checkout exists.
